@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Home",
+    "hotels": "Hotels",
+    "dashboard": "Dashboard"
+  },
+  "auth": {
+    "login": "Log in",
+    "loginTitle": "Sign in to your account",
+    "register": "Sign up",
+    "registerTitle": "Create an account",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "accountBlocked": "Too many attempts. Account temporarily locked."
+  },
+  "booking": {
+    "reserve": "Book now",
+    "checkin": "Check-in",
+    "checkout": "Check-out",
+    "guests": "Guests",
+    "search": "Search"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "view": "View"
+  },
+  "status": {
+    "EN_ATTENTE": "Pending",
+    "CONFIRMEE": "Confirmed",
+    "EN_COURS": "Ongoing",
+    "TERMINEE": "Completed",
+    "ANNULEE": "Cancelled",
+    "PAYE": "Paid",
+    "EN_COURS_PAIEMENT": "Payment pending",
+    "ECHOUE": "Failed",
+    "REMBOURSE": "Refunded",
+    "PUBLIE": "Published",
+    "REJETE": "Rejected",
+    "ACTIVE": "Active",
+    "EXPIREE": "Expired",
+    "INACTIVE": "Inactive"
+  }
+}

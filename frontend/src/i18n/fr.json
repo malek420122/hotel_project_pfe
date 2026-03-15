@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "hotels": "Hôtels",
+    "dashboard": "Tableau de bord"
+  },
+  "auth": {
+    "login": "Connexion",
+    "loginTitle": "Connexion à votre compte",
+    "register": "S'inscrire",
+    "registerTitle": "Créer un compte",
+    "logout": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "accountBlocked": "Trop de tentatives. Compte temporairement bloqué."
+  },
+  "booking": {
+    "reserve": "Réserver",
+    "checkin": "Arrivée",
+    "checkout": "Départ",
+    "guests": "Voyageurs",
+    "search": "Rechercher"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "view": "Voir"
+  },
+  "status": {
+    "EN_ATTENTE": "En attente",
+    "CONFIRMEE": "Confirmée",
+    "EN_COURS": "En cours",
+    "TERMINEE": "Terminée",
+    "ANNULEE": "Annulée",
+    "PAYE": "Payé",
+    "EN_COURS_PAIEMENT": "Paiement en cours",
+    "ECHOUE": "Échoué",
+    "REMBOURSE": "Remboursé",
+    "PUBLIE": "Publié",
+    "REJETE": "Rejeté",
+    "ACTIVE": "Actif",
+    "EXPIREE": "Expiré",
+    "INACTIVE": "Inactif"
+  }
+}

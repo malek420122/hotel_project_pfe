@@ -1,0 +1,73 @@
+<template>
+  <div>
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Promotions</h2>
+      <button @click="showModal=true" class="btn-primary">+ Nouvelle promotion</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div v-for="promo in promotions" :key="promo.id" :class="['card border-2', promo.statut==='ACTIVE' ? 'border-green-300' : 'border-gray-200']">
+        <div class="flex justify-between items-start mb-3">
+          <span :class="['text-3xl']">{{ promo.icon }}</span>
+          <StatusBadge :status="promo.statut" />
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 mb-1">{{ promo.titre }}</h3>
+        <p class="text-gray-500 text-sm mb-3">{{ promo.description }}</p>
+        <div class="flex justify-between text-sm mb-3">
+          <span class="text-green-600 font-bold">-{{ promo.remise }}%</span>
+          <span class="text-gray-400">{{ promo.debut }} → {{ promo.fin }}</span>
+        </div>
+        <div class="mb-3">
+          <div class="flex justify-between text-xs text-gray-500 mb-1">
+            <span>{{ promo.utilisations }} utilisations</span>
+            <span>Max: {{ promo.maxUtil }}</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div :style="`width:${(promo.utilisations/promo.maxUtil)*100}%`" class="h-full bg-green-500 rounded-full"></div>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-outline text-xs py-1.5 px-3 flex-1">✏️ Modifier</button>
+          <button @click="togglePromo(promo)" :class="['text-xs py-1.5 px-3 rounded-xl font-semibold flex-1', promo.statut==='ACTIVE' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600']">
+            {{ promo.statut==='ACTIVE' ? '⏸ Pause' : '▶ Activer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <Teleport to="body">
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-lg">
+          <h3 class="text-xl font-bold mb-4">Nouvelle promotion</h3>
+          <form @submit.prevent="createPromo" class="space-y-3">
+            <input v-model="form.titre" placeholder="Titre de la promotion" class="input-field" required />
+            <textarea v-model="form.description" placeholder="Description" rows="2" class="input-field"></textarea>
+            <div class="grid grid-cols-2 gap-3">
+              <input v-model="form.remise" type="number" placeholder="Remise %" class="input-field" min="1" max="100" />
+              <input v-model="form.maxUtil" type="number" placeholder="Utilisations max" class="input-field" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <input v-model="form.debut" type="date" class="input-field" />
+              <input v-model="form.fin" type="date" class="input-field" />
+            </div>
+            <div class="flex gap-3 justify-end">
+              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
+              <button type="submit" class="btn-primary">Créer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+  </div>
+</template>
+<script setup>
+import { ref, reactive } from 'vue'
+import StatusBadge from '../../../components/StatusBadge.vue'
+const showModal = ref(false)
+const form = reactive({ titre: '', description: '', remise: 10, maxUtil: 100, debut: '', fin: '' })
+const promotions = ref([
+  { id:1, icon:'☀️', titre:'Offre Été 2025', description:'10% de remise sur tous les séjours en juillet/août', remise:10, debut:'01/07', fin:'31/08', statut:'ACTIVE', utilisations:89, maxUtil:200 },
+  { id:2, icon:'🌙', titre:'Ramadan Special', description:'15% de remise pour le mois sacré', remise:15, debut:'01/03', fin:'31/03', statut:'ACTIVE', utilisations:45, maxUtil:150 },
+  { id:3, icon:'❄️', titre:'Promo Hiver', description:'20% sur les séjours en janvier', remise:20, debut:'01/01', fin:'31/01', statut:'EXPIREE', utilisations:120, maxUtil:120 },
+])
+function togglePromo(p) { p.statut = p.statut === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }
+function createPromo() { promotions.value.push({ ...form, id: Date.now(), icon:'🎯', statut:'ACTIVE', utilisations:0 }); showModal.value = false }
+</script>

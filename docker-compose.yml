@@ -1,0 +1,96 @@
+version: '3.9'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: hotelease_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-hotelease_secret}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-hotelease}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - hotelease_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Laravel Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+    container_name: hotelease_backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    environment:
+      - APP_NAME=HotelEase
+      - APP_ENV=production
+      - APP_KEY=${APP_KEY:-base64:CHANGE_ME_IN_PRODUCTION}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=http://localhost
+      - DB_CONNECTION=mongodb
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+      - DB_DATABASE=${MONGO_DB:-hotelease}
+      - DB_USERNAME=${MONGO_USER:-admin}
+      - DB_PASSWORD=${MONGO_PASSWORD:-hotelease_secret}
+      - JWT_SECRET=${JWT_SECRET:-change_this_jwt_secret}
+      - FILESYSTEM_DISK=local
+      - QUEUE_CONNECTION=sync
+    volumes:
+      - ./backend:/var/www/html
+      - backend_storage:/var/www/html/storage
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - hotelease_net
+    expose:
+      - "9000"
+
+  # Vue.js Frontend build + serve via nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: hotelease_frontend
+    restart: unless-stopped
+    networks:
+      - hotelease_net
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: hotelease_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/dist:/var/www/frontend:ro
+      - backend_storage:/var/www/html/storage:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - hotelease_net
+
+volumes:
+  mongodb_data:
+  backend_storage:
+
+networks:
+  hotelease_net:
+    driver: bridge

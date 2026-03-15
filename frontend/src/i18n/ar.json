@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "hotels": "الفنادق",
+    "dashboard": "لوحة التحكم"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "loginTitle": "تسجيل الدخول إلى حسابك",
+    "register": "إنشاء حساب",
+    "registerTitle": "إنشاء حساب جديد",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟",
+    "accountBlocked": "محاولات كثيرة. الحساب مغلق مؤقتاً."
+  },
+  "booking": {
+    "reserve": "احجز الآن",
+    "checkin": "تسجيل الوصول",
+    "checkout": "تسجيل المغادرة",
+    "guests": "الضيوف",
+    "search": "بحث"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "view": "عرض"
+  },
+  "status": {
+    "EN_ATTENTE": "قيد الانتظار",
+    "CONFIRMEE": "مؤكد",
+    "EN_COURS": "جارٍ",
+    "TERMINEE": "مكتمل",
+    "ANNULEE": "ملغى",
+    "PAYE": "مدفوع",
+    "EN_COURS_PAIEMENT": "الدفع جارٍ",
+    "ECHOUE": "فشل",
+    "REMBOURSE": "مسترد",
+    "PUBLIE": "منشور",
+    "REJETE": "مرفوض",
+    "ACTIVE": "نشط",
+    "EXPIREE": "منتهي الصلاحية",
+    "INACTIVE": "غير نشط"
+  }
+}

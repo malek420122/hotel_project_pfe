@@ -1,0 +1,28 @@
+# Dependencies
+frontend/node_modules/
+backend/vendor/
+
+# Build artifacts
+frontend/dist/
+frontend/dist-ssr/
+
+# Env files (keep .env.example, not actual .env)
+.env
+backend/.env
+!.env.docker
+!backend/.env.example
+
+# Editor
+.vscode/
+.idea/
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker volumes (not committed)
+docker/volumes/
