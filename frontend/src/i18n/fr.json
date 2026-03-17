@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "Hotel PFE",
+    "tagline": "Réservez chambres et services en toute confiance"
+  },
+  "nav": {
+    "home": "Accueil",
+    "rooms": "Chambres",
+    "services": "Services",
+    "booking": "Réserver",
+    "myBookings": "Mes réservations",
+    "admin": "Administration",
+    "language": "Langue"
+  },
+  "home": {
+    "heroTitle": "Votre séjour, simplifié",
+    "heroSubtitle": "Réservez des chambres, ajoutez spa ou restaurant, et gérez tout en ligne.",
+    "cta": "Commencer la réservation",
+    "feature1": "Paiement sécurisé",
+    "feature2": "Support 24/7",
+    "feature3": "Services premium"
+  },
+  "rooms": {
+    "title": "Chambres disponibles",
+    "subtitle": "Choisissez la chambre idéale pour votre séjour.",
+    "capacity": "Voyageurs",
+    "pricePerNight": "par nuit"
+  },
+  "services": {
+    "title": "Services hôteliers",
+    "subtitle": "Réservez des prestations complémentaires en quelques clics.",
+    "book": "Ajouter le service"
+  },
+  "booking": {
+    "title": "Réservation",
+    "subtitle": "Choisissez vos dates et confirmez en ligne.",
+    "checkIn": "Arrivée",
+    "checkOut": "Départ",
+    "guests": "Voyageurs",
+    "room": "Chambre",
+    "services": "Services sélectionnés",
+    "specialRequests": "Demandes spéciales",
+    "submit": "Confirmer la réservation"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Suivez les réservations, revenus et taux d'occupation.",
+    "totalRooms": "Chambres totales",
+    "totalBookings": "Réservations",
+    "confirmedBookings": "Réservations confirmées",
+    "revenue": "Revenu"
+  },
+  "bookingHistory": {
+    "title": "Historique des réservations",
+    "subtitle": "Suivez et modifiez vos réservations.",
+    "status": "Statut",
+    "cancel": "Annuler",
+    "modify": "Modifier",
+    "save": "Enregistrer",
+    "empty": "Aucune réservation pour le moment."
+  },
+  "form": {
+    "submit": "Envoyer",
+    "loading": "Traitement..."
+  }
+}

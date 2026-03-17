@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "Hotel PFE",
+    "tagline": "Book rooms and services with confidence"
+  },
+  "nav": {
+    "home": "Home",
+    "rooms": "Rooms",
+    "services": "Services",
+    "booking": "Book",
+    "myBookings": "My bookings",
+    "admin": "Admin",
+    "language": "Language"
+  },
+  "home": {
+    "heroTitle": "Your stay, simplified",
+    "heroSubtitle": "Reserve rooms, add spa or restaurant services, and manage everything online.",
+    "cta": "Start booking",
+    "feature1": "Secure payments",
+    "feature2": "24/7 support",
+    "feature3": "Premium services"
+  },
+  "rooms": {
+    "title": "Available rooms",
+    "subtitle": "Choose the best room for your stay.",
+    "capacity": "Guests",
+    "pricePerNight": "per night"
+  },
+  "services": {
+    "title": "Hotel services",
+    "subtitle": "Book complementary hotel services in a few clicks.",
+    "book": "Add service"
+  },
+  "booking": {
+    "title": "Reservation",
+    "subtitle": "Select your dates and confirm online.",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Guests",
+    "room": "Room",
+    "services": "Selected services",
+    "specialRequests": "Special requests",
+    "submit": "Confirm reservation"
+  },
+  "dashboard": {
+    "title": "Administration dashboard",
+    "subtitle": "Monitor bookings, revenue, and occupancy.",
+    "totalRooms": "Total rooms",
+    "totalBookings": "Total bookings",
+    "confirmedBookings": "Confirmed bookings",
+    "revenue": "Revenue"
+  },
+  "bookingHistory": {
+    "title": "Booking history",
+    "subtitle": "Track and update your reservations.",
+    "status": "Status",
+    "cancel": "Cancel",
+    "modify": "Modify",
+    "save": "Save",
+    "empty": "No bookings yet."
+  },
+  "form": {
+    "submit": "Submit",
+    "loading": "Processing..."
+  }
+}
