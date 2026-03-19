@@ -7,12 +7,17 @@ use App\Models\Chambre;
 use App\Models\Avis;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class HotelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Hotel::where('estActif', true);
+        $isAdminContext = $this->isAdminContext($request);
+        $query = Hotel::query();
+        if (!$isAdminContext) {
+            $query->where('estActif', true);
+        }
 
         if ($request->has('ville')) {
             $query->where('ville', 'like', '%' . $request->ville . '%');
@@ -93,5 +98,19 @@ class HotelController extends Controller
         $hotel = Hotel::findOrFail($id);
         $hotel->update(['estActif' => !$hotel->estActif]);
         return response()->json($hotel);
+    }
+
+    private function isAdminContext(Request $request): bool
+    {
+        if (!$request->bearerToken()) {
+            return false;
+        }
+
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return $user?->role === 'admin' && $user?->est_actif;
+        } catch (\Exception) {
+            return false;
+        }
     }
 }

@@ -16,7 +16,7 @@ export const useNotifStore = defineStore('notifications', () => {
 
   async function markRead(id) {
     try {
-      await api.put(`/notifications/${id}/lire`)
+      await api.put(`/notifications/${id}/read`)
       const n = notifications.value.find(n => n._id === id)
       if (n) n.estLue = true
     } catch {}
@@ -24,7 +24,7 @@ export const useNotifStore = defineStore('notifications', () => {
 
   async function markAllRead() {
     try {
-      await api.put('/notifications/lire-toutes')
+      await api.put('/notifications/read-all')
       notifications.value.forEach(n => n.estLue = true)
     } catch {}
   }

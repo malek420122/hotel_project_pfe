@@ -36,6 +36,7 @@ Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
     Route::post('avis', [AvisController::class, 'store']);
     Route::get('client/fidelite', [UserController::class, 'fidelite']);
     Route::put('profile', [UserController::class, 'updateProfile']);
+    Route::get('services', [ServiceController::class, 'index']);
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
