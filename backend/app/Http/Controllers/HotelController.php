@@ -7,6 +7,7 @@ use App\Models\Chambre;
 use App\Models\Avis;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Http\Requests\HotelStoreRequest;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +16,15 @@ class HotelController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $middlewares = $request->route()?->gatherMiddleware() ?? [];
-        $isAdminContext = in_array('role:admin', $middlewares, true);
+        $isAdminContext = false;
+        if ($request->bearerToken()) {
+            try {
+                $user = JWTAuth::parseToken()->authenticate();
+                $isAdminContext = $user?->role === 'admin';
+            } catch (\Exception) {
+                $isAdminContext = false;
+            }
+        }
         $query = Hotel::query();
         if (!$isAdminContext) {
             $query->where('estActif', true);

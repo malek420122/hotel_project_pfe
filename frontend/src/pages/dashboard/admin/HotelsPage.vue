@@ -26,20 +26,20 @@
           <h3 class="text-xl font-bold text-gray-800 mb-4">{{ form._id ? 'Modifier hôtel' : 'Ajouter un hôtel' }}</h3>
           <form @submit.prevent="saveHotel" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nom</label><input v-model="form.nom" class="input-field" required /></div>
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Ville</label><input v-model="form.ville" class="input-field" required /></div>
+              <div><label for="hotel-nom" class="block text-xs font-semibold text-gray-500 mb-1">Nom</label><input id="hotel-nom" v-model="form.nom" class="input-field" required /></div>
+              <div><label for="hotel-ville" class="block text-xs font-semibold text-gray-500 mb-1">Ville</label><input id="hotel-ville" v-model="form.ville" class="input-field" required /></div>
             </div>
-            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input v-model="form.adresse" class="input-field" required /></div>
-            <div><label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.description') }}</label><textarea v-model="form.description" rows="3" class="input-field"></textarea></div>
+            <div><label for="hotel-adresse" class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input id="hotel-adresse" v-model="form.adresse" class="input-field" required /></div>
+            <div><label for="hotel-description" class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.description') }}</label><textarea id="hotel-description" v-model="form.description" rows="3" class="input-field"></textarea></div>
             <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Étoiles</label>
-                <select v-model="form.etoiles" class="input-field"><option v-for="i in 5" :key="i" :value="i">{{ i }}</option></select>
+              <div><label for="hotel-etoiles" class="block text-xs font-semibold text-gray-500 mb-1">Étoiles</label>
+                <select id="hotel-etoiles" v-model="form.etoiles" class="input-field"><option v-for="i in 5" :key="i" :value="i">{{ i }}</option></select>
               </div>
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Prix min (€/nuit)</label><input v-model="form.prix_min" type="number" class="input-field" /></div>
+              <div><label for="hotel-prix-min" class="block text-xs font-semibold text-gray-500 mb-1">Prix min (€/nuit)</label><input id="hotel-prix-min" v-model="form.prix_min" type="number" class="input-field" /></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input v-model="form.latitude" type="number" step="any" class="input-field" required /></div>
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input v-model="form.longitude" type="number" step="any" class="input-field" required /></div>
+              <div><label for="hotel-latitude" class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input id="hotel-latitude" v-model="form.latitude" type="number" step="any" class="input-field" required /></div>
+              <div><label for="hotel-longitude" class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input id="hotel-longitude" v-model="form.longitude" type="number" step="any" class="input-field" required /></div>
             </div>
             <div class="flex gap-3 justify-end">
               <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>

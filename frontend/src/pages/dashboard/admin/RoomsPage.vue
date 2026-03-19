@@ -27,7 +27,13 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6">
           <h3 class="text-xl font-bold mb-4">{{ form._id ? 'Modifier chambre' : 'Nouvelle chambre' }}</h3>
           <form @submit.prevent="saveRoom" class="space-y-3">
-            <select v-model="form.hotelId" class="input-field" required><option value="">Choisir hôtel</option><option v-for="h in hotels" :key="h._id" :value="h._id">{{ h.nom }}</option></select>
+            <div>
+              <label for="room-hotel" class="block text-sm font-semibold text-gray-600 mb-1">Hôtel</label>
+              <select id="room-hotel" v-model="form.hotelId" class="input-field" required>
+                <option value="">Choisir hôtel</option>
+                <option v-for="h in hotels" :key="h._id" :value="h._id">{{ h.nom }}</option>
+              </select>
+            </div>
             <div class="grid grid-cols-2 gap-3">
               <input v-model="form.nom" placeholder="Nom chambre" class="input-field" required />
               <input v-model="form.numero" placeholder="N° chambre" class="input-field" />
