@@ -16,15 +16,7 @@ class HotelController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $isAdminContext = false;
-        if ($request->bearerToken()) {
-            try {
-                $user = JWTAuth::parseToken()->authenticate();
-                $isAdminContext = $user?->role === 'admin';
-            } catch (\Exception) {
-                $isAdminContext = false;
-            }
-        }
+        $isAdminContext = $this->isAdminContext($request);
         $query = Hotel::query();
         if (!$isAdminContext) {
             $query->where('estActif', true);
@@ -100,5 +92,19 @@ class HotelController extends Controller
         $hotel = Hotel::findOrFail($id);
         $hotel->update(['estActif' => !$hotel->estActif]);
         return response()->json($hotel);
+    }
+
+    private function isAdminContext(Request $request): bool
+    {
+        if (!$request->bearerToken()) {
+            return false;
+        }
+
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return $user?->role === 'admin';
+        } catch (\Exception) {
+            return false;
+        }
     }
 }

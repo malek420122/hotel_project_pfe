@@ -78,7 +78,14 @@ async function loadRooms() {
     rooms.value = data
   } catch {}
 }
-function editRoom(r) { Object.assign(form, { ...r, _id: r._id }); showModal.value = true }
+function editRoom(r) {
+  Object.assign(form, {
+    ...r,
+    _id: r._id,
+    hotelId: r.hotelId ?? r.hotel_id ?? '',
+  })
+  showModal.value = true
+}
 async function saveRoom() {
   try {
     if (form._id) await api.put(`/admin/chambres/${form._id}`, form)
