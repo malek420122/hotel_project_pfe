@@ -29,7 +29,7 @@
               <div><label for="hotel-nom" class="block text-xs font-semibold text-gray-500 mb-1">Nom</label><input id="hotel-nom" v-model="form.nom" class="input-field" required /></div>
               <div><label for="hotel-ville" class="block text-xs font-semibold text-gray-500 mb-1">Ville</label><input id="hotel-ville" v-model="form.ville" class="input-field" required /></div>
             </div>
-            <div><label for="hotel-adresse" class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input id="hotel-adresse" v-model="form.adresse" class="input-field" :required="!form._id" /></div>
+            <div><label for="hotel-adresse" class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input id="hotel-adresse" v-model="form.adresse" class="input-field" required /></div>
             <div><label for="hotel-description" class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.description') }}</label><textarea id="hotel-description" v-model="form.description" rows="3" class="input-field"></textarea></div>
             <div class="grid grid-cols-2 gap-4">
               <div><label for="hotel-etoiles" class="block text-xs font-semibold text-gray-500 mb-1">Étoiles</label>
@@ -38,8 +38,8 @@
               <div><label for="hotel-prix-min" class="block text-xs font-semibold text-gray-500 mb-1">Prix min (€/nuit)</label><input id="hotel-prix-min" v-model="form.prix_min" type="number" class="input-field" /></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <div><label for="hotel-latitude" class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input id="hotel-latitude" v-model="form.latitude" type="number" step="any" class="input-field" :required="!form._id" /></div>
-              <div><label for="hotel-longitude" class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input id="hotel-longitude" v-model="form.longitude" type="number" step="any" class="input-field" :required="!form._id" /></div>
+              <div><label for="hotel-latitude" class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input id="hotel-latitude" v-model="form.latitude" type="number" step="any" class="input-field" required /></div>
+              <div><label for="hotel-longitude" class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input id="hotel-longitude" v-model="form.longitude" type="number" step="any" class="input-field" required /></div>
             </div>
             <div class="flex gap-3 justify-end">
               <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>

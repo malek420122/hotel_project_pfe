@@ -82,7 +82,7 @@ function editRoom(r) {
   Object.assign(form, {
     ...r,
     _id: r._id,
-    hotelId: r.hotelId ?? r.hotel_id ?? '',
+    hotelId: r.hotelId ?? '',
   })
   showModal.value = true
 }
