@@ -31,13 +31,11 @@
             <input v-model="form.password" :type="showPwd ? 'text' : 'password'" class="input-field pr-10" required minlength="8" />
             <button type="button" @click="showPwd = !showPwd" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">{{ showPwd ? '🙈' : '👁️' }}</button>
           </div>
-          <p class="text-xs mt-1 text-gray-500">Le mot de passe doit contenir au moins 8 caractères, une lettre MAJUSCULE et un chiffre.</p>
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1">{{ t('auth.confirmPassword') }}</label>
           <input v-model="form.password_confirmation" :type="showPwd ? 'text' : 'password'" class="input-field" required />
           <p v-if="form.password && form.password_confirmation && form.password !== form.password_confirmation" class="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas</p>
-          <p v-if="form.password && !isValidPassword(form.password)" class="text-xs text-red-500 mt-1">Mot de passe invalide : au moins 8 caractères, une lettre MAJUSCULE et un chiffre requis.</p>
         </div>
         <div class="flex items-start gap-2">
           <input v-model="form.accept" type="checkbox" required class="mt-0.5 rounded" id="accept" />
@@ -71,20 +69,13 @@ const error = ref('')
 const loading = ref(false)
 const showPwd = ref(false)
 
-function isValidPassword(p) {
-  if (!p || p.length < 8) return false
-  // must contain at least one uppercase and one digit
-  return /[A-Z]/.test(p) && /\d/.test(p)
-}
-
 async function handleRegister() {
   if (form.password !== form.password_confirmation) { error.value = 'Les mots de passe ne correspondent pas'; return }
-  if (!isValidPassword(form.password)) { error.value = 'Mot de passe invalide : au moins 8 caractères, une lettre MAJUSCULE et un chiffre requis.'; return }
   error.value = ''
   loading.value = true
   try {
     await auth.register(form)
-    router.push('/portal/overview')
+    router.push('/dashboard/client/overview')
   } catch (e) {
     error.value = e.response?.data?.message || Object.values(e.response?.data?.errors || {})[0]?.[0] || 'Erreur lors de l\'inscription'
   } finally {

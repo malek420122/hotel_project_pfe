@@ -8,12 +8,9 @@ use App\Models\Avis;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 
-use App\Http\Requests\HotelStoreRequest;
-use Illuminate\Http\JsonResponse;
-
 class HotelController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $query = Hotel::where('estActif', true);
 
@@ -28,15 +25,24 @@ class HotelController extends Controller
         return response()->json($hotels);
     }
 
-    public function show($id): JsonResponse
+    public function show($id)
     {
         $hotel = Hotel::findOrFail($id);
         return response()->json($hotel);
     }
 
-    public function store(HotelStoreRequest $request): JsonResponse
+    public function store(Request $request)
     {
-        $hotel = Hotel::create($request->validated());
+        $request->validate([
+            'nom' => 'required|string',
+            'adresse' => 'required|string',
+            'ville' => 'required|string',
+            'etoiles' => 'required|integer|between:1,5',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $hotel = Hotel::create($request->all());
         return response()->json($hotel, 201);
     }
 

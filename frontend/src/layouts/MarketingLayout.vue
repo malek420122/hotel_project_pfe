@@ -16,7 +16,7 @@
         </RouterLink>
       </nav>
       <div class="p-3 border-t border-white/10">
-        <button @click="logout" class="sidebar-link w-full"><span>🚪</span><span>{{ t('auth.logout') }}</span></button>
+        <button @click="logout" class="sidebar-link w-full"><span>🚪</span><span>Déconnexion</span></button>
       </div>
     </aside>
     <div class="flex-1 flex flex-col overflow-hidden">
@@ -36,21 +36,19 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import NotifBell from '../components/NotifBell.vue'
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
-const { t } = useI18n()
-const navItems = computed(() => [
-  { to: '/dashboard/marketing/overview', icon: '📊', label: t('nav.overview') },
-  { to: '/dashboard/marketing/promotions', icon: '🎯', label: t('nav.promotions') },
-  { to: '/dashboard/marketing/promo-codes', icon: '🏷️', label: t('nav.promo_codes') },
-  { to: '/dashboard/marketing/statistics', icon: '📈', label: t('nav.statistics') },
-  { to: '/dashboard/marketing/reviews', icon: '⭐', label: t('nav.reviews') },
-  { to: '/dashboard/marketing/loyalty', icon: '🎁', label: t('nav.loyalty') },
-])
-const pageTitle = computed(() => navItems.value.find(i => route.path.startsWith(i.to))?.label || t('nav.marketing'))
+const navItems = [
+  { to: '/dashboard/marketing/overview', icon: '📊', label: 'Vue d\'ensemble' },
+  { to: '/dashboard/marketing/promotions', icon: '🎯', label: 'Promotions' },
+  { to: '/dashboard/marketing/promo-codes', icon: '🏷️', label: 'Codes promo' },
+  { to: '/dashboard/marketing/statistics', icon: '📈', label: 'Statistiques' },
+  { to: '/dashboard/marketing/reviews', icon: '⭐', label: 'Modération avis' },
+  { to: '/dashboard/marketing/loyalty', icon: '🎁', label: 'Programme fidélité' },
+]
+const pageTitle = computed(() => navItems.find(i => route.path.startsWith(i.to))?.label || 'Marketing')
 async function logout() { await auth.logout(); router.push('/login') }
 </script>

@@ -2,25 +2,7 @@
   "nav": {
     "home": "Accueil",
     "hotels": "Hôtels",
-    "dashboard": "Tableau de bord",
-    "clientPortal": "Portail Client",
-    "clientSpace": "Espace Client",
-    "overview": "Vue d'ensemble",
-    "reservations": "Mes réservations",
-    "newBooking": "Nouvelle réservation",
-    "services": "Mes services",
-    "payments": "Paiements",
-    "reviews": "Modération avis",
-    "loyalty": "Programme fidélité",
-    "profile": "Mon profil",
-    "promotions": "Promotions",
-    "promo_codes": "Codes promo",
-    "statistics": "Statistiques",
-    "queue": "File d'attente",
-    "checkin": "Check-In",
-    "checkout": "Check-Out",
-    "room_grid": "Grille chambres",
-    "special_requests": "Demandes spéciales"
+    "dashboard": "Tableau de bord"
   },
   "auth": {
     "login": "Connexion",
@@ -54,8 +36,7 @@
     "close": "Fermer",
     "back": "Retour",
     "next": "Suivant",
-    "view": "Voir",
-    "create": "Créer"
+    "view": "Voir"
   },
   "status": {
     "EN_ATTENTE": "En attente",
@@ -72,167 +53,5 @@
     "ACTIVE": "Actif",
     "EXPIREE": "Expiré",
     "INACTIVE": "Inactif"
-  },
-  "home": {
-    "hero": {
-      "badge": "La plateforme N°1 de reservation hoteliere",
-      "titleStart": "Votre sejour",
-      "titleAccent": "ideal",
-      "titleEnd": "vous attend",
-      "subtitle": "Decouvrez des hotels d'exception partout dans le monde. Reservez en quelques clics, profitez d'un service 5 etoiles."
-    },
-    "search": {
-      "destination": "Destination",
-      "destinationPlaceholder": "Marrakech, Agadir...",
-      "checkin": "Arrivee",
-      "checkout": "Depart",
-      "travelers": "Voyageurs",
-      "button": "Rechercher"
-    },
-    "stats": {
-      "partnerHotels": "Hotels partenaires",
-      "happyClients": "Clients satisfaits",
-      "citiesCovered": "Villes couvertes",
-      "avgRating": "Note moyenne"
-    },
-    "featured": {
-      "badge": "Nos coups de coeur",
-      "title": "Hotels en vedette",
-      "subtitle": "Selectionnes pour leur qualite et leur rapport qualite-prix exceptionnel",
-      "cta": "Voir tous les hotels"
-    },
-    "why": {
-      "title": "Pourquoi choisir HotelEase ?",
-      "items": {
-        "securePayment": {
-          "title": "Paiement securise",
-          "desc": "Vos transactions sont protegees par un chiffrement SSL 256 bits."
-        },
-        "fastBooking": {
-          "title": "Reservation rapide",
-          "desc": "Reservez en moins de 3 minutes grace a notre interface intuitive."
-        },
-        "bestPrices": {
-          "title": "Meilleurs prix",
-          "desc": "Garantie du meilleur tarif ou remboursement de la difference."
-        },
-        "loyalty": {
-          "title": "Programme fidelite",
-          "desc": "Accumulez des points a chaque sejour et profitez d'avantages exclusifs."
-        }
-      }
-    },
-    "footer": {
-      "tagline": "La plateforme de reservation hoteliere qui simplifie vos voyages.",
-      "rights": "© 2025 HotelEase. Tous droits reserves.",
-      "destinationsTitle": "Destinations",
-      "servicesTitle": "Services",
-      "companyTitle": "Entreprise",
-      "destinations": {
-        "marrakech": "Marrakech",
-        "casablanca": "Casablanca",
-        "agadir": "Agadir",
-        "rabat": "Rabat",
-        "fes": "Fes"
-      },
-      "services": {
-        "booking": "Reservation",
-        "flexCancel": "Annulation flexible",
-        "support": "Support 24/7",
-        "loyalty": "Programme fidelite"
-      },
-      "company": {
-        "about": "A propos",
-        "careers": "Carrieres",
-        "partnerships": "Partenariats",
-        "blog": "Blog",
-        "press": "Presse"
-      }
-    }
-  },
-  "dashboard": {
-    "overview_title": "Vue d'ensemble",
-    "total_hotels": "Total Hôtels",
-    "reservations_month": "Réservations (mois)",
-    "revenue_month": "Revenus (mois)",
-    "active_users": "Utilisateurs actifs",
-    "reservations_chart": "Réservations par mois",
-    "revenue_chart": "Répartition revenus",
-    "recent_reservations": "Réservations récentes",
-    "top_hotels": "Meilleurs hôtels",
-    "promotions": "Promotions",
-    "new_promotion": "Nouvelle promotion",
-    "promo_title": "Titre de la promotion",
-    "description": "Description",
-    "discount": "Remise %",
-    "max_uses": "Utilisations max",
-    "new_booking": "Nouvelle réservation",
-    "choose_room": "Choisir un hôtel et une chambre",
-    "destination": "Destination",
-    "city_placeholder": "Ville...",
-    "checkin": "Arrivée",
-    "checkout": "Départ",
-    "search_rooms": "Rechercher les chambres",
-    "next": "Suivant →",
-    "back": "← Retour",
-    "stay_details": "Détails du séjour",
-    "guests_count": "Nombre de voyageurs",
-    "special_requests": "Demandes spéciales",
-    "additional_services": "Services supplémentaires",
-    "payment": "Paiement",
-    "promo_code": "Code promo",
-    "apply": "Appliquer",
-    "my_reservations": "Mes réservations",
-    "all_statuses": "Tous les statuts",
-    "reference": "Référence",
-    "hotel": "Hôtel",
-    "dates": "Dates",
-    "price": "Prix",
-    "status": "Statut",
-    "actions": "Actions",
-    "review_moderation": "Modération des Avis",
-    "publish": "✅ Publier",
-    "reject": "🚫 Rejeter",
-    "reply": "💬 Répondre",
-    "statistics": "Statistiques",
-    "reservations_12_months": "Réservations sur 12 mois",
-    "revenue_by_hotel": "Revenus par hotel",
-    "traffic_sources": "Sources de trafic",
-    "monthly_occupancy": "Taux d'occupation mensuel",
-    "check_in_title": "Check-In",
-    "search_reservation": "Rechercher une réservation",
-    "reservation_found": "✅ Réservation trouvée",
-    "promo_codes": "Codes Promo",
-    "create_code": "+ Créer un code",
-    "copy": "📋 Copier",
-    "new_promo_code": "Nouveau code promo",
-    "percentage": "Pourcentage (%)",
-    "fixed_amount": "Montant fixe (€)",
-    "nb_max_uses": "Nb max utilisations",
-    "plus_new_promotion": "+ Nouvelle promotion",
-    "new_clients": "Nouveaux clients",
-    "loyal_members": "Membres Fidèles",
-    "points_awarded": "Points attribués",
-    "top_loyal_members": "Top membres fidèles",
-    "conversions_channel": "Conversions par canal",
-    "promotions_efficiency": "Efficacité des promotions",
-    "recent_reviews": "Avis récents",
-    "marketing_overview": "Vue d'ensemble Marketing",
-    "reservations_list": "Liste des réservations",
-    "btn_search": "Rechercher",
-    "active_promotions": "Promotions actives",
-    "used_promo_codes": "Codes promo utilisés",
-    "avg_rating": "Note moyenne",
-    "conversion_rate": "Taux conversion",
-    "bronze_members": "Membres Bronze",
-    "silver_members": "Membres Argent",
-    "gold_members": "Membres Or",
-    "waiting": "En attente",
-    "today_checkins": "Check-in aujourd'hui",
-    "today_checkouts": "Check-out aujourd'hui",
-    "active_reservations": "Réservations actives",
-    "completed_stays": "Séjours complétés",
-    "loyalty_points": "Points fidélité",
-    "total_spent": "Total dépenses"
   }
 }

@@ -2,9 +2,9 @@
   <div>
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Programme de Fidélité</h2>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-      <KpiCard icon="🥉" :label="$t('dashboard.bronze_members')" value="842" color="blue" />
-      <KpiCard icon="🥈" :label="$t('dashboard.silver_members')" value="324" color="green" />
-      <KpiCard icon="🥇" :label="$t('dashboard.gold_members')" value="82" color="gold" />
+      <KpiCard icon="🥉" label="Membres Bronze" value="842" color="blue" />
+      <KpiCard icon="🥈" label="Membres Argent" value="324" color="green" />
+      <KpiCard icon="🥇" label="Membres Or" value="82" color="gold" />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card">
@@ -12,7 +12,7 @@
         <Doughnut :data="chartData" :options="opts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.top_loyal_members') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Top membres fidèles</h3>
         <div class="space-y-3">
           <div v-for="(m,i) in topMembers" :key="m.name" class="flex items-center gap-3">
             <span class="text-xl w-6">{{ ['🥇','🥈','🥉','4️⃣','5️⃣'][i] }}</span>

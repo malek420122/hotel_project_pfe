@@ -1,25 +1,25 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.overview_title') }}</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Vue d'ensemble</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-      <KpiCard icon="🏨" :label="$t('dashboard.total_hotels')" value="12" color="blue" :trend="8" />
-      <KpiCard icon="📅" :label="$t('dashboard.reservations_month')" value="384" color="green" :trend="15" />
-      <KpiCard icon="💰" :label="$t('dashboard.revenue_month')" value="87,450€" color="gold" :trend="12" />
-      <KpiCard icon="👥" :label="$t('dashboard.active_users')" value="1,248" color="purple" :trend="-3" />
+      <KpiCard icon="🏨" label="Total Hôtels" value="12" color="blue" :trend="8" />
+      <KpiCard icon="📅" label="Réservations (mois)" value="384" color="green" :trend="15" />
+      <KpiCard icon="💰" label="Revenus (mois)" value="87,450€" color="gold" :trend="12" />
+      <KpiCard icon="👥" label="Utilisateurs actifs" value="1,248" color="purple" :trend="-3" />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.reservations_chart') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Réservations par mois</h3>
         <Bar :data="bookingsChart" :options="chartOpts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.revenue_chart') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Répartition revenus</h3>
         <Doughnut :data="revenueChart" :options="doughnutOpts" />
       </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.recent_reservations') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Réservations récentes</h3>
         <div class="space-y-2">
           <div v-for="r in recentReservations" :key="r.ref" class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
             <div>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.top_hotels') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Meilleurs hôtels</h3>
         <div class="space-y-3">
           <div v-for="(h, i) in topHotels" :key="h.nom" class="flex items-center gap-3">
             <span class="text-lg font-bold w-6">{{ i+1 }}</span>

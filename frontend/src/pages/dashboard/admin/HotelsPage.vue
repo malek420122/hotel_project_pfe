@@ -30,7 +30,7 @@
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Ville</label><input v-model="form.ville" class="input-field" required /></div>
             </div>
             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input v-model="form.adresse" class="input-field" /></div>
-            <div><label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.description') }}</label><textarea v-model="form.description" rows="3" class="input-field"></textarea></div>
+            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Description</label><textarea v-model="form.description" rows="3" class="input-field"></textarea></div>
             <div class="grid grid-cols-2 gap-4">
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Étoiles</label>
                 <select v-model="form.etoiles" class="input-field"><option v-for="i in 5" :key="i" :value="i">{{ i }}</option></select>
@@ -42,7 +42,7 @@
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input v-model="form.longitude" type="number" step="any" class="input-field" /></div>
             </div>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
+              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
               <button type="submit" class="btn-primary">{{ form._id ? 'Enregistrer' : 'Créer' }}</button>
             </div>
           </form>

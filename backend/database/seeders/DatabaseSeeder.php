@@ -8,9 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            AdminUserSeeder::class,
-            SampleDataSeeder::class,
-        ]);
+        // Seeders can be added here
     }
 }

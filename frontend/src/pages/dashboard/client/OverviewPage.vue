@@ -6,10 +6,10 @@
     </div>
     <!-- KPIs -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-      <KpiCard icon="📅" :label="$t('dashboard.active_reservations')" :value="stats.active" color="blue" />
-      <KpiCard icon="✅" :label="$t('dashboard.completed_stays')" :value="stats.done" color="green" />
-      <KpiCard icon="🎁" :label="$t('dashboard.loyalty_points')" :value="loyalty.points" color="gold" />
-      <KpiCard icon="💰" :label="$t('dashboard.total_spent')" :value="`${stats.spent}€`" color="purple" />
+      <KpiCard icon="📅" label="Réservations actives" :value="stats.active" color="blue" />
+      <KpiCard icon="✅" label="Séjours complétés" :value="stats.done" color="green" />
+      <KpiCard icon="🎁" label="Points fidélité" :value="loyalty.points" color="gold" />
+      <KpiCard icon="💰" label="Total dépenses" :value="`${stats.spent}€`" color="purple" />
     </div>
     <!-- Next booking -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -26,7 +26,7 @@
         <div v-else class="text-center py-6 text-gray-400">
           <p class="text-3xl mb-2">🛏️</p>
           <p class="text-sm">Aucune réservation à venir</p>
-          <RouterLink to="/portal/new-booking" class="btn-primary mt-3 inline-block text-sm">Réserver maintenant</RouterLink>
+          <RouterLink to="/dashboard/client/new-booking" class="btn-primary mt-3 inline-block text-sm">Réserver maintenant</RouterLink>
         </div>
       </div>
       <div class="card">
@@ -53,18 +53,18 @@
     <!-- Recent Reservations -->
     <div class="card">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-gray-800">{{ $t('dashboard.recent_reservations') }}</h3>
-        <RouterLink to="/portal/reservations" class="text-secondary text-sm hover:underline">Voir toutes</RouterLink>
+        <h3 class="text-lg font-bold text-gray-800">Réservations récentes</h3>
+        <RouterLink to="/dashboard/client/reservations" class="text-secondary text-sm hover:underline">Voir toutes</RouterLink>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.hotel') }}</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">Hôtel</th>
               <th class="px-3 py-2 text-left font-semibold text-gray-600">Chambre</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.dates') }}</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.price') }}</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.status') }}</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">Dates</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">Prix</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">Statut</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">

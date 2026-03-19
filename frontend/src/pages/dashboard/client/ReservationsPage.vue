@@ -2,7 +2,7 @@
   <div>
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-gray-800">Mes Réservations</h2>
-      <RouterLink to="/portal/new-booking" class="btn-primary text-sm">+ Nouvelle réservation</RouterLink>
+      <RouterLink to="/dashboard/client/new-booking" class="btn-primary text-sm">+ Nouvelle réservation</RouterLink>
     </div>
     <!-- Filters -->
     <div class="card mb-6 flex flex-wrap gap-3">
@@ -44,7 +44,7 @@
       <div v-if="!filtered.length" class="card text-center py-16 text-gray-400">
         <p class="text-5xl mb-4">📋</p>
         <p class="text-lg">Aucune réservation trouvée</p>
-        <RouterLink to="/portal/new-booking" class="btn-primary mt-4 inline-block text-sm">Faire une réservation</RouterLink>
+        <RouterLink to="/dashboard/client/new-booking" class="btn-primary mt-4 inline-block text-sm">Faire une réservation</RouterLink>
       </div>
     </div>
     <ConfirmModal :show="cancelModal.show" title="Annuler la réservation"

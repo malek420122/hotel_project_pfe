@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.review_moderation') }}</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Modération des Avis</h2>
     <div class="flex gap-3 mb-6">
       <button v-for="f in filters" :key="f.val" @click="active=f.val"
         :class="['px-4 py-2 rounded-xl text-sm font-medium', active===f.val ? 'bg-secondary text-white' : 'bg-white border text-gray-600 hover:bg-gray-50']">
@@ -23,9 +23,9 @@
             </div>
             <p class="text-gray-700 mt-2 italic">"{{ avis.comment }}"</p>
             <div class="flex gap-2 mt-3">
-              <button @click="publish(avis)" class="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100">{{ $t('dashboard.publish') }}</button>
-              <button @click="reject(avis)" class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">{{ $t('dashboard.reject') }}</button>
-              <button class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">{{ $t('dashboard.reply') }}</button>
+              <button @click="publish(avis)" class="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100">✅ Publier</button>
+              <button @click="reject(avis)" class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">🚫 Rejeter</button>
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">💬 Répondre</button>
             </div>
           </div>
           <StatusBadge :status="avis.statut" />

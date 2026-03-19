@@ -100,11 +100,11 @@
               <h3 class="text-lg font-bold text-primary mb-4">Réserver votre séjour</h3>
               <div class="space-y-3">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.checkin') }}</label>
+                  <label class="block text-xs font-semibold text-gray-500 mb-1">Arrivée</label>
                   <input v-model="bookForm.dateArrivee" type="date" :min="today" class="input-field" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.checkout') }}</label>
+                  <label class="block text-xs font-semibold text-gray-500 mb-1">Départ</label>
                   <input v-model="bookForm.dateDepart" type="date" :min="bookForm.dateArrivee || today" class="input-field" />
                 </div>
                 <div>
@@ -150,7 +150,7 @@ function loadRooms() {
 
 function selectRoom(room) {
   bookingStore.updateBooking({ chambre: room, hotel: hotel.value, ...bookForm })
-  router.push('/portal/new-booking')
+  router.push('/dashboard/client/new-booking')
 }
 
 function formatDate(d) {

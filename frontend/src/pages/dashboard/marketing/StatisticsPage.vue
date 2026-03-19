@@ -1,23 +1,23 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.statistics') }}</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Statistiques</h2>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.reservations_12_months') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Réservations sur 12 mois</h3>
         <Line :data="lineData" :options="lineOpts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.revenue_by_hotel') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Revenus par hotel</h3>
         <Bar :data="barData" :options="barOpts" />
       </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.traffic_sources') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Sources de trafic</h3>
         <Doughnut :data="doughnutData" :options="doughnutOpts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.monthly_occupancy') }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Taux d'occupation mensuel</h3>
         <Bar :data="occData" :options="occOpts" />
       </div>
     </div>

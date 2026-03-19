@@ -40,9 +40,9 @@
               <input v-model="form.maxVoyageurs" type="number" placeholder="Capacité" class="input-field" />
               <input v-model="form.etage" type="number" placeholder="Étage" class="input-field" />
             </div>
-            <textarea v-model="form.description" rows="2" :placeholder="$t('dashboard.description')" class="input-field"></textarea>
+            <textarea v-model="form.description" rows="2" placeholder="Description" class="input-field"></textarea>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
+              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
               <button type="submit" class="btn-primary">Enregistrer</button>
             </div>
           </form>

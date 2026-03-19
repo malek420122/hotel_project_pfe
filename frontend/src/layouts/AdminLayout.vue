@@ -17,7 +17,7 @@
       </nav>
       <div class="p-3 border-t border-white/10">
         <button @click="logout" class="sidebar-link w-full">
-          <span>🚪</span><span>{{ t('auth.logout') }}</span>
+          <span>🚪</span><span>Déconnexion</span>
         </button>
       </div>
     </aside>
@@ -38,22 +38,18 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import NotifBell from '../components/NotifBell.vue'
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
-const { t } = useI18n()
-const navItems = computed(() => [
-  { to: '/dashboard/admin/overview', icon: '📊', label: t('nav.overview') },
-  { to: '/dashboard/admin/reservations', icon: '📅', label: t('nav.reservations') },
-  { to: '/dashboard/admin/hotels', icon: '🏨', label: t('nav.hotels') },
-  { to: '/dashboard/admin/rooms', icon: '🛏️', label: t('nav.rooms', 'Chambres') },
-  { to: '/dashboard/admin/payments', icon: '💳', label: t('nav.payments') },
-  { to: '/dashboard/admin/users', icon: '👥', label: t('nav.users', 'Utilisateurs') },
-  { to: '/dashboard/admin/pricing', icon: '💰', label: t('nav.pricing', 'Prix dynamiques') },
-])
-const pageTitle = computed(() => navItems.value.find(i => route.path.startsWith(i.to))?.label || 'Admin')
+const navItems = [
+  { to: '/dashboard/admin/overview', icon: '📊', label: 'Vue d\'ensemble' },
+  { to: '/dashboard/admin/hotels', icon: '🏨', label: 'Hôtels' },
+  { to: '/dashboard/admin/rooms', icon: '🛏️', label: 'Chambres' },
+  { to: '/dashboard/admin/users', icon: '👥', label: 'Utilisateurs' },
+  { to: '/dashboard/admin/pricing', icon: '💰', label: 'Prix dynamiques' },
+]
+const pageTitle = computed(() => navItems.find(i => route.path.startsWith(i.to))?.label || 'Admin')
 async function logout() { await auth.logout(); router.push('/login') }
 </script>

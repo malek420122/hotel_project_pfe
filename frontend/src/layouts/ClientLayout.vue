@@ -8,14 +8,14 @@
           <span class="text-2xl">🏨</span>
           <span class="text-xl font-extrabold">HotelEase</span>
         </RouterLink>
-        <p class="text-white/50 text-xs mt-1">{{ t('nav.clientSpace') }}</p>
+        <p class="text-white/50 text-xs mt-1">Espace Client</p>
       </div>
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <RouterLink v-for="item in navItems" :key="item.to" :to="item.to"
-          :class="['sidebar-link', $route.path.startsWith(item.to) && item.to !== '/portal' ? 'active' : '']"
+          :class="['sidebar-link', $route.path.startsWith(item.to) && item.to !== '/dashboard/client' ? 'active' : '']"
           @click="sidebarOpen = false">
           <span class="text-lg">{{ item.icon }}</span>
-          <span>{{ t(item.labelKey) }}</span>
+          <span>{{ item.label }}</span>
           <span v-if="item.badge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{{ item.badge }}</span>
         </RouterLink>
       </nav>
@@ -30,7 +30,7 @@
           </div>
         </div>
         <button @click="logout" class="sidebar-link w-full">
-          <span>🚪</span><span>{{ t('auth.logout') }}</span>
+          <span>🚪</span><span>Déconnexion</span>
         </button>
       </div>
     </aside>
@@ -57,32 +57,27 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import NotifBell from '../components/NotifBell.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
 const auth = useAuthStore()
 const sidebarOpen = ref(false)
 
 const navItems = [
-  { to: '/portal/overview', icon: '🏠', labelKey: 'nav.overview' },
-  { to: '/portal/reservations', icon: '📅', labelKey: 'nav.reservations' },
-  { to: '/portal/new-booking', icon: '➕', labelKey: 'nav.newBooking' },
-  { to: '/portal/services', icon: '🛎️', labelKey: 'nav.services' },
-  { to: '/portal/payments', icon: '💳', labelKey: 'nav.payments' },
-  { to: '/portal/reviews', icon: '⭐', labelKey: 'nav.reviews' },
-  { to: '/portal/loyalty', icon: '🎁', labelKey: 'nav.loyalty' },
-  { to: '/portal/profile', icon: '👤', labelKey: 'nav.profile' },
+  { to: '/dashboard/client/overview', icon: '🏠', label: 'Vue d\'ensemble' },
+  { to: '/dashboard/client/reservations', icon: '📅', label: 'Mes réservations' },
+  { to: '/dashboard/client/new-booking', icon: '➕', label: 'Nouvelle réservation' },
+  { to: '/dashboard/client/services', icon: '🛎️', label: 'Mes services' },
+  { to: '/dashboard/client/payments', icon: '💳', label: 'Paiements' },
+  { to: '/dashboard/client/reviews', icon: '⭐', label: 'Mes avis' },
+  { to: '/dashboard/client/loyalty', icon: '🎁', label: 'Fidélité' },
+  { to: '/dashboard/client/profile', icon: '👤', label: 'Mon profil' },
 ]
 
-const pageTitle = computed(() => {
-  const current = navItems.find(i => route.path.startsWith(i.to))
-  return current ? t(current.labelKey) : t('nav.clientPortal')
-})
+const pageTitle = computed(() => navItems.find(i => route.path.startsWith(i.to))?.label || 'Dashboard')
 
 async function logout() {
   await auth.logout()

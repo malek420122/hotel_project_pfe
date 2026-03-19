@@ -1,15 +1,15 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.check_in_title') }}</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Check-In</h2>
     <div class="card mb-6">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.search_reservation') }}</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Rechercher une réservation</h3>
       <div class="flex gap-3">
         <input v-model="search" placeholder="Nom, email ou référence..." class="input-field flex-1" @keyup.enter="searchReservation" />
-        <button @click="searchReservation" class="btn-primary">{{ $t('dashboard.btn_search') }}</button>
+        <button @click="searchReservation" class="btn-primary">Rechercher</button>
       </div>
     </div>
     <div v-if="found" class="card border-2 border-secondary mb-6">
-      <h3 class="text-lg font-bold text-secondary mb-4">{{ $t('dashboard.reservation_found') }}</h3>
+      <h3 class="text-lg font-bold text-secondary mb-4">✅ Réservation trouvée</h3>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
         <div><p class="text-xs text-gray-500">Client</p><p class="font-bold">{{ found.client }}</p></div>
         <div><p class="text-xs text-gray-500">Hôtel / Chambre</p><p class="font-bold">{{ found.hotel }} · {{ found.chambre }}</p></div>
@@ -34,7 +34,7 @@
           </div>
           <div class="flex items-center gap-3">
             <StatusBadge :status="r.statut" />
-            <button v-if="r.statut !== 'EN_COURS'" @click="found=r" class="btn-primary text-xs py-1.5 px-3">{{ $t('dashboard.check_in_title') }}</button>
+            <button v-if="r.statut !== 'EN_COURS'" @click="found=r" class="btn-primary text-xs py-1.5 px-3">Check-In</button>
           </div>
         </div>
       </div>

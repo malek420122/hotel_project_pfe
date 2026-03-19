@@ -14,8 +14,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
-use App\Http\Requests\ReservationStoreRequest;
-
 class ReservationController extends Controller
 {
     private function generateReference(): string
@@ -25,38 +23,25 @@ class ReservationController extends Controller
         return "R-{$year}-{$rand}";
     }
 
-    public function store(ReservationStoreRequest $request)
+    public function store(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $validated = $request->validated();
 
-        // Vérifier la disponibilité (chevauchement)
-        $exists = Reservation::where('chambreId', $validated['chambreId'])
-            ->whereIn('statut', ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'])
-            ->where(function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('dateArrivee', '>=', $request->dateArrivee)
-                      ->where('dateArrivee', '<', $request->dateDepart);
-                })->orWhere(function ($q) use ($request) {
-                    $q->where('dateDepart', '>', $request->dateArrivee)
-                      ->where('dateDepart', '<=', $request->dateDepart);
-                })->orWhere(function ($q) use ($request) {
-                    $q->where('dateArrivee', '<=', $request->dateArrivee)
-                      ->where('dateDepart', '>=', $request->dateDepart);
-                });
-            })->exists();
+        $request->validate([
+            'chambreId' => 'required|string',
+            'hotelId' => 'required|string',
+            'dateArrivee' => 'required|date',
+            'dateDepart' => 'required|date|after:dateArrivee',
+            'nbVoyageurs' => 'required|integer|min:1',
+        ]);
 
-        if ($exists) {
-            return response()->json(['error' => 'La chambre est déjà réservée pour ces dates.'], 422);
-        }
-
-        $chambre = Chambre::findOrFail($validated['chambreId']);
-        $nuits = Carbon::parse($validated['dateArrivee'])->diffInDays(Carbon::parse($validated['dateDepart']));
+        $chambre = Chambre::findOrFail($request->chambreId);
+        $nuits = Carbon::parse($request->dateArrivee)->diffInDays(Carbon::parse($request->dateDepart));
         $prixTotal = $chambre->prix_base * $nuits;
 
         $remise = 0;
-        if (isset($validated['codePromo'])) {
-            $promo = Promotion::where('codePromo', $validated['codePromo'])
+        if ($request->has('codePromo')) {
+            $promo = Promotion::where('codePromo', $request->codePromo)
                 ->where('estActive', true)
                 ->where('dateDebut', '<=', now())
                 ->where('dateFin', '>=', now())
@@ -69,36 +54,25 @@ class ReservationController extends Controller
         }
 
         $servicesPrix = 0;
-        if (isset($validated['servicesChoisis']) && is_array($validated['servicesChoisis'])) {
-            foreach ($validated['servicesChoisis'] as $service) {
+        if ($request->has('servicesChoisis') && is_array($request->servicesChoisis)) {
+            foreach ($request->servicesChoisis as $service) {
                 $servicesPrix += $service['prix'] ?? 0;
             }
             $prixTotal += $servicesPrix;
         }
 
-        // Apply Loyalty Discount if no promo code is used
-        if ($remise === 0) {
-            if ($user->niveau_fidelite === 'Argent') {
-                $remise = 5;
-                $prixTotal = $prixTotal * 0.95;
-            } elseif ($user->niveau_fidelite === 'Or') {
-                $remise = 10;
-                $prixTotal = $prixTotal * 0.90;
-            }
-        }
-
         $reservation = Reservation::create([
             'reference' => $this->generateReference(),
             'clientId' => (string) $user->_id,
-            'chambreId' => $validated['chambreId'],
-            'hotelId' => $validated['hotelId'],
-            'dateArrivee' => $validated['dateArrivee'],
-            'dateDepart' => $validated['dateDepart'],
-            'nbVoyageurs' => $validated['nbVoyageurs'],
+            'chambreId' => $request->chambreId,
+            'hotelId' => $request->hotelId,
+            'dateArrivee' => $request->dateArrivee,
+            'dateDepart' => $request->dateDepart,
+            'nbVoyageurs' => $request->nbVoyageurs,
             'prixTotal' => round($prixTotal, 2),
-            'demandesSpeciales' => $validated['demandesSpeciales'] ?? '',
-            'servicesChoisis' => $validated['servicesChoisis'] ?? [],
-            'codePromoApplique' => $validated['codePromo'] ?? '',
+            'demandesSpeciales' => $request->demandesSpeciales ?? '',
+            'servicesChoisis' => $request->servicesChoisis ?? [],
+            'codePromoApplique' => $request->codePromo ?? '',
             'remiseAppliquee' => $remise,
         ]);
 
@@ -106,7 +80,7 @@ class ReservationController extends Controller
             'reservationId' => (string) $reservation->_id,
             'montant' => $reservation->prixTotal,
             'statut' => 'EN_COURS',
-            'methode' => $validated['methodePaiement'] ?? 'carte',
+            'methode' => $request->methodePaiement ?? 'carte',
         ]);
 
         $points = (int) round($prixTotal / 10);
@@ -120,9 +94,6 @@ class ReservationController extends Controller
             'message' => "Votre réservation {$reservation->reference} a été créée avec succès.",
             'estLue' => false,
         ]);
-
-        // Simulation d'envoi d'email
-        \Illuminate\Support\Facades\Log::info("EMAIL SENT: Confirmation de réservation {$reservation->reference} à {$user->email}");
 
         return response()->json($reservation, 201);
     }
@@ -168,21 +139,6 @@ class ReservationController extends Controller
         return response()->json($reservations);
     }
 
-    public function adminIndex(Request $request)
-    {
-        $query = Reservation::query()->orderBy('created_at', 'desc');
-
-        if ($request->filled('statut') && $request->statut !== 'ALL') {
-            $query->where('statut', $request->statut);
-        }
-
-        if ($request->filled('clientId')) {
-            $query->where('clientId', $request->clientId);
-        }
-
-        return response()->json($query->limit(200)->get());
-    }
-
     public function confirmer($id)
     {
         $reservation = Reservation::findOrFail($id);
@@ -195,29 +151,6 @@ class ReservationController extends Controller
             'userId' => $reservation->clientId,
             'type' => 'RESERVATION_CONFIRMEE',
             'message' => "Votre réservation {$reservation->reference} est confirmée ! Bon séjour.",
-            'estLue' => false,
-        ]);
-
-        return response()->json($reservation);
-    }
-
-    public function rejeter(Request $request, $id)
-    {
-        $reservation = Reservation::findOrFail($id);
-
-        if (!in_array($reservation->statut, ['EN_ATTENTE', 'CONFIRMEE'])) {
-            return response()->json(['error' => 'Statut non modifiable'], 400);
-        }
-
-        $motif = (string) ($request->motif ?? '');
-        $reservation->update(['statut' => 'REJETE']);
-
-        Notification::create([
-            'userId' => $reservation->clientId,
-            'type' => 'RESERVATION_REJETEE',
-            'message' => $motif !== ''
-                ? "Votre réservation {$reservation->reference} a été refusée. Motif: {$motif}"
-                : "Votre réservation {$reservation->reference} a été refusée.",
             'estLue' => false,
         ]);
 

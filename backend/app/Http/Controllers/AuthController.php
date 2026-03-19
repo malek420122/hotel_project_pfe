@@ -8,38 +8,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Carbon\Carbon;
-use App\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    public function register(Request $request)
     {
-        $validated = $request->validated();
-        $validated['password'] = Hash::make($validated['password']);
-        // Set default values for optional fields if not provided
-        $validated['nationalite'] = $validated['nationalite'] ?? '';
-        $validated['langue'] = $validated['langue'] ?? 'fr';
+        $request->validate([
+            'nom' => 'required|string|max:100',
+            'prenom' => 'required|string|max:100',
+            'email' => 'required|email|unique:mongodb.users,email',
+            'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[A-Z])(?=.*\d).+$/',
+            'telephone' => 'required|string',
+            'nationalite' => 'nullable|string',
+            'langue' => 'nullable|in:fr,en,ar',
+        ]);
 
-        $user = User::create($validated);
+        $user = User::create([
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'telephone' => $request->telephone,
+            'nationalite' => $request->nationalite ?? '',
+            'langue' => $request->langue ?? 'fr',
+        ]);
 
-        // Envoyer une notification de bienvenue
-        try {
-            Notification::create([
-                'userId' => (string) $user->_id,
-                'type' => 'BIENVENUE',
-                'message' => "Bienvenue sur HotelEase, {$user->prenom} !",
-                'estLue' => false,
-            ]);
-        } catch (\Exception $e) {
-            // Logger l'erreur mais ne pas bloquer l'inscription
-        }
+        Notification::create([
+            'userId' => (string) $user->_id,
+            'type' => 'BIENVENUE',
+            'message' => "Bienvenue sur HotelEase, {$user->prenom} !",
+            'estLue' => false,
+        ]);
 
         $token = JWTAuth::fromUser($user);
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ], 201);
+        return response()->json(['user' => $user, 'token' => $token], 201);
     }
 
     public function login(Request $request)

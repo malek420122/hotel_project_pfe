@@ -5,9 +5,6 @@ import ar from './ar.json'
 
 const savedLocale = localStorage.getItem('locale') || 'fr'
 
-document.documentElement.setAttribute('lang', savedLocale)
-document.documentElement.setAttribute('dir', savedLocale === 'ar' ? 'rtl' : 'ltr')
-
 export default createI18n({
   legacy: false,
   locale: savedLocale,

@@ -10,13 +10,12 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StatistiqueController;
-use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // Auth (public)
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('jwt.auth');
     Route::get('me', [AuthController::class, 'me'])->middleware('jwt.auth');
 });
@@ -40,17 +39,12 @@ Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
-    // Payment processing
-    Route::post('payments/create-intent', [PaymentController::class, 'createIntent']);
-    Route::post('payments/process', [PaymentController::class, 'process']);
 });
 
 // Receptionniste routes
 Route::middleware(['jwt.auth', 'role:receptionniste,admin'])->group(function () {
-    Route::get('reservations', [ReservationController::class, 'adminIndex']);
     Route::get('reservations/pending', [ReservationController::class, 'pending']);
     Route::put('reservations/{id}/confirmer', [ReservationController::class, 'confirmer']);
-    Route::put('reservations/{id}/rejeter', [ReservationController::class, 'rejeter']);
     Route::put('reservations/{id}/checkin', [ReservationController::class, 'checkin']);
     Route::put('reservations/{id}/checkout', [ReservationController::class, 'checkout']);
     Route::get('chambres/grille', [ChambreController::class, 'grille']);
@@ -66,16 +60,12 @@ Route::middleware(['jwt.auth', 'role:admin'])->group(function () {
     Route::get('admin/users', [UserController::class, 'index']);
     Route::put('admin/users/{id}', [UserController::class, 'update']);
     Route::get('admin/users/{id}/reservations', [UserController::class, 'reservations']);
-    // Admin payments
-    Route::get('admin/payments', [PaymentController::class, 'index']);
-    Route::get('admin/payments/{id}', [PaymentController::class, 'show']);
     Route::get('admin/statistiques', [StatistiqueController::class, 'dashboard']);
 });
 
 // Marketing routes
 Route::middleware(['jwt.auth', 'role:marketing,admin'])->group(function () {
     Route::apiResource('marketing/promotions', PromotionController::class);
-    Route::post('marketing/notifications/broadcast', [NotificationController::class, 'sendToAll']);
     Route::get('marketing/statistiques', [StatistiqueController::class, 'marketing']);
     Route::get('marketing/avis', [AvisController::class, 'moderation']);
     Route::put('marketing/avis/{id}/moderer', [AvisController::class, 'moderer']);

@@ -2,9 +2,9 @@
   <div>
     <h2 class="text-2xl font-bold text-gray-800 mb-6">File d'attente</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <KpiCard icon="⏳" :label="$t('dashboard.waiting')" :value="queue.filter(r=>r.type==='checkin').length" color="gold" />
-      <KpiCard icon="🔑" :label="$t('dashboard.today_checkins')" :value="todayCheckins" color="blue" />
-      <KpiCard icon="🚪" :label="$t('dashboard.today_checkouts')" :value="todayCheckouts" color="green" />
+      <KpiCard icon="⏳" label="En attente" :value="queue.filter(r=>r.type==='checkin').length" color="gold" />
+      <KpiCard icon="🔑" label="Check-in aujourd'hui" :value="todayCheckins" color="blue" />
+      <KpiCard icon="🚪" label="Check-out aujourd'hui" :value="todayCheckouts" color="green" />
     </div>
     <div class="card">
       <h3 class="text-lg font-bold text-gray-800 mb-4">File d'attente en temps réel</h3>

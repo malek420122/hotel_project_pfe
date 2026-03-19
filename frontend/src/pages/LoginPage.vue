@@ -78,9 +78,8 @@ async function handleLogin() {
   loading.value = true
   try {
     const user = await auth.login(form)
-    const roleMap = { client: '/portal', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
-    const role = String(user?.role || '').trim().toLowerCase()
-    router.push(roleMap[role] || '/')
+    const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+    router.push(roleMap[user.role] || '/')
   } catch (e) {
     if (e.response?.status === 429) error.value = t('auth.accountBlocked')
     else error.value = e.response?.data?.message || 'Email ou mot de passe incorrect'

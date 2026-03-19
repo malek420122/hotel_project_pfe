@@ -36,22 +36,9 @@ export const useBookingStore = defineStore('booking', () => {
       loading.value = false
     }
   }
-  
-  async function processPayment(reservationId, methode = 'carte', paymentIntentId = null) {
-    loading.value = true
-    try {
-      const { data } = await api.post('/payments/process', { reservationId, methode, paymentIntentId })
-      // refresh reservations list entry if exists
-      const idx = reservations.value.findIndex(r => r._id === reservationId)
-      if (idx !== -1) reservations.value[idx].statut = 'CONFIRMEE'
-      return data
-    } finally {
-      loading.value = false
-    }
-  }
 
   async function cancelReservation(id) {
-    await api.delete(`/reservations/${id}`)
+    await api.put(`/reservations/${id}/annuler`)
     const res = reservations.value.find(r => r._id === id)
     if (res) res.statut = 'ANNULEE'
   }
@@ -67,5 +54,5 @@ export const useBookingStore = defineStore('booking', () => {
     })
   }
 
-  return { reservations, loading, currentBooking, fetchMyReservations, createReservation, processPayment, cancelReservation, updateBooking, resetBooking }
+  return { reservations, loading, currentBooking, fetchMyReservations, createReservation, cancelReservation, updateBooking, resetBooking }
 })

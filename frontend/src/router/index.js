@@ -8,12 +8,12 @@ const routes = [
   { path: '/login', component: () => import('../pages/LoginPage.vue') },
   { path: '/register', component: () => import('../pages/RegisterPage.vue') },
 
-  // Client Portal
+  // Client Dashboard
   {
-    path: '/portal',
+    path: '/dashboard/client',
     component: () => import('../layouts/ClientLayout.vue'),
     meta: { requiresAuth: true, role: 'client' },
-    redirect: '/portal/overview',
+    redirect: '/dashboard/client/overview',
     children: [
       { path: 'overview', component: () => import('../pages/dashboard/client/OverviewPage.vue') },
       { path: 'reservations', component: () => import('../pages/dashboard/client/ReservationsPage.vue') },
@@ -34,10 +34,8 @@ const routes = [
     redirect: '/dashboard/admin/overview',
     children: [
       { path: 'overview', component: () => import('../pages/dashboard/admin/OverviewPage.vue') },
-      { path: 'reservations', component: () => import('../pages/dashboard/admin/ReservationsPage.vue') },
       { path: 'hotels', component: () => import('../pages/dashboard/admin/HotelsPage.vue') },
       { path: 'rooms', component: () => import('../pages/dashboard/admin/RoomsPage.vue') },
-      { path: 'payments', component: () => import('../pages/dashboard/admin/PaymentsPage.vue') },
       { path: 'users', component: () => import('../pages/dashboard/admin/UsersPage.vue') },
       { path: 'pricing', component: () => import('../pages/dashboard/admin/PricingPage.vue') },
     ]
@@ -88,26 +86,24 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || 'null')
-  const role = String(user?.role || '').trim().toLowerCase()
 
   if (to.meta.requiresAuth) {
     if (!token || !user) {
       next('/login')
       return
     }
-    const requiredRole = String(to.meta.role || '').trim().toLowerCase()
-    if (requiredRole && role !== 'admin' && role !== requiredRole) {
+    if (to.meta.role && user.role !== 'admin' && user.role !== to.meta.role) {
       // Admin can access everything, others are redirected
-      const roleMap = { client: '/portal', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
-      next(roleMap[role] || '/')
+      const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+      next(roleMap[user.role] || '/')
       return
     }
   }
 
   // Redirect logged-in users away from auth pages
   if ((to.path === '/login' || to.path === '/register') && token && user) {
-    const roleMap = { client: '/portal', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
-    next(roleMap[role] || '/')
+    const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+    next(roleMap[user.role] || '/')
     return
   }
 
