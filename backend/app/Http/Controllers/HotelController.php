@@ -15,7 +15,10 @@ class HotelController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Hotel::where('estActif', true);
+        $query = Hotel::query();
+        if ($request->segment(2) !== 'admin') {
+            $query->where('estActif', true);
+        }
 
         if ($request->has('ville')) {
             $query->where('ville', 'like', '%' . $request->ville . '%');

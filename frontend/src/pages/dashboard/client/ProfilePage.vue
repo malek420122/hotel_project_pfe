@@ -25,7 +25,7 @@
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-600 mb-1">Email</label>
-          <input v-model="form.email" type="email" class="input-field" />
+          <input v-model="form.email" type="email" class="input-field" readonly />
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-600 mb-1">Téléphone</label>
@@ -34,6 +34,10 @@
         <div>
           <label class="block text-sm font-semibold text-gray-600 mb-1">Nouveau mot de passe (optionnel)</label>
           <input v-model="form.password" type="password" class="input-field" placeholder="Laisser vide pour ne pas changer" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-600 mb-1">Confirmer le mot de passe</label>
+          <input v-model="form.passwordConfirmation" type="password" class="input-field" placeholder="Confirmez le mot de passe" />
         </div>
         <button type="submit" class="btn-primary w-full">Enregistrer les modifications</button>
       </form>
@@ -45,10 +49,30 @@ import { reactive } from 'vue'
 import { useAuthStore } from '../../../stores/auth'
 import api from '../../../api'
 const auth = useAuthStore()
-const form = reactive({ prenom: auth.user?.prenom || '', nom: auth.user?.nom || '', email: auth.user?.email || '', telephone: auth.user?.telephone || '', password: '' })
+const form = reactive({
+  prenom: auth.user?.prenom || '',
+  nom: auth.user?.nom || '',
+  email: auth.user?.email || '',
+  telephone: auth.user?.telephone || '',
+  password: '',
+  passwordConfirmation: '',
+})
 async function save() {
   try {
-    const { data } = await api.put('/client/profile', form)
+    if (form.password && form.password !== form.passwordConfirmation) {
+      alert('Les mots de passe ne correspondent pas.')
+      return
+    }
+    const payload = {
+      prenom: form.prenom,
+      nom: form.nom,
+      telephone: form.telephone,
+    }
+    if (form.password) {
+      payload.password = form.password
+      payload.password_confirmation = form.passwordConfirmation
+    }
+    const { data } = await api.put('/profile', payload)
     auth.updateUser(data)
     alert('Profil mis à jour !')
   } catch {}

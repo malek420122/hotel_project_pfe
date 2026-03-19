@@ -222,7 +222,7 @@ onMounted(async () => {
   if (bookingStore.currentBooking.chambre) {
     currentStep.value = 2
     try {
-        const { data } = await api.get('/admin/services', { params: { hotelId: bookingStore.currentBooking.hotel?._id } })
+        const { data } = await api.get('/services', { params: { hotelId: bookingStore.currentBooking.hotel?._id } })
         availableServices.value = data.map(s => ({
             id: s._id,
             nom: s.nom,

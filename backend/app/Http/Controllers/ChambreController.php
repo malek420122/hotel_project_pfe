@@ -20,7 +20,7 @@ class ChambreController extends Controller
     {
         $request->validate([
             'hotelId' => 'required|string',
-            'type' => 'required|in:SIMPLE,DOUBLE,SUITE',
+            'type' => 'required|in:SIMPLE,DOUBLE,SUITE,FAMILIALE,DELUXE,PRESIDENTIELLE',
             'nom' => 'required|string',
             'prix_base' => 'required|numeric|min:0',
             'maxVoyageurs' => 'required|integer|min:1',
