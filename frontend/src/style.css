@@ -1,0 +1,75 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Leaflet overrides */
+@import 'leaflet/dist/leaflet.css';
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  body { @apply font-sans text-gray-900 bg-neutral; }
+  [dir="rtl"] { direction: rtl; }
+}
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-secondary text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-primary transition-colors duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-outline {
+    @apply border-2 border-secondary text-secondary px-6 py-2.5 rounded-xl font-semibold hover:bg-secondary hover:text-white transition-colors duration-200 cursor-pointer;
+  }
+  .btn-accent {
+    @apply bg-accent text-primary px-6 py-2.5 rounded-xl font-bold hover:bg-yellow-400 transition-colors duration-200 cursor-pointer;
+  }
+  
+  /* Form inputs */
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-colors bg-white text-gray-900 placeholder-gray-400 caret-gray-900;
+  }
+
+  .input-field::placeholder {
+    @apply text-gray-400 opacity-100;
+  }
+
+  /* Explicit input style for hero search widget to prevent color inheritance issues */
+  .home-search-input {
+    @apply bg-white text-gray-900 placeholder-gray-400 caret-gray-900;
+  }
+
+  .home-search-input::placeholder {
+    @apply text-gray-400 opacity-100;
+  }
+  
+  /* Cards */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-5;
+  }
+  
+  /* Sidebar link */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200;
+  }
+  .sidebar-link.active {
+    @apply bg-white/20 text-white;
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #0071c2; border-radius: 3px; }
+
+/* Print */
+@media print {
+  .no-print { display: none !important; }
+}
