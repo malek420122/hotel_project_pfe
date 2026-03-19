@@ -102,7 +102,7 @@ class HotelController extends Controller
 
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return $user?->role === 'admin';
+            return $user?->role === 'admin' && $user?->est_actif;
         } catch (\Exception) {
             return false;
         }
