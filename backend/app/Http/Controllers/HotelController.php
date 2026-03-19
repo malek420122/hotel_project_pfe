@@ -15,8 +15,10 @@ class HotelController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $middlewares = $request->route()?->gatherMiddleware() ?? [];
+        $isAdminContext = in_array('role:admin', $middlewares, true);
         $query = Hotel::query();
-        if ($request->segment(2) !== 'admin') {
+        if (!$isAdminContext) {
             $query->where('estActif', true);
         }
 

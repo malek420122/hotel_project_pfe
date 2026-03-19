@@ -13,6 +13,9 @@
         </div>
       </div>
       <form @submit.prevent="save" class="space-y-4">
+        <p v-if="message" :class="['text-sm', message.type === 'success' ? 'text-green-600' : 'text-red-500']">
+          {{ message.text }}
+        </p>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold text-gray-600 mb-1">Prénom</label>
@@ -45,10 +48,11 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useAuthStore } from '../../../stores/auth'
 import api from '../../../api'
 const auth = useAuthStore()
+const message = ref(null)
 const form = reactive({
   prenom: auth.user?.prenom || '',
   nom: auth.user?.nom || '',
@@ -60,9 +64,10 @@ const form = reactive({
 async function save() {
   try {
     if (form.password && form.password !== form.passwordConfirmation) {
-      alert('Les mots de passe ne correspondent pas.')
+      message.value = { type: 'error', text: 'Les mots de passe ne correspondent pas.' }
       return
     }
+    message.value = null
     const payload = {
       prenom: form.prenom,
       nom: form.nom,
@@ -74,7 +79,11 @@ async function save() {
     }
     const { data } = await api.put('/profile', payload)
     auth.updateUser(data)
-    alert('Profil mis à jour !')
-  } catch {}
+    message.value = { type: 'success', text: 'Profil mis à jour !' }
+    form.password = ''
+    form.passwordConfirmation = ''
+  } catch (e) {
+    message.value = { type: 'error', text: e.response?.data?.message || 'Erreur lors de la mise à jour.' }
+  }
 }
 </script>
