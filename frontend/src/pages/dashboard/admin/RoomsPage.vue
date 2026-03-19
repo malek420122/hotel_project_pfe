@@ -30,7 +30,7 @@
             <div>
               <label for="room-hotel" class="block text-sm font-semibold text-gray-600 mb-1">Hôtel</label>
               <select id="room-hotel" v-model="form.hotelId" class="input-field" required>
-                <option value="">Choisir hôtel</option>
+                <option value="" disabled>Choisir hôtel</option>
                 <option v-for="h in hotels" :key="h._id" :value="h._id">{{ h.nom }}</option>
               </select>
             </div>
