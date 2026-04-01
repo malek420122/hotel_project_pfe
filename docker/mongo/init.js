@@ -9,14 +9,15 @@ db.createUser({
 });
 
 // Create indexes
-db.utilisateurs.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ role: 1 });
 db.hotels.createIndex({ ville: 1, etoiles: 1 });
-db.hotels.createIndex({ location: '2dsphere' });
-db.chambres.createIndex({ hotel_id: 1, statut: 1 });
-db.reservations.createIndex({ client_id: 1, statut: 1 });
-db.reservations.createIndex({ hotel_id: 1, dateArrivee: 1, dateDepart: 1 });
+db.hotels.createIndex({ latitude: 1, longitude: 1 });
+db.chambres.createIndex({ hotelId: 1, estDisponible: 1 });
+db.reservations.createIndex({ clientId: 1, statut: 1 });
+db.reservations.createIndex({ hotelId: 1, dateArrivee: 1, dateDepart: 1 });
 db.reservations.createIndex({ reference: 1 }, { unique: true, sparse: true });
-db.paiements.createIndex({ reservation_id: 1 });
-db.avis.createIndex({ hotel_id: 1, statut: 1 });
+db.paiements.createIndex({ reservationId: 1 });
+db.avis.createIndex({ hotelId: 1, statut: 1 });
 
 print('Database initialization complete!');

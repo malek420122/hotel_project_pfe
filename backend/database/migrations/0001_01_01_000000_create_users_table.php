@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if ($this->isMongoConnection()) {
+            return;
+        }
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -42,8 +47,20 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if ($this->isMongoConnection()) {
+            return;
+        }
+
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+    }
+
+    private function isMongoConnection(): bool
+    {
+        $default = config('database.default');
+        $driver = DB::connection($default)->getDriverName();
+
+        return $default === 'mongodb' || $driver === 'mongodb';
     }
 };
