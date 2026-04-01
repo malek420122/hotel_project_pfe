@@ -16,7 +16,7 @@
         <LanguageSwitcher />
         <template v-if="auth.isAuthenticated">
           <RouterLink :to="dashboardUrl" :class="['btn-primary text-sm', !scrolled && 'bg-white/20 hover:bg-white/30 border border-white/30']">
-            {{ t('nav.dashboard') }}
+            {{ dashboardLabel }}
           </RouterLink>
         </template>
         <template v-else>
@@ -44,9 +44,11 @@ const navLinks = computed(() => [
 ])
 
 const dashboardUrl = computed(() => {
-  const map = { admin: '/dashboard/admin', client: '/dashboard/client', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+  const map = { admin: '/dashboard/admin', client: '/hotels', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
   return map[auth.user?.role] || '/dashboard/client'
 })
+
+const dashboardLabel = computed(() => auth.user?.role === 'client' ? t('nav.hotels') : t('nav.dashboard'))
 
 function handleScroll() { scrolled.value = window.scrollY > 50 }
 onMounted(() => window.addEventListener('scroll', handleScroll))

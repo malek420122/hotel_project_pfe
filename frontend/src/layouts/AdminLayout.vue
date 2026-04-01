@@ -6,7 +6,7 @@
           <span class="text-2xl">🏨</span>
           <span class="text-xl font-extrabold">HotelEase</span>
         </RouterLink>
-        <p class="text-white/50 text-xs mt-1">Administration</p>
+        <p class="text-white/50 text-xs mt-1">{{ $t('layout.administration') }}</p>
       </div>
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <RouterLink v-for="item in navItems" :key="item.to" :to="item.to"
@@ -17,7 +17,7 @@
       </nav>
       <div class="p-3 border-t border-white/10">
         <button @click="logout" class="sidebar-link w-full">
-          <span>🚪</span><span>Déconnexion</span>
+          <span>🚪</span><span>{{ $t('auth.logout') }}</span>
         </button>
       </div>
     </aside>
@@ -38,18 +38,20 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import NotifBell from '../components/NotifBell.vue'
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
-const navItems = [
-  { to: '/dashboard/admin/overview', icon: '📊', label: 'Vue d\'ensemble' },
-  { to: '/dashboard/admin/hotels', icon: '🏨', label: 'Hôtels' },
-  { to: '/dashboard/admin/rooms', icon: '🛏️', label: 'Chambres' },
-  { to: '/dashboard/admin/users', icon: '👥', label: 'Utilisateurs' },
-  { to: '/dashboard/admin/pricing', icon: '💰', label: 'Prix dynamiques' },
-]
-const pageTitle = computed(() => navItems.find(i => route.path.startsWith(i.to))?.label || 'Admin')
+const { t } = useI18n()
+const navItems = computed(() => [
+  { to: '/dashboard/admin/overview', icon: '📊', label: t('nav.overview') },
+  { to: '/dashboard/admin/hotels', icon: '🏨', label: t('nav.hotels') },
+  { to: '/dashboard/admin/rooms', icon: '🛏️', label: t('nav.rooms') },
+  { to: '/dashboard/admin/users', icon: '👥', label: t('nav.users') },
+  { to: '/dashboard/admin/pricing', icon: '💰', label: t('nav.dynamic_pricing') },
+])
+const pageTitle = computed(() => navItems.value.find(i => route.path.startsWith(i.to))?.label || t('layout.admin'))
 async function logout() { await auth.logout(); router.push('/login') }
 </script>

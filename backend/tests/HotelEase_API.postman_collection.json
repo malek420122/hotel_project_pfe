@@ -1,0 +1,78 @@
+{
+	"info": {
+		"_postman_id": "a9a9a9a9-b9b9-c9c9-d9d9-e9e9e9e9e9e9",
+		"name": "HotelEase API (PFE)",
+		"description": "API collection for testing HotelEase backend routes.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Benhamida\",\n  \"prenom\": \"Malek\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"password_confirmation\": \"Password123!\",\n  \"telephone\": \"12345678\",\n  \"role\": \"client\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/auth/register" }
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/auth/login" }
+					}
+				},
+				{
+					"name": "Get Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer <YOUR_TOKEN_HERE>" }
+						],
+						"url": { "raw": "{{base_url}}/auth/me" }
+					}
+				}
+			]
+		},
+		{
+			"name": "Hotels",
+			"item": [
+				{
+					"name": "List Hotels",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": { "raw": "{{base_url}}/hotels" }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/api",
+			"type": "string"
+		}
+	]
+}

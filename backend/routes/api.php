@@ -10,6 +10,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StatistiqueController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\MarketingEmailController;
 use Illuminate\Support\Facades\Route;
 
 // Auth (public)
@@ -26,6 +28,7 @@ Route::get('hotels/{id}', [HotelController::class, 'show']);
 Route::get('hotels/{id}/chambres', [HotelController::class, 'chambresDisponibles']);
 Route::get('hotels/{id}/avis', [HotelController::class, 'avis']);
 Route::post('promotions/validate', [PromotionController::class, 'validate']);
+Route::post('payments/webhook/stripe', [PaymentController::class, 'stripeWebhook'])->middleware('stripe.webhook');
 
 // Client routes (JWT + role:client or admin)
 Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
@@ -40,6 +43,8 @@ Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
+    Route::get('payments/history', [PaymentController::class, 'history']);
 });
 
 // Receptionniste routes
@@ -70,4 +75,5 @@ Route::middleware(['jwt.auth', 'role:marketing,admin'])->group(function () {
     Route::get('marketing/statistiques', [StatistiqueController::class, 'marketing']);
     Route::get('marketing/avis', [AvisController::class, 'moderation']);
     Route::put('marketing/avis/{id}/moderer', [AvisController::class, 'moderer']);
+    Route::post('marketing/offers/email', [MarketingEmailController::class, 'sendSpecialOffer']);
 });

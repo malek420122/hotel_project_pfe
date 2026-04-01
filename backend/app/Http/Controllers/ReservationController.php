@@ -9,7 +9,10 @@ use App\Models\Paiement;
 use App\Models\Notification;
 use App\Models\Promotion;
 use App\Models\User;
+use App\Mail\BookingConfirmationMail;
+use App\Mail\BookingCancelledMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -95,6 +98,8 @@ class ReservationController extends Controller
             'estLue' => false,
         ]);
 
+        Mail::to($user->email)->queue(new BookingConfirmationMail($reservation, $chambre));
+
         return response()->json($reservation, 201);
     }
 
@@ -127,6 +132,8 @@ class ReservationController extends Controller
             'message' => "Votre réservation {$reservation->reference} a été annulée.",
             'estLue' => false,
         ]);
+
+        Mail::to($user->email)->queue(new BookingCancelledMail($reservation));
 
         return response()->json($reservation);
     }

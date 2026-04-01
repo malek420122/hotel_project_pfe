@@ -3,8 +3,8 @@
     <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-12 text-white">
       <div>
         <RouterLink to="/" class="text-4xl font-extrabold flex items-center gap-3 mb-8">🏨 HotelEase</RouterLink>
-        <h2 class="text-3xl font-bold mb-4">Bienvenue à nouveau !</h2>
-        <p class="text-white/70 text-lg mb-8">Connectez-vous pour accéder à vos réservations et profiter de toutes nos fonctionnalités.</p>
+        <h2 class="text-3xl font-bold mb-4">{{ t('auth.welcomeBack') }}</h2>
+        <p class="text-white/70 text-lg mb-8">{{ t('auth.loginSubtitle') }}</p>
         <div class="grid grid-cols-2 gap-4">
           <div v-for="feat in features" :key="feat" class="bg-white/10 rounded-xl p-4 text-sm">{{ feat }}</div>
         </div>
@@ -34,7 +34,7 @@
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" v-model="form.remember" class="rounded" />
-              <span class="text-sm text-gray-600">Se souvenir de moi</span>
+              <span class="text-sm text-gray-600">{{ t('auth.rememberMe') }}</span>
             </label>
             <a href="#" class="text-sm text-secondary hover:underline">{{ t('auth.forgotPassword') }}</a>
           </div>
@@ -71,18 +71,23 @@ const error = ref('')
 const loading = ref(false)
 const showPwd = ref(false)
 
-const features = ['✅ Réservations simplifiées', '🔔 Notifications en temps réel', '💳 Paiements sécurisés', '🎁 Programme fidélité']
+const features = [
+  t('auth.feature1'),
+  t('auth.feature2'),
+  t('auth.feature3'),
+  t('auth.feature4'),
+]
 
 async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
     const user = await auth.login(form)
-    const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+    const roleMap = { client: '/hotels', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
     router.push(roleMap[user.role] || '/')
   } catch (e) {
     if (e.response?.status === 429) error.value = t('auth.accountBlocked')
-    else error.value = e.response?.data?.message || 'Email ou mot de passe incorrect'
+    else error.value = e.response?.data?.message || t('auth.invalidCredentials')
   } finally {
     loading.value = false
   }

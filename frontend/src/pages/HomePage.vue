@@ -13,27 +13,27 @@
         <div class="max-w-3xl">
           <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
             <span>🏆</span>
-            <span class="text-sm font-medium">La plateforme N°1 de réservation hôtelière</span>
+            <span class="text-sm font-medium">{{ t('home.badge') }}</span>
           </div>
           <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-            Votre séjour<br/><span class="text-accent">idéal</span> vous attend
+            {{ t('home.heroLine1') }}<br/><span class="text-accent">{{ t('home.heroAccent') }}</span> {{ t('home.heroLine2') }}
           </h1>
-          <p class="text-xl text-white/80 mb-10">Découvrez des hôtels d'exception partout dans le monde. Réservez en quelques clics, profitez d'un service 5 étoiles.</p>
+          <p class="text-xl text-white/80 mb-10">{{ t('home.heroDescription') }}</p>
 
           <!-- Search Widget -->
           <div class="bg-white rounded-2xl p-2 shadow-2xl flex flex-col md:flex-row gap-2">
             <div class="flex-1 flex items-center gap-3 px-4 py-2">
               <span class="text-2xl">📍</span>
               <div class="flex-1">
-                <p class="text-xs font-semibold text-gray-500">Destination</p>
-                <input v-model="search.ville" type="text" placeholder="Marrakech, Agadir..." class="w-full outline-none text-gray-800 font-medium" />
+                <p class="text-xs font-semibold text-gray-500">{{ $t('dashboard.destination') }}</p>
+                <input v-model="search.ville" type="text" :placeholder="t('home.destinationPlaceholder')" class="w-full outline-none text-gray-800 font-medium" />
               </div>
             </div>
             <div class="hidden md:block w-px bg-gray-200 my-2"></div>
             <div class="flex items-center gap-3 px-4 py-2">
               <span class="text-2xl">📅</span>
               <div>
-                <p class="text-xs font-semibold text-gray-500">Arrivée</p>
+                <p class="text-xs font-semibold text-gray-500">{{ $t('dashboard.checkin') }}</p>
                 <input v-model="search.dateArrivee" type="date" class="outline-none text-gray-800 font-medium" />
               </div>
             </div>
@@ -41,7 +41,7 @@
             <div class="flex items-center gap-3 px-4 py-2">
               <span class="text-2xl">📅</span>
               <div>
-                <p class="text-xs font-semibold text-gray-500">Départ</p>
+                <p class="text-xs font-semibold text-gray-500">{{ $t('dashboard.checkout') }}</p>
                 <input v-model="search.dateDepart" type="date" class="outline-none text-gray-800 font-medium" />
               </div>
             </div>
@@ -49,12 +49,12 @@
             <div class="flex items-center gap-3 px-4 py-2">
               <span class="text-2xl">👥</span>
               <div>
-                <p class="text-xs font-semibold text-gray-500">Voyageurs</p>
+                <p class="text-xs font-semibold text-gray-500">{{ t('booking.guests') }}</p>
                 <input v-model="search.nbVoyageurs" type="number" min="1" max="20" class="outline-none text-gray-800 font-medium w-16" />
               </div>
             </div>
             <button @click="doSearch" class="btn-accent px-8 py-3 text-base flex items-center gap-2 rounded-xl">
-              🔍 Rechercher
+              🔍 {{ t('booking.search') }}
             </button>
           </div>
         </div>
@@ -75,9 +75,9 @@
     <!-- Featured Hotels -->
     <section class="py-20 max-w-7xl mx-auto px-4">
       <div class="text-center mb-12">
-        <p class="text-secondary font-semibold mb-2">Nos coups de cœur</p>
-        <h2 class="text-4xl font-extrabold text-gray-800 mb-4">Hôtels en vedette</h2>
-        <p class="text-gray-500 max-w-2xl mx-auto">Sélectionnés pour leur qualité et leur rapport qualité-prix exceptionnel</p>
+        <p class="text-secondary font-semibold mb-2">{{ t('home.featuredTag') }}</p>
+        <h2 class="text-4xl font-extrabold text-gray-800 mb-4">{{ t('home.featuredTitle') }}</h2>
+        <p class="text-gray-500 max-w-2xl mx-auto">{{ t('home.featuredSubtitle') }}</p>
       </div>
       <div v-if="hotelStore.loading" class="flex justify-center py-16">
         <div class="w-12 h-12 border-4 border-secondary border-t-transparent rounded-full animate-spin"></div>
@@ -86,7 +86,7 @@
         <HotelCard v-for="hotel in hotelStore.hotels.slice(0,6)" :key="hotel._id" :hotel="hotel" />
       </div>
       <div class="text-center mt-10">
-        <RouterLink to="/hotels" class="btn-outline px-8 py-3 text-base">Voir tous les hôtels →</RouterLink>
+        <RouterLink to="/hotels" class="btn-outline px-8 py-3 text-base">{{ t('home.seeAllHotels') }} →</RouterLink>
       </div>
     </section>
 
@@ -94,7 +94,7 @@
     <section class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-4">
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-extrabold text-gray-800 mb-4">Pourquoi choisir HotelEase ?</h2>
+          <h2 class="text-4xl font-extrabold text-gray-800 mb-4">{{ t('home.whyTitle') }}</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div v-for="feat in features" :key="feat.title" class="text-center">
@@ -114,7 +114,7 @@
             <span class="text-2xl">🏨</span>
             <span class="text-xl font-extrabold">HotelEase</span>
           </div>
-          <p class="text-white/60 text-sm">La plateforme de réservation hôtelière qui simplifie vos voyages.</p>
+          <p class="text-white/60 text-sm">{{ t('home.footerDescription') }}</p>
         </div>
         <div v-for="col in footerCols" :key="col.title">
           <h4 class="font-bold mb-3">{{ col.title }}</h4>
@@ -124,7 +124,7 @@
         </div>
       </div>
       <div class="border-t border-white/10 mt-8 pt-8 max-w-7xl mx-auto px-4 flex justify-between items-center text-sm text-white/40">
-        <p>© 2025 HotelEase. Tous droits réservés.</p>
+        <p>{{ t('home.copyright') }}</p>
         <LanguageSwitcher />
       </div>
     </footer>
@@ -132,8 +132,9 @@
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useHotelStore } from '../stores/hotel'
 import Navbar from '../components/Navbar.vue'
 import HotelCard from '../components/HotelCard.vue'
@@ -141,25 +142,26 @@ import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 
 const router = useRouter()
 const hotelStore = useHotelStore()
+const { t } = useI18n()
 
 const search = reactive({ ville: '', dateArrivee: '', dateDepart: '', nbVoyageurs: 1 })
-const stats = [
-  { value: '500+', label: 'Hôtels partenaires' },
-  { value: '50K+', label: 'Clients satisfaits' },
-  { value: '30+', label: 'Villes couvertes' },
-  { value: '4.8⭐', label: 'Note moyenne' },
-]
-const features = [
-  { icon: '🔒', title: 'Paiement sécurisé', desc: 'Vos transactions sont protégées par un chiffrement SSL 256 bits.' },
-  { icon: '⚡', title: 'Réservation rapide', desc: 'Réservez en moins de 3 minutes grâce à notre interface intuitive.' },
-  { icon: '💰', title: 'Meilleurs prix', desc: 'Garantie du meilleur tarif ou remboursement de la différence.' },
-  { icon: '🎁', title: 'Programme fidélité', desc: 'Accumulez des points à chaque séjour et profitez d\'avantages exclusifs.' },
-]
-const footerCols = [
-  { title: 'Destinations', links: ['Marrakech', 'Casablanca', 'Agadir', 'Rabat', 'Fès'] },
-  { title: 'Services', links: ['Réservation', 'Annulation flexible', 'Support 24/7', 'Programme fidélité'] },
-  { title: 'Entreprise', links: ['À propos', 'Carrières', 'Partenariats', 'Blog', 'Presse'] },
-]
+const stats = computed(() => [
+  { value: '500+', label: t('home.stats.partners') },
+  { value: '50K+', label: t('home.stats.satisfied') },
+  { value: '30+', label: t('home.stats.cities') },
+  { value: '4.8⭐', label: t('home.stats.rating') },
+])
+const features = computed(() => [
+  { icon: '🔒', title: t('home.features.securePayment.title'), desc: t('home.features.securePayment.desc') },
+  { icon: '⚡', title: t('home.features.fastBooking.title'), desc: t('home.features.fastBooking.desc') },
+  { icon: '💰', title: t('home.features.bestPrices.title'), desc: t('home.features.bestPrices.desc') },
+  { icon: '🎁', title: t('home.features.loyalty.title'), desc: t('home.features.loyalty.desc') },
+])
+const footerCols = computed(() => [
+  { title: t('home.footer.destinationsTitle'), links: ['Marrakech', 'Casablanca', 'Agadir', 'Rabat', 'Fès'] },
+  { title: t('home.footer.servicesTitle'), links: [t('home.footer.links.booking'), t('home.footer.links.flexibleCancellation'), t('home.footer.links.support247'), t('home.footer.links.loyaltyProgram')] },
+  { title: t('home.footer.companyTitle'), links: [t('home.footer.links.about'), t('home.footer.links.careers'), t('home.footer.links.partnerships'), t('home.footer.links.blog'), t('home.footer.links.press')] },
+])
 
 function doSearch() {
   router.push({ path: '/hotels', query: { ...search } })

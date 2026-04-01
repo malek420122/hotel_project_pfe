@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Vue d'ensemble Marketing</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.marketing_overview') }}</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
       <KpiCard icon="🎯" label="Promotions actives" value="5" color="purple" />
       <KpiCard icon="🏷️" label="Codes promo utilisés" value="142" color="blue" :trend="23" />
@@ -9,16 +9,16 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Conversions par canal</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.conversions_channel') }}</h3>
         <Bar :data="convChart" :options="chartOpts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Efficacité des promotions</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.promotions_efficiency') }}</h3>
         <Radar :data="radarChart" :options="radarOpts" />
       </div>
     </div>
     <div class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Avis récents</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.recent_reviews') }}</h3>
       <div class="space-y-3">
         <div v-for="avis in recentAvis" :key="avis.id" class="flex items-start gap-3 border-b pb-3 last:border-0">
           <div class="w-9 h-9 bg-secondary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">{{ avis.client[0] }}</div>

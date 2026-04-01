@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Promotions</h2>
-      <button @click="showModal=true" class="btn-primary">+ Nouvelle promotion</button>
+      <h2 class="text-2xl font-bold text-gray-800">{{ $t('dashboard.promotions') }}</h2>
+      <button @click="showModal=true" class="btn-primary">{{ $t('dashboard.plus_new_promotion') }}</button>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       <div v-for="promo in promotions" :key="promo.id" :class="['card border-2', promo.statut==='ACTIVE' ? 'border-green-300' : 'border-gray-200']">
@@ -36,21 +36,21 @@
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div class="bg-white rounded-xl p-6 w-full max-w-lg">
-          <h3 class="text-xl font-bold mb-4">Nouvelle promotion</h3>
+          <h3 class="text-xl font-bold mb-4">{{ $t('dashboard.new_promotion') }}</h3>
           <form @submit.prevent="createPromo" class="space-y-3">
-            <input v-model="form.titre" placeholder="Titre de la promotion" class="input-field" required />
-            <textarea v-model="form.description" placeholder="Description" rows="2" class="input-field"></textarea>
+            <input v-model="form.titre" :placeholder="$t('dashboard.promo_title')" class="input-field" required />
+            <textarea v-model="form.description" :placeholder="$t('dashboard.description')" rows="2" class="input-field"></textarea>
             <div class="grid grid-cols-2 gap-3">
-              <input v-model="form.remise" type="number" placeholder="Remise %" class="input-field" min="1" max="100" />
-              <input v-model="form.maxUtil" type="number" placeholder="Utilisations max" class="input-field" />
+              <input v-model="form.remise" type="number" :placeholder="$t('dashboard.discount')" class="input-field" min="1" max="100" />
+              <input v-model="form.maxUtil" type="number" :placeholder="$t('dashboard.max_uses')" class="input-field" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <input v-model="form.debut" type="date" class="input-field" />
               <input v-model="form.fin" type="date" class="input-field" />
             </div>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
-              <button type="submit" class="btn-primary">Créer</button>
+              <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
+              <button type="submit" class="btn-primary">{{ $t('common.create') }}</button>
             </div>
           </form>
         </div>

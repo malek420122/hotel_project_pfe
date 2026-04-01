@@ -29,8 +29,8 @@
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nom</label><input v-model="form.nom" class="input-field" required /></div>
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Ville</label><input v-model="form.ville" class="input-field" required /></div>
             </div>
-            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input v-model="form.adresse" class="input-field" /></div>
-            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Description</label><textarea v-model="form.description" rows="3" class="input-field"></textarea></div>
+            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Adresse</label><input v-model="form.adresse" class="input-field" required /></div>
+            <div><label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.description') }}</label><textarea v-model="form.description" rows="3" class="input-field"></textarea></div>
             <div class="grid grid-cols-2 gap-4">
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Étoiles</label>
                 <select v-model="form.etoiles" class="input-field"><option v-for="i in 5" :key="i" :value="i">{{ i }}</option></select>
@@ -38,11 +38,11 @@
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Prix min (€/nuit)</label><input v-model="form.prix_min" type="number" class="input-field" /></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input v-model="form.latitude" type="number" step="any" class="input-field" /></div>
-              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input v-model="form.longitude" type="number" step="any" class="input-field" /></div>
+              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input v-model="form.latitude" type="number" step="any" class="input-field" required /></div>
+              <div><label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input v-model="form.longitude" type="number" step="any" class="input-field" required /></div>
             </div>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
+              <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn-primary">{{ form._id ? 'Enregistrer' : 'Créer' }}</button>
             </div>
           </form>
@@ -69,7 +69,7 @@ const cols = [
   { key: 'nom', label: 'Nom' }, { key: 'ville', label: 'Ville' }, { key: 'etoiles', label: 'Étoiles' },
   { key: 'prix_min', label: 'Prix min' }, { key: 'noteMoyenne', label: 'Note' }, { key: 'statut', label: 'Statut' }, { key: 'actions', label: 'Actions' }
 ]
-async function fetchHotels() { const { data } = await api.get('/hotels'); hotels.value = data.data || data }
+async function fetchHotels() { const { data } = await api.get('/admin/hotels'); hotels.value = data.data || data }
 function openModal(hotel) {
   if (hotel) Object.assign(form, { ...hotel, _id: hotel._id })
   else Object.assign(form, { _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null })
@@ -77,15 +77,15 @@ function openModal(hotel) {
 }
 async function saveHotel() {
   try {
-    if (form._id) await api.put(`/hotels/${form._id}`, form)
-    else await api.post('/hotels', form)
+    if (form._id) await api.put(`/admin/hotels/${form._id}`, form)
+    else await api.post('/admin/hotels', form)
     showModal.value = false
     await fetchHotels()
   } catch(e) { alert(e.response?.data?.message || 'Erreur') }
 }
 function confirmDelete(hotel) { deleteModal.value = { show: true, hotel } }
 async function doDelete() {
-  await api.delete(`/hotels/${deleteModal.value.hotel._id}`)
+  await api.delete(`/admin/hotels/${deleteModal.value.hotel._id}`)
   deleteModal.value.show = false
   await fetchHotels()
 }

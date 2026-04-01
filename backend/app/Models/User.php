@@ -23,6 +23,11 @@ class User extends Model implements AuthenticatableContract, JWTSubject
 
     protected $hidden = ['password'];
 
+    protected $casts = [
+        'est_actif' => 'boolean',
+        'points_fidelite' => 'integer',
+    ];
+
     protected $attributes = [
         'role' => 'client',
         'points_fidelite' => 0,

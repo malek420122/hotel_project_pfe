@@ -4,16 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Service::query();
-        if ($request->has('hotelId')) {
-            $query->where('hotelId', $request->hotelId);
-        }
-        return response()->json($query->get());
+        $cacheKey = 'services:index:' . ($request->hotelId ?? 'all');
+        $services = Cache::remember($cacheKey, 60, function () use ($request) {
+            $query = Service::query();
+            if ($request->has('hotelId')) {
+                $query->where('hotelId', $request->hotelId);
+            }
+            return $query->get();
+        });
+
+        return response()->json($services);
     }
 
     public function store(Request $request)
@@ -24,19 +30,23 @@ class ServiceController extends Controller
             'nom' => 'required|string',
             'prix' => 'required|numeric|min:0',
         ]);
-        return response()->json(Service::create($request->all()), 201);
+        $created = Service::create($request->all());
+        Cache::flush();
+        return response()->json($created, 201);
     }
 
     public function update(Request $request, $id)
     {
         $service = Service::findOrFail($id);
         $service->update($request->all());
+        Cache::flush();
         return response()->json($service);
     }
 
     public function destroy($id)
     {
         Service::findOrFail($id)->delete();
+        Cache::flush();
         return response()->json(['message' => 'Service supprimé']);
     }
 }

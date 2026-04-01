@@ -12,7 +12,7 @@
         <Doughnut :data="chartData" :options="opts" />
       </div>
       <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Top membres fidèles</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.top_loyal_members') }}</h3>
         <div class="space-y-3">
           <div v-for="(m,i) in topMembers" :key="m.name" class="flex items-center gap-3">
             <span class="text-xl w-6">{{ ['🥇','🥈','🥉','4️⃣','5️⃣'][i] }}</span>

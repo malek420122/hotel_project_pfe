@@ -100,11 +100,11 @@
               <h3 class="text-lg font-bold text-primary mb-4">Réserver votre séjour</h3>
               <div class="space-y-3">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-500 mb-1">Arrivée</label>
+                  <label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.checkin') }}</label>
                   <input v-model="bookForm.dateArrivee" type="date" :min="today" class="input-field" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-500 mb-1">Départ</label>
+                  <label class="block text-xs font-semibold text-gray-500 mb-1">{{ $t('dashboard.checkout') }}</label>
                   <input v-model="bookForm.dateDepart" type="date" :min="bookForm.dateArrivee || today" class="input-field" />
                 </div>
                 <div>
@@ -128,6 +128,7 @@
 <script setup>
 import { reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useHotelStore } from '../stores/hotel'
 import { useBookingStore } from '../stores/booking'
 import Navbar from '../components/Navbar.vue'
@@ -136,6 +137,7 @@ import RoomCard from '../components/RoomCard.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
 const hotelStore = useHotelStore()
 const bookingStore = useBookingStore()
 
@@ -155,7 +157,8 @@ function selectRoom(room) {
 
 function formatDate(d) {
   if (!d) return ''
-  return new Date(d).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
+  const code = locale.value === 'ar' ? 'ar-MA' : locale.value === 'en' ? 'en-US' : 'fr-FR'
+  return new Date(d).toLocaleDateString(code, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 onMounted(async () => {

@@ -9,12 +9,12 @@
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-gray-500 mb-1">Prénom</label>
-            <input v-model="form.prenom" type="text" placeholder="Prénom" class="input-field" required />
+            <label class="block text-xs font-semibold text-gray-500 mb-1">{{ t('auth.firstName') }}</label>
+            <input v-model="form.prenom" type="text" :placeholder="t('auth.firstName')" class="input-field" required />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 mb-1">Nom</label>
-            <input v-model="form.nom" type="text" placeholder="Nom" class="input-field" required />
+            <label class="block text-xs font-semibold text-gray-500 mb-1">{{ t('auth.lastName') }}</label>
+            <input v-model="form.nom" type="text" :placeholder="t('auth.lastName')" class="input-field" required />
           </div>
         </div>
         <div>
@@ -22,7 +22,7 @@
           <input v-model="form.email" type="email" :placeholder="t('auth.email')" class="input-field" required />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-500 mb-1">Téléphone</label>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">{{ t('auth.phone') }}</label>
           <input v-model="form.telephone" type="tel" placeholder="+33 6 12 34 56 78" class="input-field" />
         </div>
         <div>
@@ -35,11 +35,11 @@
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1">{{ t('auth.confirmPassword') }}</label>
           <input v-model="form.password_confirmation" :type="showPwd ? 'text' : 'password'" class="input-field" required />
-          <p v-if="form.password && form.password_confirmation && form.password !== form.password_confirmation" class="text-xs text-red-500 mt-1">Les mots de passe ne correspondent pas</p>
+          <p v-if="form.password && form.password_confirmation && form.password !== form.password_confirmation" class="text-xs text-red-500 mt-1">{{ t('auth.passwordMismatch') }}</p>
         </div>
         <div class="flex items-start gap-2">
           <input v-model="form.accept" type="checkbox" required class="mt-0.5 rounded" id="accept" />
-          <label for="accept" class="text-sm text-gray-600">J'accepte les <a href="#" class="text-secondary hover:underline">CGU</a> et la <a href="#" class="text-secondary hover:underline">politique de confidentialité</a></label>
+          <label for="accept" class="text-sm text-gray-600">{{ t('auth.acceptTerms') }} <a href="#" class="text-secondary hover:underline">{{ t('auth.terms') }}</a> {{ t('auth.and') }} <a href="#" class="text-secondary hover:underline">{{ t('auth.privacyPolicy') }}</a></label>
         </div>
         <button type="submit" :disabled="loading || form.password !== form.password_confirmation"
           class="btn-primary w-full py-3 disabled:opacity-70 disabled:cursor-not-allowed">
@@ -70,14 +70,14 @@ const loading = ref(false)
 const showPwd = ref(false)
 
 async function handleRegister() {
-  if (form.password !== form.password_confirmation) { error.value = 'Les mots de passe ne correspondent pas'; return }
+  if (form.password !== form.password_confirmation) { error.value = t('auth.passwordMismatch'); return }
   error.value = ''
   loading.value = true
   try {
     await auth.register(form)
     router.push('/dashboard/client/overview')
   } catch (e) {
-    error.value = e.response?.data?.message || Object.values(e.response?.data?.errors || {})[0]?.[0] || 'Erreur lors de l\'inscription'
+    error.value = e.response?.data?.message || Object.values(e.response?.data?.errors || {})[0]?.[0] || t('auth.registerError')
   } finally {
     loading.value = false
   }

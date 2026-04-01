@@ -7,6 +7,7 @@ use App\Models\Chambre;
 use App\Models\Avis;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class HotelController extends Controller
@@ -14,19 +15,30 @@ class HotelController extends Controller
     public function index(Request $request)
     {
         $isAdminContext = $this->isAdminContext($request);
-        $query = Hotel::query();
-        if (!$isAdminContext) {
-            $query->where('estActif', true);
-        }
+        $cacheKey = 'hotels:index:' . md5(json_encode([
+            'admin' => $isAdminContext,
+            'ville' => $request->ville,
+            'etoiles' => $request->etoiles,
+            'per_page' => $request->get('per_page', 10),
+            'page' => $request->get('page', 1),
+        ]));
 
-        if ($request->has('ville')) {
-            $query->where('ville', 'like', '%' . $request->ville . '%');
-        }
-        if ($request->has('etoiles')) {
-            $query->whereIn('etoiles', (array) $request->etoiles);
-        }
+        $hotels = Cache::remember($cacheKey, 60, function () use ($request, $isAdminContext) {
+            $query = Hotel::query();
+            if (! $isAdminContext) {
+                $query->where('estActif', true);
+            }
 
-        $hotels = $query->orderBy('noteMoyenne', 'desc')->paginate($request->get('per_page', 10));
+            if ($request->has('ville')) {
+                $query->where('ville', 'like', '%' . $request->ville . '%');
+            }
+            if ($request->has('etoiles')) {
+                $query->whereIn('etoiles', (array) $request->etoiles);
+            }
+
+            return $query->orderBy('noteMoyenne', 'desc')->paginate($request->get('per_page', 10));
+        });
+
         return response()->json($hotels);
     }
 

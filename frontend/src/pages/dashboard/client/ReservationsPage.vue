@@ -55,11 +55,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '../../../stores/booking'
 import StatusBadge from '../../../components/StatusBadge.vue'
 import ConfirmModal from '../../../components/ConfirmModal.vue'
 
 const bookingStore = useBookingStore()
+const { locale } = useI18n()
 const filterStatus = ref('ALL')
 const cancelModal = ref({ show: false, res: null })
 
@@ -79,7 +81,8 @@ const filtered = computed(() => {
 
 function formatDate(d) {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+  const code = locale.value === 'ar' ? 'ar-MA' : locale.value === 'en' ? 'en-US' : 'fr-FR'
+  return new Date(d).toLocaleDateString(code, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function nightCount(res) {

@@ -28,7 +28,7 @@
           <h3 class="text-xl font-bold mb-4">{{ form._id ? 'Modifier chambre' : 'Nouvelle chambre' }}</h3>
           <form @submit.prevent="saveRoom" class="space-y-3">
             <div>
-              <label for="room-hotel" class="block text-sm font-semibold text-gray-600 mb-1">Hôtel</label>
+              <label for="room-hotel" class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.hotel') }}</label>
               <select id="room-hotel" v-model="form.hotelId" class="input-field" required>
                 <option value="" disabled>Choisir hôtel</option>
                 <option v-for="h in hotels" :key="h._id" :value="h._id">{{ h.nom }}</option>
@@ -46,9 +46,9 @@
               <input v-model="form.maxVoyageurs" type="number" placeholder="Capacité" class="input-field" required />
               <input v-model="form.etage" type="number" placeholder="Étage" class="input-field" />
             </div>
-            <textarea v-model="form.description" rows="2" placeholder="Description" class="input-field"></textarea>
+            <textarea v-model="form.description" rows="2" :placeholder="$t('dashboard.description')" class="input-field"></textarea>
             <div class="flex gap-3 justify-end">
-              <button type="button" @click="showModal=false" class="btn-outline">Annuler</button>
+              <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn-primary">Enregistrer</button>
             </div>
           </form>

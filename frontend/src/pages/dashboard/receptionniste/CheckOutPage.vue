@@ -5,7 +5,7 @@
       <h3 class="text-lg font-bold text-gray-800 mb-4">Rechercher un client</h3>
       <div class="flex gap-3">
         <input v-model="search" placeholder="Nom, chambre ou référence..." class="input-field flex-1" />
-        <button @click="doSearch" class="btn-primary">Rechercher</button>
+        <button @click="doSearch" class="btn-primary">{{ $t('dashboard.btn_search') }}</button>
       </div>
     </div>
     <div class="card">

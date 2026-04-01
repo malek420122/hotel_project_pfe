@@ -9,8 +9,10 @@
   </div>
 </template>
 <script setup>
+import { onMounted, ref } from 'vue'
 import DataTable from '../../../components/DataTable.vue'
 import StatusBadge from '../../../components/StatusBadge.vue'
+import api from '../../../api'
 const cols = [
   { key: 'reference', label: 'Référence' },
   { key: 'hotel', label: 'Hôtel' },
@@ -19,8 +21,14 @@ const cols = [
   { key: 'date', label: 'Date' },
   { key: 'statut', label: 'Statut' },
 ]
-const payments = [
-  { reference: 'PAY-001', hotel: 'Hôtel Atlas', montant: '450€', methode: 'Carte Visa', date: '10/03/2025', statut: 'PAYE' },
-  { reference: 'PAY-002', hotel: 'Riad Al Baraka', montant: '320€', methode: 'PayPal', date: '22/02/2025', statut: 'PAYE' },
-]
+const payments = ref([])
+
+onMounted(async () => {
+  const { data } = await api.get('/payments/history')
+  payments.value = (data || []).map(row => ({
+    ...row,
+    montant: `${row.montant}€`,
+    hotel: row.hotel || '-',
+  }))
+})
 </script>

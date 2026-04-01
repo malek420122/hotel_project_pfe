@@ -14,7 +14,7 @@
           </div>
           <div class="flex gap-2 ml-4">
             <button @click="markDone(req)" class="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100">✅ Traité</button>
-            <button class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">💬 Répondre</button>
+            <button class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">{{ $t('dashboard.reply') }}</button>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@
           <span class="text-2xl">🏨</span>
           <span class="text-xl font-extrabold">HotelEase</span>
         </RouterLink>
-        <p class="text-white/50 text-xs mt-1">Espace Client</p>
+        <p class="text-white/50 text-xs mt-1">{{ $t('layout.client_space') }}</p>
       </div>
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <RouterLink v-for="item in navItems" :key="item.to" :to="item.to"
@@ -30,7 +30,7 @@
           </div>
         </div>
         <button @click="logout" class="sidebar-link w-full">
-          <span>🚪</span><span>Déconnexion</span>
+          <span>🚪</span><span>{{ $t('auth.logout') }}</span>
         </button>
       </div>
     </aside>
@@ -58,6 +58,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import NotifBell from '../components/NotifBell.vue'
 
@@ -65,19 +66,20 @@ const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const sidebarOpen = ref(false)
+const { t } = useI18n()
 
-const navItems = [
-  { to: '/dashboard/client/overview', icon: '🏠', label: 'Vue d\'ensemble' },
-  { to: '/dashboard/client/reservations', icon: '📅', label: 'Mes réservations' },
-  { to: '/dashboard/client/new-booking', icon: '➕', label: 'Nouvelle réservation' },
-  { to: '/dashboard/client/services', icon: '🛎️', label: 'Mes services' },
-  { to: '/dashboard/client/payments', icon: '💳', label: 'Paiements' },
-  { to: '/dashboard/client/reviews', icon: '⭐', label: 'Mes avis' },
-  { to: '/dashboard/client/loyalty', icon: '🎁', label: 'Fidélité' },
-  { to: '/dashboard/client/profile', icon: '👤', label: 'Mon profil' },
-]
+const navItems = computed(() => [
+  { to: '/dashboard/client/overview', icon: '🏠', label: t('nav.overview') },
+  { to: '/dashboard/client/reservations', icon: '📅', label: t('dashboard.my_reservations') },
+  { to: '/dashboard/client/new-booking', icon: '➕', label: t('dashboard.new_booking') },
+  { to: '/dashboard/client/services', icon: '🛎️', label: t('nav.my_services') },
+  { to: '/dashboard/client/payments', icon: '💳', label: t('nav.payments') },
+  { to: '/dashboard/client/reviews', icon: '⭐', label: t('nav.my_reviews') },
+  { to: '/dashboard/client/loyalty', icon: '🎁', label: t('nav.loyalty') },
+  { to: '/dashboard/client/profile', icon: '👤', label: t('nav.my_profile') },
+])
 
-const pageTitle = computed(() => navItems.find(i => route.path.startsWith(i.to))?.label || 'Dashboard')
+const pageTitle = computed(() => navItems.value.find(i => route.path.startsWith(i.to))?.label || t('nav.dashboard'))
 
 async function logout() {
   await auth.logout()

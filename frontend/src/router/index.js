@@ -94,7 +94,7 @@ router.beforeEach((to, _from, next) => {
     }
     if (to.meta.role && user.role !== 'admin' && user.role !== to.meta.role) {
       // Admin can access everything, others are redirected
-      const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+      const roleMap = { client: '/hotels', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
       next(roleMap[user.role] || '/')
       return
     }
@@ -102,7 +102,7 @@ router.beforeEach((to, _from, next) => {
 
   // Redirect logged-in users away from auth pages
   if ((to.path === '/login' || to.path === '/register') && token && user) {
-    const roleMap = { client: '/dashboard/client', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
+    const roleMap = { client: '/hotels', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
     next(roleMap[user.role] || '/')
     return
   }

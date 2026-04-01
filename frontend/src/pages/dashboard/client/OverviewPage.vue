@@ -53,18 +53,18 @@
     <!-- Recent Reservations -->
     <div class="card">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-gray-800">Réservations récentes</h3>
+        <h3 class="text-lg font-bold text-gray-800">{{ $t('dashboard.recent_reservations') }}</h3>
         <RouterLink to="/dashboard/client/reservations" class="text-secondary text-sm hover:underline">Voir toutes</RouterLink>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">Hôtel</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.hotel') }}</th>
               <th class="px-3 py-2 text-left font-semibold text-gray-600">Chambre</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">Dates</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">Prix</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-600">Statut</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.dates') }}</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.price') }}</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-600">{{ $t('dashboard.status') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -87,6 +87,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../../stores/auth'
 import { useBookingStore } from '../../../stores/booking'
 import KpiCard from '../../../components/KpiCard.vue'
@@ -94,6 +95,7 @@ import StatusBadge from '../../../components/StatusBadge.vue'
 
 const auth = useAuthStore()
 const bookingStore = useBookingStore()
+const { locale } = useI18n()
 const loyalty = ref({ points: 0, niveau: 'Bronze' })
 
 const stats = computed(() => ({
@@ -115,7 +117,8 @@ const loyaltyPercent = computed(() => Math.min(100, ((loyalty.value.points || 0)
 
 function formatDate(d) {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+  const code = locale.value === 'ar' ? 'ar-MA' : locale.value === 'en' ? 'en-US' : 'fr-FR'
+  return new Date(d).toLocaleDateString(code, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 onMounted(async () => {

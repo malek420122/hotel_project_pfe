@@ -38,7 +38,7 @@ export const useBookingStore = defineStore('booking', () => {
   }
 
   async function cancelReservation(id) {
-    await api.put(`/reservations/${id}/annuler`)
+    await api.delete(`/reservations/${id}`)
     const res = reservations.value.find(r => r._id === id)
     if (res) res.statut = 'ANNULEE'
   }

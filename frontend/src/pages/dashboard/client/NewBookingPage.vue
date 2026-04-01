@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Nouvelle réservation</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.new_booking') }}</h2>
     <!-- Steps -->
     <div class="flex items-center gap-2 mb-8">
       <div v-for="(step, i) in steps" :key="i" class="flex items-center gap-2 flex-1">
@@ -16,23 +16,23 @@
 
     <!-- Step 1: Choose Room -->
     <div v-if="currentStep === 1" class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Choisir un hôtel et une chambre</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.choose_room') }}</h3>
       <div class="space-y-4 mb-5">
         <div>
-          <label class="block text-sm font-semibold text-gray-600 mb-1">Destination</label>
-          <input v-model="bookForm.ville" type="text" placeholder="Ville..." class="input-field" />
+          <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.destination') }}</label>
+          <input v-model="bookForm.ville" type="text" :placeholder="$t('dashboard.city_placeholder')" class="input-field" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-600 mb-1">Arrivée</label>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.checkin') }}</label>
             <input v-model="bookForm.dateArrivee" type="date" :min="today" class="input-field" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-600 mb-1">Départ</label>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.checkout') }}</label>
             <input v-model="bookForm.dateDepart" type="date" :min="bookForm.dateArrivee || today" class="input-field" />
           </div>
         </div>
-        <button @click="searchHotels" class="btn-primary">Rechercher les chambres</button>
+        <button @click="searchHotels" class="btn-primary">{{ $t('dashboard.search_rooms') }}</button>
       </div>
       <div v-if="selectedRoom" class="bg-blue-50 rounded-xl p-4 border border-secondary/20">
         <p class="font-semibold text-secondary">✅ Chambre sélectionnée: {{ selectedRoom.nom }}</p>
@@ -42,37 +42,35 @@
         <HotelCard v-for="hotel in hotelStore.hotels.slice(0,3)" :key="hotel._id" :hotel="hotel" class="mb-3" />
       </div>
       <div class="flex justify-end mt-6">
-        <button @click="nextStep" :disabled="!selectedRoom && !bookForm.ville" class="btn-primary disabled:opacity-50">
-          Suivant →
-        </button>
+        <button @click="nextStep" :disabled="!selectedRoom && !bookForm.ville" class="btn-primary disabled:opacity-50">{{ $t('dashboard.next') }}</button>
       </div>
     </div>
 
     <!-- Step 2: Stay Details -->
     <div v-if="currentStep === 2" class="card space-y-4">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Détails du séjour</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.stay_details') }}</h3>
       <div class="bg-gray-50 rounded-xl p-4 mb-4">
         <p class="font-semibold">{{ booking.hotel?.nom }} · {{ booking.chambre?.nom }}</p>
         <p class="text-sm text-gray-500">{{ formatDate(booking.dateArrivee) }} → {{ formatDate(booking.dateDepart) }} ({{ nightCount }}  nuit(s))</p>
         <p class="text-lg font-bold text-secondary mt-1">{{ totalPrice }}€</p>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-gray-600 mb-1">Nombre de voyageurs</label>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.guests_count') }}</label>
         <input v-model="booking.nbVoyageurs" type="number" min="1" :max="booking.chambre?.maxVoyageurs || 10" class="input-field" />
       </div>
       <div>
-        <label class="block text-sm font-semibold text-gray-600 mb-1">Demandes spéciales</label>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.special_requests') }}</label>
         <textarea v-model="booking.demandesSpeciales" rows="3" class="input-field" placeholder="Lit bébé, chambre haute, préférences alimentaires..."></textarea>
       </div>
       <div class="flex gap-3 justify-between mt-4">
-        <button @click="currentStep--" class="btn-outline">← Retour</button>
-        <button @click="nextStep" class="btn-primary">Suivant →</button>
+        <button @click="currentStep--" class="btn-outline">{{ $t('dashboard.back') }}</button>
+        <button @click="nextStep" class="btn-primary">{{ $t('dashboard.next') }}</button>
       </div>
     </div>
 
     <!-- Step 3: Services -->
     <div v-if="currentStep === 3" class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Services supplémentaires</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.additional_services') }}</h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label v-for="svc in availableServices" :key="svc.id" :class="['flex items-center gap-3 border-2 rounded-xl p-3 cursor-pointer transition-colors', booking.servicesChoisis?.includes(svc.id) ? 'border-secondary bg-blue-50' : 'border-gray-200 hover:border-gray-300']">
           <input type="checkbox" :value="svc.id" v-model="booking.servicesChoisis" class="hidden" />
@@ -85,14 +83,14 @@
         </label>
       </div>
       <div class="flex gap-3 justify-between mt-6">
-        <button @click="currentStep--" class="btn-outline">← Retour</button>
-        <button @click="nextStep" class="btn-primary">Suivant →</button>
+        <button @click="currentStep--" class="btn-outline">{{ $t('dashboard.back') }}</button>
+        <button @click="nextStep" class="btn-primary">{{ $t('dashboard.next') }}</button>
       </div>
     </div>
 
     <!-- Step 4: Payment -->
     <div v-if="currentStep === 4" class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Paiement</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.payment') }}</h3>
       <div class="bg-gray-50 rounded-xl p-5 mb-5">
         <h4 class="font-bold text-gray-800 mb-3">Récapitulatif</h4>
         <div class="space-y-2 text-sm">
@@ -103,17 +101,17 @@
         </div>
       </div>
       <div class="mb-4">
-        <label class="block text-sm font-semibold text-gray-600 mb-1">Code promo</label>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">{{ $t('dashboard.promo_code') }}</label>
         <div class="flex gap-2">
           <input v-model="booking.codePromo" type="text" placeholder="PROMO2025" class="input-field flex-1" />
-          <button @click="applyPromo" class="btn-outline px-4">Appliquer</button>
+          <button @click="applyPromo" class="btn-outline px-4">{{ $t('dashboard.apply') }}</button>
         </div>
         <p v-if="promoMessage" :class="['text-xs mt-1', promoMessage.ok ? 'text-green-600' : 'text-red-500']">{{ promoMessage.text }}</p>
       </div>
       <button @click="confirmBooking" :disabled="bookingStore.loading" class="btn-primary w-full py-3 text-base">
         {{ bookingStore.loading ? 'Traitement...' : `💳 Confirmer et payer ${totalPrice}€` }}
       </button>
-      <button @click="currentStep--" class="btn-outline w-full mt-3">← Retour</button>
+      <button @click="currentStep--" class="btn-outline w-full mt-3">{{ $t('dashboard.back') }}</button>
     </div>
 
     <!-- Success -->
@@ -132,6 +130,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '../../../stores/booking'
 import { useHotelStore } from '../../../stores/hotel'
 import api from '../../../api'
@@ -139,6 +138,7 @@ import HotelCard from '../../../components/HotelCard.vue'
 
 const bookingStore = useBookingStore()
 const hotelStore = useHotelStore()
+const { locale } = useI18n()
 
 const steps = ['Choisir chambre', 'Détails séjour', 'Services', 'Paiement']
 const currentStep = ref(1)
@@ -169,7 +169,8 @@ const totalPrice = computed(() => chambreTotal.value + servicesTotal.value - pro
 
 function formatDate(d) {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  const code = locale.value === 'ar' ? 'ar-MA' : locale.value === 'en' ? 'en-US' : 'fr-FR'
+  return new Date(d).toLocaleDateString(code, { day: 'numeric', month: 'short' })
 }
 
 function nextStep() { currentStep.value++ }
@@ -179,9 +180,11 @@ async function searchHotels() { await hotelStore.fetchHotels({ ville: bookForm.v
 async function applyPromo() {
   if (!booking.codePromo) return
   try {
-    const { data } = await api.post('/codes-promo/valider', { code: booking.codePromo, montant: totalPrice.value })
-    promoDiscount.value = data.remise || 0
-    promoMessage.value = { ok: true, text: `Code valide ! -${data.remise}€` }
+    const { data } = await api.post('/promotions/validate', { code: booking.codePromo })
+    const discountPercent = data.remise_pourcent || 0
+    const discountValue = Math.round((chambreTotal.value + servicesTotal.value) * discountPercent) / 100
+    promoDiscount.value = discountValue
+    promoMessage.value = { ok: true, text: `Code valide ! -${discountValue}€` }
   } catch {
     promoDiscount.value = 0
     promoMessage.value = { ok: false, text: 'Code promo invalide ou expiré' }
@@ -191,19 +194,37 @@ async function applyPromo() {
 async function confirmBooking() {
   try {
     const res = await bookingStore.createReservation({
-      chambre_id: booking.chambre?._id,
-      hotel_id: booking.hotel?._id,
+      chambreId: booking.chambre?._id,
+      hotelId: booking.hotel?._id,
       dateArrivee: booking.dateArrivee,
       dateDepart: booking.dateDepart,
       nbVoyageurs: booking.nbVoyageurs,
       demandesSpeciales: booking.demandesSpeciales,
-      services: booking.servicesChoisis,
+      servicesChoisis: (booking.servicesChoisis || []).map(id => {
+        const service = availableServices.find(s => s.id === id)
+        return { id, nom: service?.nom, prix: service?.prix || 0 }
+      }),
+      methodePaiement: 'carte',
       codePromo: booking.codePromo,
-      prixTotal: totalPrice.value,
     })
+
+    const successUrl = `${window.location.origin}/dashboard/client/payments?payment=success&reservation=${res._id}`
+    const cancelUrl = `${window.location.origin}/dashboard/client/new-booking?payment=cancel&reservation=${res._id}`
+
+    const checkout = await api.post('/payments/checkout-session', {
+      reservationId: res._id,
+      successUrl,
+      cancelUrl,
+    })
+
+    const checkoutUrl = checkout?.data?.checkoutUrl
+    if (!checkoutUrl) {
+      throw new Error('URL de paiement Stripe introuvable')
+    }
+
     createdRef.value = res.reference || res._id
-    currentStep.value = 5
     bookingStore.resetBooking()
+    window.location.href = checkoutUrl
   } catch (e) {
     alert(e.response?.data?.message || 'Erreur lors de la réservation')
   }

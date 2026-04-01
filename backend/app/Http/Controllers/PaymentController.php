@@ -11,6 +11,69 @@ use App\Models\Notification;
 
 class PaymentController extends Controller
 {
+    public function createCheckoutSession(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $request->validate([
+            'reservationId' => 'required|string',
+            'successUrl' => 'required|url',
+            'cancelUrl' => 'required|url',
+        ]);
+
+        $reservation = Reservation::findOrFail($request->reservationId);
+        if ((string) $reservation->clientId !== (string) $user->_id) {
+            return response()->json(['error' => 'Non autorise'], 403);
+        }
+
+        $paiement = Paiement::firstOrCreate(
+            ['reservationId' => (string) $reservation->_id],
+            [
+                'montant' => (float) $reservation->prixTotal,
+                'statut' => 'EN_COURS',
+                'methode' => 'carte',
+            ]
+        );
+
+        $stripeSecret = config('services.stripe.secret');
+        if (! $stripeSecret) {
+            return response()->json(['error' => 'Stripe non configure (STRIPE_SECRET manquant).'], 500);
+        }
+
+        $response = Http::asForm()
+            ->withToken($stripeSecret)
+            ->post('https://api.stripe.com/v1/checkout/sessions', [
+                'mode' => 'payment',
+                'success_url' => $request->successUrl,
+                'cancel_url' => $request->cancelUrl,
+                'customer_email' => $user->email,
+                'line_items[0][price_data][currency]' => 'eur',
+                'line_items[0][price_data][unit_amount]' => (int) round(((float) $reservation->prixTotal) * 100),
+                'line_items[0][price_data][product_data][name]' => 'Reservation ' . $reservation->reference,
+                'line_items[0][quantity]' => 1,
+                'metadata[reservation_id]' => (string) $reservation->_id,
+                'metadata[paiement_id]' => (string) $paiement->_id,
+            ]);
+
+        if (! $response->successful()) {
+            return response()->json([
+                'error' => 'Echec de creation de session Stripe',
+                'details' => $response->json(),
+            ], 422);
+        }
+
+        $session = $response->json();
+        $paiement->update([
+            'transactionId' => $session['id'] ?? null,
+            'statut' => 'EN_COURS',
+        ]);
+
+        return response()->json([
+            'checkoutUrl' => $session['url'] ?? null,
+            'sessionId' => $session['id'] ?? null,
+        ]);
+    }
+
     public function createIntent(Request $request)
     {
         JWTAuth::parseToken()->authenticate();
@@ -130,6 +193,57 @@ class PaymentController extends Controller
             'provider' => $provider,
             'transactionId' => $paiement->transactionId,
         ]);
+    }
+
+    public function stripeWebhook(Request $request)
+    {
+        $event = $request->json()->all();
+        $type = $event['type'] ?? null;
+
+        if ($type === 'checkout.session.completed') {
+            $session = $event['data']['object'] ?? [];
+            $metadata = $session['metadata'] ?? [];
+            $reservationId = $metadata['reservation_id'] ?? null;
+            $paiementId = $metadata['paiement_id'] ?? null;
+
+            if ($paiementId) {
+                Paiement::where('_id', $paiementId)->update([
+                    'statut' => 'PAYE',
+                    'transactionId' => $session['id'] ?? null,
+                ]);
+            }
+
+            if ($reservationId) {
+                Reservation::where('_id', $reservationId)->update(['statut' => 'CONFIRMEE']);
+            }
+        }
+
+        return response()->json(['received' => true]);
+    }
+
+    public function history()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $reservations = Reservation::where('clientId', (string) $user->_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $rows = [];
+        foreach ($reservations as $reservation) {
+            $payment = Paiement::where('reservationId', (string) $reservation->_id)->first();
+            $rows[] = [
+                'reference' => $reservation->reference,
+                'reservationId' => (string) $reservation->_id,
+                'montant' => $payment?->montant ?? $reservation->prixTotal,
+                'methode' => $payment?->methode ?? 'carte',
+                'date' => optional($reservation->created_at)->format('Y-m-d H:i') ?? now()->format('Y-m-d H:i'),
+                'statut' => $payment?->statut ?? 'EN_COURS',
+                'transactionId' => $payment?->transactionId,
+            ];
+        }
+
+        return response()->json($rows);
     }
 
     // Admin: list payments
