@@ -1,0 +1,99 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+
+actor Visiteur
+actor Client
+actor Receptionniste
+actor Administrateur as Admin
+actor "Responsable Marketing" as Marketing
+
+Client --|> Visiteur
+
+rectangle "Systeme HotelEase" {
+  ' === CONSULTATION ===
+  usecase "Consulter hotels" as UC1
+  usecase "Rechercher / filtrer" as UC2
+  usecase "Voir details hotel" as UC3
+  
+  ' === AUTH ===
+  usecase "S inscrire" as UC4
+  usecase "Se connecter" as UC5
+  
+  ' === CLIENT ===
+  usecase "Reserver chambre" as UC6
+  usecase "Payer reservation" as UC7
+  usecase "Consulter mes reservations" as UC8
+  usecase "Gerer profil" as UC9
+  
+  ' === RECEPTION ===
+  usecase "Consulter file attente" as UC10
+  usecase "Effectuer check-in" as UC11
+  usecase "Effectuer check-out" as UC12
+  
+  ' === ADMIN ===
+  usecase "Gerer hotels" as UC13
+  usecase "Gerer chambres" as UC14
+  usecase "Gerer services" as UC15
+  usecase "Gerer utilisateurs" as UC16
+  
+  ' === MARKETING ===
+  usecase "Gerer promotions" as UC17
+  usecase "Moderer avis" as UC18
+  usecase "Verifier disponibilite" as UC19
+}
+
+' === VISITEUR ===
+Visiteur --> UC1
+Visiteur --> UC2
+Visiteur --> UC3
+Visiteur --> UC4
+Visiteur --> UC5
+
+' === CLIENT ===
+Client --> UC6
+Client --> UC7
+Client --> UC8
+Client --> UC9
+Client --> UC19
+
+' === RECEPTIONNISTE ===
+Receptionniste --> UC5
+Receptionniste --> UC10
+Receptionniste --> UC11
+Receptionniste --> UC12
+
+' === ADMIN ===
+Admin --> UC5
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+Admin --> UC16
+
+' === MARKETING ===
+Marketing --> UC5
+Marketing --> UC17
+Marketing --> UC18
+
+' === DEPENDENCIES ===
+UC6 ..> UC5 : <<include>>
+UC6 ..> UC19 : <<include>>
+UC7 ..> UC5 : <<include>>
+UC8 ..> UC5 : <<include>>
+UC9 ..> UC5 : <<include>>
+
+UC10 ..> UC5 : <<include>>
+UC11 ..> UC5 : <<include>>
+UC12 ..> UC5 : <<include>>
+
+UC13 ..> UC5 : <<include>>
+UC14 ..> UC5 : <<include>>
+UC15 ..> UC5 : <<include>>
+UC16 ..> UC5 : <<include>>
+
+UC17 ..> UC5 : <<include>>
+UC18 ..> UC5 : <<include>>
+
+@enduml

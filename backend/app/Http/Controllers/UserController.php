@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Reservation;
+use App\Models\Promotion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -31,6 +32,10 @@ class UserController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $data = $request->only(['nom', 'prenom', 'telephone', 'nationalite', 'langue']);
         if ($request->has('password')) {
+            $request->validate(['old_password' => 'required|string']);
+            if (!Hash::check((string) $request->old_password, (string) $user->password)) {
+                return response()->json(['message' => 'Ancien mot de passe incorrect'], 422);
+            }
             $request->validate(['password' => 'min:8|confirmed|regex:/^(?=.*[A-Z])(?=.*\d).+$/']);
             $data['password'] = Hash::make($request->password);
         }
@@ -59,9 +64,65 @@ class UserController extends Controller
         return response()->json([
             'points' => $user->points_fidelite,
             'niveau' => $user->niveau_fidelite,
+            'niveaux' => [
+                ['name' => 'Bronze', 'icon' => '🥉', 'minPts' => 0, 'maxPts' => 1999, 'benefits' => ['5% remise', 'Check-in prioritaire']],
+                ['name' => 'Argent', 'icon' => '🥈', 'minPts' => 2000, 'maxPts' => 4999, 'benefits' => ['10% remise', 'Surclassement gratuit', 'Petit-dej offert']],
+                ['name' => 'Or', 'icon' => '🥇', 'minPts' => 5000, 'maxPts' => null, 'benefits' => ['20% remise', 'Surclassement automatique', 'Accès VIP lounge', 'Late checkout']],
+            ],
             'historique' => $historique,
             'prochainNiveau' => $user->niveau_fidelite === 'Bronze' ? ['nom' => 'Argent', 'pointsRequis' => 1000] :
                 ($user->niveau_fidelite === 'Argent' ? ['nom' => 'Or', 'pointsRequis' => 5000] : null),
+        ]);
+    }
+
+    public function redeemPoints(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $request->validate([
+            'reward' => 'required|in:discount10,free_breakfast,free_upgrade',
+        ]);
+
+        $rewardMap = [
+            'discount10' => ['cost' => 500, 'title' => 'Récompense 10% fidélité', 'discount' => 10],
+            'free_breakfast' => ['cost' => 1000, 'title' => 'Petit-déjeuner offert', 'discount' => 15],
+            'free_upgrade' => ['cost' => 2000, 'title' => 'Surclassement offert', 'discount' => 20],
+        ];
+
+        $reward = $rewardMap[$request->reward];
+        $currentPoints = (int) ($user->points_fidelite ?? 0);
+
+        if ($currentPoints < $reward['cost']) {
+            return response()->json(['error' => 'Points insuffisants'], 422);
+        }
+
+        $newPoints = $currentPoints - $reward['cost'];
+        $niveau = $newPoints >= 5000 ? 'Or' : ($newPoints >= 1000 ? 'Argent' : 'Bronze');
+
+        $code = 'LOYAL-' . strtoupper(substr($request->reward, 0, 3)) . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
+
+        $promo = Promotion::create([
+            'titre' => $reward['title'],
+            'description' => 'Code généré via le programme fidélité client',
+            'remise_pourcent' => $reward['discount'],
+            'codePromo' => $code,
+            'dateDebut' => now(),
+            'dateFin' => now()->addMonths(3),
+            'chambresIds' => [],
+            'estActive' => true,
+            'nbUtilisations' => 0,
+            'limiteUtilisations' => 1,
+        ]);
+
+        $user->update([
+            'points_fidelite' => $newPoints,
+            'niveau_fidelite' => $niveau,
+        ]);
+
+        return response()->json([
+            'message' => 'Récompense activée avec succès',
+            'codePromo' => $promo->codePromo,
+            'pointsRestants' => $newPoints,
         ]);
     }
 }

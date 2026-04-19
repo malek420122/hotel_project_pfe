@@ -16,4 +16,10 @@ class Paiement extends Model
     protected $attributes = [
         'statut' => 'EN_COURS',
     ];
+
+    protected $casts = [
+        'montant' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 }

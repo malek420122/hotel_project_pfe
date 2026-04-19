@@ -1,0 +1,225 @@
+@startuml ClassDiagramHotelEase
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 45
+
+title HotelEase - Diagramme de classes (version reorganisee)
+
+class Utilisateur {
+  +id : String
+  +nom : String
+  +prenom : String
+  +email : String
+  +motDePasseHash : String
+  +telephone : String
+  +langue : String
+  +role : Enum
+  +dateCreation : Date
+  --
+  +seConnecter() : Boolean
+  +sInscrire() : void
+  +mettreAJourProfil() : void
+}
+
+class Client {
+  +historiqueReservations : List
+  --
+  +rechercherHotels() : List
+  +reserverChambre() : void
+  +consulterReservations() : List
+  +annulerReservation() : void
+  +soumettreAvis() : void
+  +consulterNotifications() : List
+}
+
+class Admin {
+  --
+  +gererHotels() : void
+  +gererChambres() : void
+  +gererServices() : void
+  +gererUtilisateurs() : void
+  +consulterPaiements() : void
+  +superviserReservations() : void
+}
+
+class Receptionniste {
+  --
+  +confirmerReservation() : void
+  +modifierReservation() : void
+  +effectuerCheckIn() : void
+  +effectuerCheckOut() : void
+}
+
+class ResponsableMarketing {
+  --
+  +gererPromotions() : void
+  +creerCodePromo() : String
+  +consulterStatistiques() : Map
+  +analyserTauxOccupation() : Float
+  +modererAvis() : void
+  +envoyerOffresEmail() : void
+}
+
+class Hotel {
+  +id : String
+  +nom : String
+  +description : String
+  +adresse : String
+  +ville : String
+  +etoiles : Integer
+  +noteMoyenne : Float
+  --
+  +afficherDisponibilites() : List
+  +calculerNoteMoyenne() : Float
+}
+
+class Chambre {
+  +id : String
+  +type : String
+  +nom : String
+  +prixNuit : Float
+  +capaciteMax : Integer
+  +estDisponible : Boolean
+  --
+  +verifierDisponibilite() : Boolean
+  +mettreAJourPrix() : void
+}
+
+class Service {
+  +id : String
+  +categorie : Enum
+  +nom : String
+  +prix : Float
+  +capacite : Integer
+  +estActif : Boolean
+  --
+  +verifierDisponibilite() : Boolean
+  +reserver() : void
+}
+
+class Promotion {
+  +id : String
+  +titre : String
+  +remisePourcentage : Float
+  +codePromo : String
+  +dateDebut : Date
+  +dateFin : Date
+  +estActive : Boolean
+  +limiteUtilisations : Integer
+  --
+  +appliquer() : Float
+  +desactiver() : void
+}
+
+class Reservation {
+  +id : String
+  +reference : String
+  +dateArrivee : Date
+  +dateDepart : Date
+  +nbVoyageurs : Integer
+  +statut : Enum
+  +prixTotal : Float
+  +demandesSpeciales : String
+  +remiseAppliquee : Float
+  +dateCreation : Date
+  --
+  +confirmer() : void
+  +annuler() : void
+  +modifier() : void
+  +calculerPrix() : Float
+}
+
+class Paiement {
+  +id : String
+  +montant : Float
+  +statut : Enum
+  +methode : String
+  +transactionId : String
+  +dateCreation : Date
+  +dateMiseAJour : Date
+  --
+  +traiterPaiement() : Boolean
+  +rembourser() : void
+  +genererFacture() : File
+}
+
+class Avis {
+  +id : String
+  +note : Integer
+  +commentaire : String
+  +statut : Enum
+  +reponseHotel : String
+  +dateCreation : Date
+  --
+  +publier() : void
+  +moderer() : void
+  +repondre() : void
+}
+
+class Notification {
+  +id : String
+  +type : String
+  +message : String
+  +estLue : Boolean
+  +dateCreation : Date
+  --
+  +envoyer() : void
+  +marquerCommeLue() : void
+}
+
+class "AssistantIA\n<<service>>" as AssistantIA {
+  +id : String
+  +fournisseurModele : String
+  +versionModele : String
+  --
+  +repondreQuestion() : String
+  +recommanderHotels() : List
+  +suggererPeriodeSejour() : List
+}
+
+' Heritage
+Utilisateur <|-- Client
+Utilisateur <|-- Admin
+Utilisateur <|-- Receptionniste
+Utilisateur <|-- ResponsableMarketing
+
+' Structure metier
+Hotel *-- "1..*" Chambre : contient
+Hotel o-- "0..*" Service : propose
+Hotel "1" -- "0..*" Reservation : concerne
+Hotel "1" -- "0..*" Avis : recoit
+
+Client "1" -- "0..*" Reservation : effectue
+Client "1" -- "0..*" Avis : redige
+Client "1" -- "0..*" AssistantIA : utilise
+Utilisateur "1" -- "0..*" Notification : recoit
+
+Reservation "1" -- "1" Chambre : reserve
+Reservation *-- "0..1" Paiement : genere
+Reservation "1" -- "0..*" Service : inclut
+Reservation "1" -- "0..*" Notification : declenche
+Reservation "0..1" -- "1" Promotion : applique
+
+Avis "1" -- "0..1" Reservation : provient_de
+Promotion "1" -- "0..*" Chambre : cible
+AssistantIA ..> Hotel : recommande
+AssistantIA ..> Reservation : suggere
+
+' Liens operationnels des roles
+Admin "1" -- "0..*" Hotel : gere
+Admin "1" -- "0..*" Utilisateur : administre
+Admin "1" -- "0..*" Paiement : consulte
+Admin "1" -- "0..*" Reservation : supervise
+
+Receptionniste "1" -- "0..*" Reservation : traite
+Receptionniste "1" -- "0..*" Chambre : consulte
+
+ResponsableMarketing "1" -- "0..*" Promotion : cree
+ResponsableMarketing "1" -- "0..*" Avis : modere
+ResponsableMarketing "1" -- "0..*" Hotel : analyse
+
+@enduml

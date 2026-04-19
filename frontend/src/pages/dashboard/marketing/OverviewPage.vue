@@ -1,66 +1,294 @@
 <template>
-  <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $t('dashboard.marketing_overview') }}</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-      <KpiCard icon="🎯" label="Promotions actives" value="5" color="purple" />
-      <KpiCard icon="🏷️" label="Codes promo utilisés" value="142" color="blue" :trend="23" />
-      <KpiCard icon="⭐" label="Note moyenne" value="4.6" color="gold" />
-      <KpiCard icon="🔄" label="Taux conversion" value="12.4%" color="green" :trend="5" />
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.conversions_channel') }}</h3>
-        <Bar :data="convChart" :options="chartOpts" />
+  <section class="marketing-page">
+    <header class="marketing-head">
+      <div>
+        <h2 class="marketing-title">{{ t('dashboard.marketing_overview') }}</h2>
+        <p class="marketing-subtitle">{{ t('marketing.subtitle') }}</p>
       </div>
-      <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.promotions_efficiency') }}</h3>
-        <Radar :data="radarChart" :options="radarOpts" />
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('dashboard.recent_reviews') }}</h3>
-      <div class="space-y-3">
-        <div v-for="avis in recentAvis" :key="avis.id" class="flex items-start gap-3 border-b pb-3 last:border-0">
-          <div class="w-9 h-9 bg-secondary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">{{ avis.client[0] }}</div>
-          <div class="flex-1">
-            <div class="flex justify-between">
-              <p class="font-semibold text-sm text-gray-800">{{ avis.client }}</p>
-              <div class="flex gap-0.5">
-                <span v-for="i in 5" :key="i" :class="i <= avis.note ? 'text-accent' : 'text-gray-200'" class="text-sm">★</span>
-              </div>
-            </div>
-            <p class="text-gray-500 text-sm">{{ avis.hotel }}</p>
-            <p class="text-sm text-gray-700 mt-1 italic">"{{ avis.comment }}"</p>
-          </div>
-          <StatusBadge :status="avis.statut" />
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-<script setup>
-import { Bar, Radar } from 'vue-chartjs'
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler } from 'chart.js'
-ChartJS.register(CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler)
-import KpiCard from '../../../components/KpiCard.vue'
-import StatusBadge from '../../../components/StatusBadge.vue'
+    </header>
 
-const convChart = {
-  labels: ['Email','SEO','Réseaux sociaux','Partenaires','Direct'],
-  datasets: [{ label: 'Conversions', data: [42, 35, 28, 20, 17], backgroundColor: '#0071c2', borderRadius: 6 }]
+    <div class="marketing-grid-kpi">
+      <article class="premium-card kpi-card">
+        <p class="kpi-label">{{ t('marketing.conversionRate') }}</p>
+        <p class="kpi-value">{{ Number(kpis.tauxConversion || 0).toFixed(1) }}%</p>
+      </article>
+      <article class="premium-card kpi-card">
+        <p class="kpi-label">{{ t('marketing.avgRating') }}</p>
+        <p class="kpi-value">{{ Number(kpis.noteMoyenne || 0).toFixed(1) }}/5</p>
+      </article>
+      <article class="premium-card kpi-card">
+        <p class="kpi-label">{{ t('marketing.promoUsed') }}</p>
+        <p class="kpi-value">{{ Number(kpis.codesPromoUtilises || 0) }}</p>
+      </article>
+      <article class="premium-card kpi-card">
+        <p class="kpi-label">{{ t('marketing.activePromos') }}</p>
+        <p class="kpi-value">{{ Number(kpis.promotionsActives || 0) }}</p>
+      </article>
+    </div>
+
+    <div class="marketing-grid-charts">
+      <article class="premium-card">
+        <h3 class="chart-title">{{ t('marketing.topHotelsRevenue') }}</h3>
+        <div class="chart-wrap"><Bar :data="hotelChart" :options="hotelChartOpts" :plugins="chartPlugins" /></div>
+      </article>
+
+      <article class="premium-card">
+        <h3 class="chart-title">{{ t('marketing.promoEfficiency') }}</h3>
+        <div class="chart-wrap"><Bar :data="promotionChart" :options="promotionChartOpts" /></div>
+      </article>
+    </div>
+
+    <div class="marketing-grid-extra">
+      <article class="premium-card stat-chip">
+        <p class="chip-label">{{ t('marketing.reviewsThisWeek') }}</p>
+        <p class="chip-value">{{ extraStats.reviewsThisWeek ?? 0 }}</p>
+      </article>
+      <article class="premium-card stat-chip">
+        <p class="chip-label">{{ t('marketing.responseRate') }}</p>
+        <p class="chip-value">{{ Number(extraStats.responseRate || 0).toFixed(1) }}%</p>
+      </article>
+      <article class="premium-card stat-chip">
+        <p class="chip-label">{{ t('marketing.mostFrequentRating') }}</p>
+        <p class="chip-value">{{ ratingStars(extraStats.modeRating) }}</p>
+      </article>
+      <article class="premium-card stat-chip">
+        <p class="chip-label">{{ t('marketing.bestRatedHotel') }}</p>
+        <p class="chip-value">{{ extraStats.bestRatedHotel || '—' }}</p>
+      </article>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Bar } from 'vue-chartjs'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js'
+import api from '../../../api'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
+
+const { t, locale } = useI18n()
+
+const analytics = ref({ kpis: {}, topHotels: [], promotionEfficiency: [], extraStats: {} })
+
+const formatEuro = (value) => {
+  const amount = Number(value || 0)
+  return `${amount.toLocaleString(locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US', {
+    maximumFractionDigits: 0,
+  })}€`
 }
-const radarChart = {
-  labels: ['Clics', 'Conversions', 'Revenus', 'Satisfaction', 'ROI'],
-  datasets: [
-    { label: 'Promo Été', data: [80, 65, 75, 90, 70], borderColor: '#003580', backgroundColor: 'rgba(0,53,128,0.1)' },
-    { label: 'Promo Ramadan', data: [60, 80, 85, 95, 88], borderColor: '#FFB700', backgroundColor: 'rgba(255,183,0,0.1)' },
-  ]
-}
-const chartOpts = { responsive: true, plugins: { legend: { display: false } } }
-const radarOpts = { responsive: true, plugins: { legend: { position: 'bottom' } } }
-const recentAvis = [
-  { id:1, client:'Sophie M.', hotel:'Atlas', note:5, comment:'Service 5 étoiles !', statut:'PUBLIE' },
-  { id:2, client:'Ahmed B.', hotel:'Riad', note:4, comment:'Très bonne expérience globale.', statut:'EN_ATTENTE' },
-  { id:3, client:'Laura D.', hotel:'Ibis', note:3, comment:'Chambre propre mais bruyante.', statut:'EN_ATTENTE' },
+
+const chartPlugins = [
+  {
+    id: 'hotel-count-label',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart
+      const datasetMeta = chart.getDatasetMeta(0)
+      const counts = (analytics.value?.topHotels || []).map((item) => item.reservationsCount || 0)
+
+      ctx.save()
+      ctx.fillStyle = '#e2e8f0'
+      ctx.font = '600 11px Inter, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+
+      datasetMeta.data.forEach((bar, index) => {
+        ctx.fillText(`${counts[index] || 0}`, bar.x, bar.y - 4)
+      })
+      ctx.restore()
+    },
+  },
 ]
+
+const kpis = computed(() => analytics.value?.kpis || {})
+const extraStats = computed(() => analytics.value?.extraStats || {})
+
+const hotelChart = computed(() => ({
+  labels: (analytics.value?.topHotels || []).map((hotel) => hotel.nom),
+  datasets: [{
+    label: t('marketing.revenueLabel'),
+    data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.revenu || 0)),
+    backgroundColor: '#38bdf8',
+    borderRadius: 10,
+    maxBarThickness: 44,
+  }],
+}))
+
+const promotionChart = computed(() => ({
+  labels: (analytics.value?.promotionEfficiency || []).map((promo) => promo.label),
+  datasets: [{
+    label: t('marketing.promoUsed'),
+    data: (analytics.value?.promotionEfficiency || []).map((promo) => Number(promo.used ?? promo.score ?? 0)),
+    backgroundColor: '#f59e0b',
+    borderRadius: 10,
+    maxBarThickness: 42,
+  }],
+}))
+
+const hotelChartOpts = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${t('marketing.revenueLabel')}: ${formatEuro(context.parsed.y)}`,
+      },
+    },
+  },
+  scales: {
+    x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: {
+      ticks: {
+        color: '#cbd5e1',
+        callback: (value) => formatEuro(value),
+      },
+      grid: { color: 'rgba(255,255,255,0.05)' },
+    },
+  },
+}))
+
+const promotionChartOpts = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${t('marketing.promoUsed')}: ${Number(context.parsed.y || 0)}`,
+      },
+    },
+  },
+  scales: {
+    x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+  },
+}))
+
+function ratingStars(note) {
+  const safe = Math.max(0, Math.min(5, Number(note || 0)))
+  return `${'★'.repeat(safe)}${'☆'.repeat(5 - safe)}`
+}
+
+async function loadAnalytics() {
+  try {
+    const [overviewRes, statsRes] = await Promise.all([
+      api.get('/marketing/statistiques'),
+      api.get('/marketing/stats'),
+    ])
+
+    const over = overviewRes.data || {}
+    const stats = statsRes.data || {}
+
+    analytics.value = {
+      kpis: {
+        promotionsActives: Number(stats.promotions_actives ?? over?.kpis?.promotionsActives ?? 0),
+        codesPromoUtilises: Number(stats.codes_promo_utilises ?? over?.kpis?.codesPromoUtilises ?? 0),
+        noteMoyenne: Number(stats.note_moyenne ?? over?.kpis?.noteMoyenne ?? 0),
+        tauxConversion: Number(stats.taux_conversion ?? over?.kpis?.tauxConversion ?? 0),
+      },
+      topHotels: Array.isArray(over.topHotels) ? over.topHotels : [],
+      promotionEfficiency: Array.isArray(over.promotionEfficiency) ? over.promotionEfficiency : [],
+      extraStats: over.extraStats || {},
+    }
+  } catch {
+    analytics.value = { kpis: {}, topHotels: [], promotionEfficiency: [], extraStats: {} }
+  }
+}
+
+onMounted(loadAnalytics)
 </script>
+
+<style scoped>
+.marketing-page {
+  --bg-card: #1e293b;
+  --text-main: #e2e8f0;
+  --text-soft: #94a3b8;
+}
+
+.marketing-head {
+  margin-bottom: 1.2rem;
+}
+
+.marketing-title {
+  color: var(--text-main);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.marketing-subtitle {
+  color: var(--text-soft);
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+}
+
+.marketing-grid-kpi,
+.marketing-grid-extra {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.marketing-grid-charts {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .marketing-grid-kpi,
+  .marketing-grid-extra {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .marketing-grid-kpi,
+  .marketing-grid-extra {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .marketing-grid-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.premium-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  color: var(--text-main);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.premium-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.36);
+}
+
+.kpi-label,
+.chip-label {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  margin-bottom: 0.45rem;
+}
+
+.kpi-value,
+.chip-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.chart-title {
+  color: var(--text-main);
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+}
+
+.chart-wrap {
+  height: 290px;
+}
+</style>

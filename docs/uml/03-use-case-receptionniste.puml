@@ -1,0 +1,46 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor Receptionniste
+
+rectangle "HotelEase - Espace Reception" {
+  usecase "Se connecter" as R0
+  usecase "Consulter file d attente" as R1
+  usecase "Confirmer reservation" as R2
+  usecase "Rejeter reservation" as R3
+  usecase "Effectuer check-in" as R4
+  usecase "Effectuer check-out" as R5
+  usecase "Traiter demandes speciales" as R6
+  usecase "Consulter grille des chambres" as R7
+  usecase "Consulter reservations" as R8
+  usecase "Consulter statistiques de reception" as R9
+}
+
+Receptionniste --> R0
+Receptionniste --> R1
+Receptionniste --> R2
+Receptionniste --> R3
+Receptionniste --> R4
+Receptionniste --> R5
+Receptionniste --> R6
+Receptionniste --> R7
+Receptionniste --> R8
+Receptionniste --> R9
+
+R1 ..> R0 : <<include>>
+R2 ..> R0 : <<include>>
+R3 ..> R0 : <<include>>
+R4 ..> R0 : <<include>>
+R5 ..> R0 : <<include>>
+R6 ..> R0 : <<include>>
+R7 ..> R0 : <<include>>
+R8 ..> R0 : <<include>>
+R9 ..> R0 : <<include>>
+
+R2 ..> R1 : <<extend>>
+R3 ..> R1 : <<extend>>
+R4 ..> R8 : <<include>>
+R5 ..> R8 : <<include>>
+R6 ..> R8 : <<include>>
+@enduml

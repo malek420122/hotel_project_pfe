@@ -16,13 +16,20 @@ export const useBookingStore = defineStore('booking', () => {
     codePromo: '',
   })
 
-  async function fetchMyReservations() {
-    loading.value = true
+  async function fetchMyReservations(options = {}) {
+    const silent = Boolean(options?.silent)
+    if (!silent) {
+      loading.value = true
+    }
     try {
       const { data } = await api.get('/client/reservations')
-      reservations.value = data
+      reservations.value = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.data) ? data.data : [])
     } finally {
-      loading.value = false
+      if (!silent) {
+        loading.value = false
+      }
     }
   }
 

@@ -13,7 +13,8 @@ class Reservation extends Model
         'reference', 'clientId', 'chambreId', 'hotelId',
         'dateArrivee', 'dateDepart', 'nbVoyageurs',
         'statut', 'prixTotal', 'demandesSpeciales',
-        'servicesChoisis', 'codePromoApplique', 'remiseAppliquee'
+        'servicesChoisis', 'codePromoApplique', 'remiseAppliquee',
+        'motifRejet', 'checkinAt', 'checkoutAt'
     ];
 
     protected $attributes = [
@@ -21,5 +22,15 @@ class Reservation extends Model
         'servicesChoisis' => [],
         'nbVoyageurs' => 1,
         'remiseAppliquee' => 0,
+    ];
+
+    protected $casts = [
+        'nbVoyageurs' => 'integer',
+        'prixTotal' => 'float',
+        'remiseAppliquee' => 'float',
+        'dateArrivee' => 'datetime',
+        'dateDepart' => 'datetime',
+        'checkinAt' => 'datetime',
+        'checkoutAt' => 'datetime',
     ];
 }

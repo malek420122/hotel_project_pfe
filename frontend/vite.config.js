@@ -1,13 +1,17 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8010'
+const devPort = Number(process.env.VITE_APP_PORT || process.env.VITE_PORT || 5173)
+
 export default defineConfig({
   plugins: [vue()],
   server: {
-    port: 5173,
+    port: devPort,
+    strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: apiProxyTarget,
         changeOrigin: true,
       }
     }

@@ -1,0 +1,22 @@
+Diagramme Cas d’utilisation générale 
+ 
+ 
+Diagramme Cas d’utilisation Client (effectuer une 
+réservation) 
+ 
+
+
+ 
+Diagramme Cas d’utilisation Admin (Gérer les Hôtels) 
+ 
+ 
+Diagramme Cas d’utilisation Réceptionniste (Gérer les 
+Réservations) 
+
+
+ 
+  Diagramme Cas d’utilisation Responsable Marketing 
+(Responsable Marketing Gérer le Marketing) 
+ 
+ 
+ 

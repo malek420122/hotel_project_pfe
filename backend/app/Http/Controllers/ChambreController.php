@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chambre;
+use App\Models\Hotel;
 use Illuminate\Http\Request;
 
 class ChambreController extends Controller
@@ -24,6 +25,7 @@ class ChambreController extends Controller
             'nom' => 'required|string',
             'prix_base' => 'required|numeric|min:0',
             'maxVoyageurs' => 'required|integer|min:1',
+            'statut' => 'nullable|in:LIBRE,OCCUPE,ENTRETIEN,NETTOYAGE',
         ]);
 
         $chambre = Chambre::create($request->all());
@@ -48,9 +50,30 @@ class ChambreController extends Controller
         return response()->json(['message' => 'Chambre supprimée']);
     }
 
-    public function grille()
+    public function grille(Request $request)
     {
-        $chambres = Chambre::all();
+        $query = Chambre::query();
+        if ($request->filled('hotelId')) {
+            $query->where('hotelId', $request->hotelId);
+        }
+
+        $chambres = $query->get()->map(function (Chambre $chambre) {
+            $row = $chambre->toArray();
+            $row['hotel'] = Hotel::find($chambre->hotelId);
+            $row['numero'] = $row['numero'] ?? $row['room_number'] ?? $this->deriveRoomNumber($chambre);
+            return $row;
+        });
+
         return response()->json($chambres);
+    }
+
+    private function deriveRoomNumber(Chambre $chambre): string
+    {
+        $name = (string) ($chambre->nom ?? '');
+        if (preg_match('/\d+/', $name, $matches)) {
+            return (string) $matches[0];
+        }
+
+        return strtoupper(substr((string) $chambre->_id, -4));
     }
 }

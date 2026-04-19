@@ -4,6 +4,7 @@
       <h2 class="text-2xl font-bold text-gray-800">Gestion des Chambres</h2>
       <button @click="showModal=true" class="btn-primary">+ Ajouter chambre</button>
     </div>
+    <p v-if="errorMsg" class="mb-4 text-sm text-red-600">{{ errorMsg }}</p>
     <div class="card mb-4">
       <label class="block text-sm font-semibold text-gray-600 mb-1">Filtrer par hôtel</label>
       <select v-model="selectedHotel" class="input-field max-w-xs" @change="loadRooms">
@@ -55,17 +56,28 @@
         </div>
       </div>
     </Teleport>
+    <ConfirmModal
+      :show="deleteModal.show"
+      title="Supprimer la chambre"
+      :message="`Voulez-vous vraiment supprimer ${deleteModal.room?.nom} ?`"
+      danger
+      @confirm="confirmDeleteRoom"
+      @cancel="deleteModal.show = false"
+    />
   </div>
 </template>
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import DataTable from '../../../components/DataTable.vue'
 import StatusBadge from '../../../components/StatusBadge.vue'
+import ConfirmModal from '../../../components/ConfirmModal.vue'
 import api from '../../../api'
 const rooms = ref([])
 const hotels = ref([])
 const showModal = ref(false)
 const selectedHotel = ref('')
+const errorMsg = ref('')
+const deleteModal = ref({ show: false, room: null })
 const types = ['SIMPLE','DOUBLE','SUITE','FAMILIALE','DELUXE','PRESIDENTIELLE']
 const form = reactive({ _id: null, hotelId: '', nom: '', numero: '', type: 'DOUBLE', prix_base: 0, maxVoyageurs: 2, etage: 0, description: '' })
 const cols = [
@@ -88,13 +100,28 @@ function editRoom(r) {
 }
 async function saveRoom() {
   try {
+    errorMsg.value = ''
     if (form._id) await api.put(`/admin/chambres/${form._id}`, form)
     else await api.post('/admin/chambres', form)
     showModal.value = false; await loadRooms()
-  } catch(e) { alert(e.response?.data?.message || 'Erreur') }
+  } catch(e) { errorMsg.value = e.response?.data?.message || 'Erreur' }
 }
-async function deleteRoom(r) {
-  if (confirm(`Supprimer ${r.nom} ?`)) { await api.delete(`/admin/chambres/${r._id}`); await loadRooms() }
+function deleteRoom(r) {
+  deleteModal.value = { show: true, room: r }
+}
+
+async function confirmDeleteRoom() {
+  const room = deleteModal.value.room
+  if (!room?._id) return
+
+  try {
+    errorMsg.value = ''
+    await api.delete(`/admin/chambres/${room._id}`)
+    deleteModal.value.show = false
+    await loadRooms()
+  } catch (e) {
+    errorMsg.value = e.response?.data?.message || 'Impossible de supprimer la chambre.'
+  }
 }
 onMounted(async () => {
   const { data } = await api.get('/admin/hotels')

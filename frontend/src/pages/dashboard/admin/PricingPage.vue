@@ -21,7 +21,7 @@
             <label class="block text-sm font-semibold text-gray-600 mb-1">Majoration occupation (%) au delà du seuil</label>
             <input v-model="config.majOccupation" type="number" class="input-field" />
           </div>
-          <button type="submit" class="btn-primary">Enregistrer la configuration</button>
+          <button type="submit" class="btn-primary">Rafraichir depuis les donnees reelles</button>
         </form>
       </div>
       <div class="card">
@@ -49,23 +49,66 @@
             <p class="text-4xl font-extrabold text-secondary">{{ calculatedPrice }}€</p>
             <p class="text-xs text-gray-400">/nuit</p>
           </div>
+          <p class="text-xs text-gray-500">Simulation basee sur les indicateurs reels du tableau de bord admin.</p>
         </div>
       </div>
     </div>
     <div class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Évolution des prix (30 derniers jours)</h3>
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Evolution des revenus (12 derniers mois)</h3>
       <Line :data="priceChart" :options="lineOpts" />
     </div>
   </div>
 </template>
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Line } from 'vue-chartjs'
+import api from '../../../api'
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler } from 'chart.js'
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler)
 
-const config = reactive({ majHauteSaison: 30, remiseBasseSaison: 15, seuilOccupation: 80, majOccupation: 20 })
-const sim = reactive({ base: 150, occupation: 60, saison: 'normale' })
+const stats = ref({ revenusMensuel: [], topHotels: [], kpis: {} })
+const config = reactive({ majHauteSaison: 0, remiseBasseSaison: 0, seuilOccupation: 0, majOccupation: 0 })
+const sim = reactive({ base: 0, occupation: 0, saison: 'normale' })
+
+async function loadStats() {
+  try {
+    const { data } = await api.get('/admin/statistiques')
+    stats.value = {
+      revenusMensuel: Array.isArray(data?.revenusMensuel) ? data.revenusMensuel : [],
+      topHotels: Array.isArray(data?.topHotels) ? data.topHotels : [],
+      kpis: data?.kpis || {},
+    }
+
+    const hotelPcts = stats.value.topHotels.map((h) => Number(h?.pct || 0)).filter((n) => Number.isFinite(n))
+    const avgOccupation = hotelPcts.length ? Math.round(hotelPcts.reduce((a, b) => a + b, 0) / hotelPcts.length) : 0
+
+    const monthlyTotals = stats.value.revenusMensuel
+      .map((r) => Number(r?.total || 0))
+      .filter((n) => Number.isFinite(n))
+    const maxTotal = monthlyTotals.length ? Math.max(...monthlyTotals) : 0
+    const minTotal = monthlyTotals.length ? Math.min(...monthlyTotals) : 0
+    const spreadPct = maxTotal > 0 ? Math.round(((maxTotal - minTotal) / maxTotal) * 100) : 0
+
+    config.majHauteSaison = spreadPct
+    config.remiseBasseSaison = Math.round(spreadPct / 2)
+    config.seuilOccupation = avgOccupation
+    config.majOccupation = Math.round(avgOccupation / 4)
+
+    const reservationsMois = Number(stats.value.kpis?.reservationsMois || 0)
+    const revenusMois = Number(stats.value.kpis?.revenusMois || 0)
+    const basePrice = reservationsMois > 0 ? revenusMois / reservationsMois : 0
+    sim.base = Math.round(basePrice)
+    sim.occupation = avgOccupation
+  } catch {
+    stats.value = { revenusMensuel: [], topHotels: [], kpis: {} }
+    config.majHauteSaison = 0
+    config.remiseBasseSaison = 0
+    config.seuilOccupation = 0
+    config.majOccupation = 0
+    sim.base = 0
+    sim.occupation = 0
+  }
+}
 
 const calculatedPrice = computed(() => {
   let p = sim.base
@@ -75,12 +118,22 @@ const calculatedPrice = computed(() => {
   return Math.round(p)
 })
 
-function saveConfig() { alert('Configuration sauvegardée !') }
-
-const days = Array.from({ length: 30 }, (_, i) => `${i+1}/03`)
-const priceChart = {
-  labels: days,
-  datasets: [{ label: 'Prix moyen (€)', data: days.map((_, i) => 120 + Math.sin(i / 4) * 30 + Math.random() * 20), borderColor: '#0071c2', backgroundColor: 'rgba(0,113,194,0.1)', fill: true, tension: 0.4 }]
+async function saveConfig() {
+  await loadStats()
 }
+
+const priceChart = computed(() => ({
+  labels: stats.value.revenusMensuel.map((r) => r?.mois || ''),
+  datasets: [{
+    label: 'Revenu mensuel (€)',
+    data: stats.value.revenusMensuel.map((r) => Number(r?.total || 0)),
+    borderColor: '#0071c2',
+    backgroundColor: 'rgba(0,113,194,0.1)',
+    fill: true,
+    tension: 0.4,
+  }],
+}))
 const lineOpts = { responsive: true, plugins: { legend: { position: 'bottom' } } }
+
+onMounted(loadStats)
 </script>

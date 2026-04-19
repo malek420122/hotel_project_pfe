@@ -16,6 +16,22 @@ class SeedDemoCommand extends Command
     protected $signature = 'app:seed-demo';
     protected $description = 'Seed professional demo data (user, hotel, room, optional reservation)';
 
+    private array $defaultHotelPhotos = [
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=1400&q=80',
+    ];
+
+    private array $defaultRoomPhotos = [
+        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
+    ];
+
     public function handle(): int
     {
         $root = realpath(base_path('..')) ?: base_path('..');
@@ -70,7 +86,7 @@ class SeedDemoCommand extends Command
                 'etoiles' => 4,
                 'estActif' => true,
                 'equipements' => ['wifi', 'spa', 'restaurant'],
-                'photos' => [],
+                'photos' => $this->buildPhotoSet($this->defaultHotelPhotos, 'HotelEase Demo Hotel'),
             ]
         );
 
@@ -82,7 +98,7 @@ class SeedDemoCommand extends Command
                 'prix_base' => 185,
                 'maxVoyageurs' => 2,
                 'equipements' => ['wifi', 'tv'],
-                'photos' => [],
+                'photos' => $this->buildPhotoSet($this->defaultRoomPhotos, 'Chambre Classique Demo'),
                 'estDisponible' => true,
                 'etage' => 1,
             ]
@@ -90,6 +106,43 @@ class SeedDemoCommand extends Command
 
         $this->info('Demo hotel id: ' . (string) $hotel->_id);
         $this->info('Demo room id: ' . (string) $chambre->_id);
+
+        if (empty($hotel->photos)) {
+            $hotel->photos = $this->buildPhotoSet($this->defaultHotelPhotos, (string) $hotel->_id);
+            $hotel->save();
+            $this->info('Demo hotel photos added.');
+        }
+
+        if (empty($chambre->photos)) {
+            $chambre->photos = $this->buildPhotoSet($this->defaultRoomPhotos, (string) $chambre->_id);
+            $chambre->save();
+            $this->info('Demo room photos added.');
+        }
+
+        $updatedHotels = 0;
+        Hotel::query()->chunk(100, function ($hotels) use (&$updatedHotels) {
+            foreach ($hotels as $item) {
+                if ($this->photosNeedDiversification($item->photos)) {
+                    $item->photos = $this->buildPhotoSet($this->defaultHotelPhotos, (string) $item->_id);
+                    $item->save();
+                    $updatedHotels++;
+                }
+            }
+        });
+
+        $updatedRooms = 0;
+        Chambre::query()->chunk(100, function ($rooms) use (&$updatedRooms) {
+            foreach ($rooms as $item) {
+                if ($this->photosNeedDiversification($item->photos)) {
+                    $item->photos = $this->buildPhotoSet($this->defaultRoomPhotos, (string) $item->_id);
+                    $item->save();
+                    $updatedRooms++;
+                }
+            }
+        });
+
+        $this->info("Hotels updated with real photos: {$updatedHotels}");
+        $this->info("Rooms updated with real photos: {$updatedRooms}");
 
         if ($reservationPayload) {
             $dateArrivee = $reservationPayload['dateArrivee'] ?? Carbon::now()->addDays(2)->toDateString();
@@ -153,5 +206,44 @@ class SeedDemoCommand extends Command
         $decoded = json_decode((string) file_get_contents($path), true);
 
         return is_array($decoded) ? $decoded : ($required ? null : []);
+    }
+
+    private function buildPhotoSet(array $pool, string $seed, int $count = 3): array
+    {
+        if (empty($pool)) {
+            return [];
+        }
+
+        $start = $this->seedIndex($seed, count($pool));
+        $photos = [];
+        for ($i = 0; $i < min($count, count($pool)); $i++) {
+            $photos[] = $pool[($start + $i) % count($pool)];
+        }
+
+        return $photos;
+    }
+
+    private function seedIndex(string $seed, int $length): int
+    {
+        $hash = crc32($seed);
+        if ($hash < 0) {
+            $hash = $hash * -1;
+        }
+
+        return $length > 0 ? $hash % $length : 0;
+    }
+
+    private function photosNeedDiversification(mixed $photos): bool
+    {
+        if (! is_array($photos) || empty($photos)) {
+            return true;
+        }
+
+        $clean = array_values(array_filter($photos, fn ($p) => is_string($p) && trim($p) !== ''));
+        if (empty($clean)) {
+            return true;
+        }
+
+        return count(array_unique($clean)) === 1;
     }
 }

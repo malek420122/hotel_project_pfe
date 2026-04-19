@@ -11,7 +11,7 @@ class Avis extends Model
 
     protected $fillable = [
         'clientId', 'hotelId', 'reservationId',
-        'note', 'commentaire', 'statut', 'reponseHotel'
+        'note', 'commentaire', 'statut', 'reponseHotel', 'reponse_marketing'
     ];
 
     protected $attributes = [

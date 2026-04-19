@@ -45,6 +45,35 @@
 </head>
 <body>
 
+@php
+    $asText = function ($value, string $fallback = 'N/A') {
+        if (is_null($value) || $value === '') {
+            return $fallback;
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        if (is_array($value)) {
+            foreach (['fr', 'en', 'ar', 'name', 'nom', 'label', 'value'] as $key) {
+                if (isset($value[$key]) && is_scalar($value[$key]) && $value[$key] !== '') {
+                    return (string) $value[$key];
+                }
+            }
+
+            $flat = collect($value)
+                ->filter(fn ($item) => is_scalar($item) && $item !== '')
+                ->map(fn ($item) => (string) $item)
+                ->values();
+
+            return $flat->isNotEmpty() ? $flat->implode(', ') : $fallback;
+        }
+
+        return $fallback;
+    };
+@endphp
+
 <div class="header">
     <div class="header-left">
         <div class="brand">Hotel<span>Ease</span></div>
@@ -75,9 +104,9 @@
             <div class="info-col">
                 <div class="section-title">Établissement</div>
                 @if($hotel)
-                <div class="info-row"><span class="info-label">Hôtel :</span><span class="info-value">{{ $hotel->nom }}</span></div>
-                <div class="info-row"><span class="info-label">Adresse :</span><span class="info-value">{{ $hotel->adresse }}</span></div>
-                <div class="info-row"><span class="info-label">Ville :</span><span class="info-value">{{ $hotel->ville }}</span></div>
+                <div class="info-row"><span class="info-label">Hôtel :</span><span class="info-value">{{ $asText($hotel->nom) }}</span></div>
+                <div class="info-row"><span class="info-label">Adresse :</span><span class="info-value">{{ $asText($hotel->adresse) }}</span></div>
+                <div class="info-row"><span class="info-label">Ville :</span><span class="info-value">{{ $asText($hotel->ville) }}</span></div>
                 <div class="info-row"><span class="info-label">Étoiles :</span><span class="stars">{{ str_repeat('★', $hotel->etoiles ?? 3) }}</span></div>
                 @else
                 <div class="info-row"><span class="info-value">Hôtel non trouvé</span></div>
@@ -90,7 +119,7 @@
         <div class="section-title">Détails du séjour</div>
         <div class="info-grid">
             <div class="info-col">
-                <div class="info-row"><span class="info-label">Chambre :</span><span class="info-value">{{ $chambre->nom ?? 'N/A' }} ({{ $chambre->type ?? '' }})</span></div>
+                <div class="info-row"><span class="info-label">Chambre :</span><span class="info-value">{{ $asText($chambre->nom ?? null) }} ({{ $asText($chambre->type ?? null, '') }})</span></div>
                 <div class="info-row"><span class="info-label">Arrivée :</span><span class="info-value">{{ \Carbon\Carbon::parse($reservation->dateArrivee)->format('d/m/Y') }}</span></div>
                 <div class="info-row"><span class="info-label">Départ :</span><span class="info-value">{{ \Carbon\Carbon::parse($reservation->dateDepart)->format('d/m/Y') }}</span></div>
             </div>
@@ -123,7 +152,7 @@
                     $sousTotal = $prixNuit * $nuits;
                 @endphp
                 <tr>
-                    <td>Chambre {{ $chambre->nom ?? 'N/A' }} ({{ $chambre->type ?? '' }})</td>
+                    <td>Chambre {{ $asText($chambre->nom ?? null) }} ({{ $asText($chambre->type ?? null, '') }})</td>
                     <td style="text-align:right;">{{ $nuits }} nuit(s)</td>
                     <td style="text-align:right;">{{ number_format($prixNuit, 2) }} €</td>
                     <td style="text-align:right;">{{ number_format($sousTotal, 2) }} €</td>
@@ -131,7 +160,7 @@
                 @if(!empty($reservation->servicesChoisis) && is_array($reservation->servicesChoisis))
                     @foreach($reservation->servicesChoisis as $service)
                     <tr>
-                        <td>Service : {{ $service['nom'] ?? 'Service supplémentaire' }}</td>
+                        <td>Service : {{ $asText($service['nom'] ?? null, 'Service supplémentaire') }}</td>
                         <td style="text-align:right;">1</td>
                         <td style="text-align:right;">{{ number_format($service['prix'] ?? 0, 2) }} €</td>
                         <td style="text-align:right;">{{ number_format($service['prix'] ?? 0, 2) }} €</td>
@@ -164,7 +193,7 @@
     @if($reservation->demandesSpeciales)
     <div class="section" style="margin-top:40px;">
         <div class="section-title">Demandes spéciales</div>
-        <p style="color:#4a5568; font-style:italic;">{{ $reservation->demandesSpeciales }}</p>
+        <p style="color:#4a5568; font-style:italic;">{{ $asText($reservation->demandesSpeciales, '-') }}</p>
     </div>
     @endif
 

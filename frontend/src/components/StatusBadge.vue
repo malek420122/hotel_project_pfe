@@ -1,38 +1,101 @@
 <template>
-  <span :class="['inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold', colors[status] || 'bg-gray-100 text-gray-700']">
-    <span class="w-1.5 h-1.5 rounded-full" :class="dots[status] || 'bg-gray-400'"></span>
-    {{ t(`status.${status}`, status) }}
+  <span :class="['dashboard-status-badge', statusClass]">
+    <span class="dashboard-status-dot"></span>
+    {{ statusText }}
   </span>
 </template>
 
 <script setup>
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-defineProps({ status: { type: String, default: '' } })
-const colors = {
-  EN_ATTENTE: 'bg-yellow-100 text-yellow-800',
-  CONFIRMEE: 'bg-blue-100 text-blue-800',
-  EN_COURS: 'bg-green-100 text-green-800',
-  TERMINEE: 'bg-gray-100 text-gray-800',
-  ANNULEE: 'bg-red-100 text-red-700',
-  PAYE: 'bg-green-100 text-green-800',
-  EN_COURS_PAIEMENT: 'bg-blue-100 text-blue-800',
-  ECHOUE: 'bg-red-100 text-red-700',
-  REMBOURSE: 'bg-purple-100 text-purple-700',
-  PUBLIE: 'bg-green-100 text-green-800',
-  REJETE: 'bg-red-100 text-red-700',
-  EN_ATTENTE_MODERATION: 'bg-yellow-100 text-yellow-800',
-  ACTIVE: 'bg-green-100 text-green-800',
-  INACTIVE: 'bg-gray-100 text-gray-600',
-  EXPIREE: 'bg-orange-100 text-orange-700',
-}
-const dots = {
-  EN_ATTENTE: 'bg-yellow-500',
-  CONFIRMEE: 'bg-blue-500',
-  EN_COURS: 'bg-green-500',
-  TERMINEE: 'bg-gray-500',
-  ANNULEE: 'bg-red-500',
-  PAYE: 'bg-green-500',
-  ACTIVE: 'bg-green-500',
-}
+import { computed } from 'vue'
+
+const props = defineProps({ status: { type: String, default: '' } })
+
+const normalizedStatus = computed(() => String(props.status || '').toUpperCase())
+
+const statusText = computed(() => {
+  const keyMap = {
+    CHECKOUT: 'status.completed',
+    TERMINEE: 'status.completed',
+  }
+
+  const key = keyMap[normalizedStatus.value] || `status.${normalizedStatus.value}`
+  const label = t(key, normalizedStatus.value)
+
+  if (['CONFIRMEE', 'PAYE', 'ACTIVE', 'PUBLIE'].includes(normalizedStatus.value)) {
+    return `✓ ${label}`
+  }
+
+  return label
+})
+
+const statusClass = computed(() => {
+  const map = {
+    CONFIRMEE: 'status-confirmed',
+    EN_ATTENTE: 'status-pending',
+    ANNULEE: 'status-cancelled',
+    EN_COURS: 'status-checkin',
+    CHECKIN: 'status-checkin',
+    TERMINEE: 'status-completed',
+    CHECKOUT: 'status-completed',
+    PAYE: 'status-confirmed',
+    ACTIVE: 'status-confirmed',
+    PUBLIE: 'status-confirmed',
+    REJETE: 'status-cancelled',
+    ECHOUE: 'status-cancelled',
+    EXPIREE: 'status-pending',
+  }
+
+  return map[normalizedStatus.value] || 'status-default'
+})
 </script>
+
+<style scoped>
+.dashboard-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dashboard-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.status-confirmed {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.status-pending {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.status-cancelled {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.status-checkin {
+  color: var(--blue);
+  background: rgba(26, 86, 219, 0.15);
+}
+
+.status-completed {
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+.status-default {
+  color: var(--text-secondary);
+  background: rgba(148, 163, 184, 0.15);
+}
+</style>

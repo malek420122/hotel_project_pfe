@@ -8,6 +8,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Seeders can be added here
+        $this->call([
+            AdminUserSeeder::class,
+            HotelSeeder::class,
+            RealisticDashboardSeeder::class,
+            ReservationPaymentConsistencySeeder::class,
+        ]);
     }
 }

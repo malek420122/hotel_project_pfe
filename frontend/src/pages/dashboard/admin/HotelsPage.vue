@@ -4,6 +4,7 @@
       <h2 class="text-2xl font-bold text-gray-800">Gestion des Hôtels</h2>
       <button @click="openModal()" class="btn-primary">+ Ajouter hôtel</button>
     </div>
+    <p v-if="errorMsg" class="mb-4 text-sm text-red-600">{{ errorMsg }}</p>
     <DataTable :columns="cols" :data="hotels">
       <template #etoiles="{ row }">
         <span>{{ '★'.repeat(row.etoiles || 0) }}</span>
@@ -64,6 +65,7 @@ import api from '../../../api'
 const hotels = ref([])
 const showModal = ref(false)
 const deleteModal = ref({ show: false, hotel: null })
+const errorMsg = ref('')
 const form = reactive({ _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null })
 const cols = [
   { key: 'nom', label: 'Nom' }, { key: 'ville', label: 'Ville' }, { key: 'etoiles', label: 'Étoiles' },
@@ -77,11 +79,12 @@ function openModal(hotel) {
 }
 async function saveHotel() {
   try {
+    errorMsg.value = ''
     if (form._id) await api.put(`/admin/hotels/${form._id}`, form)
     else await api.post('/admin/hotels', form)
     showModal.value = false
     await fetchHotels()
-  } catch(e) { alert(e.response?.data?.message || 'Erreur') }
+  } catch(e) { errorMsg.value = e.response?.data?.message || 'Erreur' }
 }
 function confirmDelete(hotel) { deleteModal.value = { show: true, hotel } }
 async function doDelete() {

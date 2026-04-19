@@ -9,8 +9,9 @@
       <template #actions="{ row }">
         <div class="flex gap-2">
           <button @click="copyCode(row.code)" class="text-xs px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100">{{ $t('dashboard.copy') }}</button>
-          <button @click="toggleCode(row)" :class="['text-xs px-3 py-1.5 rounded-lg', row.statut==='ACTIVE' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600']">
-            {{ row.statut==='ACTIVE' ? 'Désactiver' : 'Activer' }}
+          <span v-if="copiedCode === row.code" class="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700">{{ $t('dashboard.copied') }}</span>
+          <button @click="toggleCode(row)" :class="['text-xs px-3 py-1.5 rounded-lg', row.statut === 'ACTIVE' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600']">
+            {{ row.statut === 'ACTIVE' ? $t('dashboard.deactivate') : $t('dashboard.activate') }}
           </button>
         </div>
       </template>
@@ -28,7 +29,7 @@
               <option value="POURCENTAGE">{{ $t('dashboard.percentage') }}</option>
               <option value="MONTANT_FIXE">{{ $t('dashboard.fixed_amount') }}</option>
             </select>
-            <input v-model.number="form.valeur" type="number" :placeholder="form.type==='POURCENTAGE' ? 'Valeur en %' : 'Valeur en €'" class="input-field" required />
+            <input v-model.number="form.valeur" type="number" :placeholder="form.type === 'POURCENTAGE' ? $t('dashboard.percent_value_placeholder') : $t('dashboard.fixed_value_placeholder')" class="input-field" required />
             <div class="grid grid-cols-2 gap-3">
               <input v-model="form.dateExpiration" type="date" class="input-field" />
               <input v-model.number="form.nbUtilisationsMax" type="number" :placeholder="$t('dashboard.nb_max_uses')" class="input-field" />
@@ -44,23 +45,88 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import DataTable from '../../../components/DataTable.vue'
 import StatusBadge from '../../../components/StatusBadge.vue'
+import api from '../../../api'
+
+const { t } = useI18n()
+
 const showModal = ref(false)
 const form = reactive({ code: '', type: 'POURCENTAGE', valeur: 10, dateExpiration: '', nbUtilisationsMax: 100 })
-const codes = ref([
-  { code:'SUMMER25', type:'POURCENTAGE', valeur:'25%', utilise:45, max:200, expiration:'31/08/25', statut:'ACTIVE' },
-  { code:'WELCOME10', type:'POURCENTAGE', valeur:'10%', utilise:89, max:500, expiration:'31/12/25', statut:'ACTIVE' },
-  { code:'FLAT50', type:'MONTANT_FIXE', valeur:'50€', utilise:12, max:50, expiration:'30/06/25', statut:'EXPIREE' },
+const codes = ref([])
+const copiedCode = ref('')
+const cols = computed(() => [
+  { key: 'code', label: t('dashboard.code') },
+  { key: 'type', label: t('dashboard.type') },
+  { key: 'valeur', label: t('dashboard.value') },
+  { key: 'utilise', label: t('dashboard.used') },
+  { key: 'max', label: t('dashboard.max') },
+  { key: 'expiration', label: t('dashboard.expiration') },
+  { key: 'statut', label: t('common.status') },
+  { key: 'actions', label: t('common.actions') },
 ])
-const cols = [
-  { key:'code', label:'Code' }, { key:'type', label:'Type' }, { key:'valeur', label:'Valeur' },
-  { key:'utilise', label:'Utilisé' }, { key:'max', label:'Max' }, { key:'expiration', label:'Expiration' },
-  { key:'statut', label:'Statut' }, { key:'actions', label:'Actions' }
-]
-function genCode() { return 'PROMO' + Math.random().toString(36).slice(2,6).toUpperCase() }
-function copyCode(c) { navigator.clipboard.writeText(c); alert('Code copié !') }
-function toggleCode(c) { c.statut = c.statut === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }
-function createCode() { codes.value.push({ ...form, utilise:0, max:form.nbUtilisationsMax, expiration: form.dateExpiration, valeur: form.type==='POURCENTAGE' ? `${form.valeur}%` : `${form.valeur}€`, statut:'ACTIVE' }); showModal.value=false }
+
+function genCode() {
+  const uuid = (globalThis.crypto?.randomUUID?.() || `${Date.now()}`).replace(/-/g, '')
+  return `PROMO${uuid.slice(0, 6).toUpperCase()}`
+}
+
+async function copyCode(c) {
+  try {
+    await navigator.clipboard.writeText(c)
+    copiedCode.value = c
+    setTimeout(() => {
+      if (copiedCode.value === c) copiedCode.value = ''
+    }, 1200)
+  } catch {
+    copiedCode.value = ''
+  }
+}
+
+function promotionToCode(promo) {
+  return {
+    _id: promo._id,
+    code: promo.codePromo,
+    type: Number(promo.remise_pourcent || 0) >= 0 ? 'POURCENTAGE' : 'MONTANT_FIXE',
+    valeur: `${promo.remise_pourcent || 0}%`,
+    utilise: promo.nbUtilisations || 0,
+    max: promo.limiteUtilisations || 0,
+    expiration: promo.dateFin,
+    statut: promo.estActive ? 'ACTIVE' : 'INACTIVE',
+  }
+}
+
+async function loadCodes() {
+  try {
+    const { data } = await api.get('/marketing/promotions')
+    codes.value = (Array.isArray(data) ? data : []).map(promotionToCode)
+  } catch {
+    codes.value = []
+  }
+}
+
+async function toggleCode(code) {
+  await api.put(`/marketing/promotions/${code._id}`, { estActive: code.statut !== 'ACTIVE' })
+  await loadCodes()
+}
+
+async function createCode() {
+  await api.post('/marketing/promotions', {
+    titre: form.code,
+    description: form.type === 'POURCENTAGE' ? `${form.valeur}%` : `${form.valeur}€`,
+    remise_pourcent: Number(form.valeur || 0),
+    codePromo: form.code,
+    dateDebut: form.dateExpiration || new Date().toISOString().slice(0, 10),
+    dateFin: form.dateExpiration || new Date().toISOString().slice(0, 10),
+    nbUtilisations: 0,
+    limiteUtilisations: Number(form.nbUtilisationsMax || 0),
+    estActive: true,
+  })
+  showModal.value = false
+  await loadCodes()
+}
+
+onMounted(loadCodes)
 </script>

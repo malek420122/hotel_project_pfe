@@ -1,0 +1,56 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor Client
+
+rectangle "HotelEase - Espace Client" {
+  usecase "Se connecter" as C1
+  usecase "Consulter hotels" as C2
+  usecase "Filtrer/rechercher hotels" as C3
+  usecase "Voir details hotel/chambres/avis" as C4
+  usecase "Reserver chambre" as C5
+  usecase "Verifier disponibilite" as C6
+  usecase "Payer reservation" as C7
+  usecase "Appliquer promotion" as C8
+  usecase "Consulter mes reservations" as C9
+  usecase "Replanifier reservation" as C10
+  usecase "Annuler reservation" as C11
+  usecase "Telecharger facture" as C12
+  usecase "Laisser avis" as C13
+  usecase "Gerer profil" as C14
+  usecase "Consulter notifications" as C15
+  usecase "Utiliser chatbot" as C16
+}
+
+Client --> C1
+Client --> C2
+Client --> C3
+Client --> C4
+Client --> C5
+Client --> C9
+Client --> C10
+Client --> C11
+Client --> C12
+Client --> C13
+Client --> C14
+Client --> C15
+Client --> C16
+
+C5 ..> C1 : <<include>>
+C5 ..> C6 : <<include>>
+C5 ..> C7 : <<include>>
+C8 ..> C7 : <<extend>>
+
+C9 ..> C1 : <<include>>
+C10 ..> C1 : <<include>>
+C11 ..> C1 : <<include>>
+C12 ..> C1 : <<include>>
+C13 ..> C1 : <<include>>
+C14 ..> C1 : <<include>>
+C15 ..> C1 : <<include>>
+
+C10 ..> C9 : <<extend>>
+C11 ..> C9 : <<extend>>
+C12 ..> C9 : <<extend>>
+@enduml

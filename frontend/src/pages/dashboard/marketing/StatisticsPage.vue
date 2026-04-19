@@ -24,17 +24,75 @@
   </div>
 </template>
 <script setup>
+import { computed, onMounted, ref } from 'vue'
 import { Line, Bar, Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Tooltip, Legend, Filler } from 'chart.js'
+import api from '../../../api'
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Tooltip, Legend, Filler)
 
-const months = ['Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc','Jan','Fév','Mar']
-const lineData = { labels: months, datasets: [{ label: 'Réservations', data: [180,220,350,480,510,290,240,210,270,300,330,384], borderColor:'#0071c2', backgroundColor:'rgba(0,113,194,0.1)', fill:true, tension:0.4 }] }
-const barData = { labels: ['Atlas','Riad','Ibis','Sofitel','Kenzi'], datasets: [{ label: 'Revenus (€)', data: [28400,21200,18800,15600,12300], backgroundColor:['#003580','#0071c2','#FFB700','#10b981','#8b5cf6'], borderRadius:6 }] }
-const doughnutData = { labels: ['Organique','Payant','Réseaux','Email','Direct'], datasets: [{ data: [35,25,20,12,8], backgroundColor:['#003580','#0071c2','#FFB700','#10b981','#8b5cf6'] }] }
-const occData = { labels: months, datasets: [{ label: 'Taux occupation (%)', data: [72,78,85,95,97,82,76,74,80,83,87,91], backgroundColor: '#10b981', borderRadius:4 }] }
+const analytics = ref({
+  reservationsParMois: [],
+  topHotels: [],
+  promotionEfficiency: [],
+})
+
+const lineData = computed(() => ({
+  labels: (analytics.value?.reservationsParMois || []).map((row) => row.label),
+  datasets: [{
+    label: 'Réservations',
+    data: (analytics.value?.reservationsParMois || []).map((row) => Number(row.count || 0)),
+    borderColor: '#0071c2',
+    backgroundColor: 'rgba(0,113,194,0.1)',
+    fill: true,
+    tension: 0.4,
+  }],
+}))
+
+const barData = computed(() => ({
+  labels: (analytics.value?.topHotels || []).map((hotel) => hotel.nom),
+  datasets: [{
+    label: 'Revenus (€)',
+    data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.revenu || 0)),
+    backgroundColor: ['#003580', '#0071c2', '#FFB700', '#10b981', '#8b5cf6'],
+    borderRadius: 6,
+  }],
+}))
+
+const doughnutData = computed(() => ({
+  labels: (analytics.value?.promotionEfficiency || []).map((promo) => promo.label),
+  datasets: [{
+    data: (analytics.value?.promotionEfficiency || []).map((promo) => Number(promo.score || 0)),
+    backgroundColor: ['#003580', '#0071c2', '#FFB700', '#10b981', '#8b5cf6'],
+  }],
+}))
+
+const occData = computed(() => ({
+  labels: (analytics.value?.topHotels || []).map((hotel) => hotel.nom),
+  datasets: [{
+    label: 'Performance (%)',
+    data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.pct || 0)),
+    backgroundColor: '#10b981',
+    borderRadius: 4,
+  }],
+}))
+
 const lineOpts = { responsive:true, plugins:{legend:{position:'bottom'}} }
 const barOpts = { responsive:true, plugins:{legend:{display:false}} }
 const doughnutOpts = { responsive:true, plugins:{legend:{position:'bottom'}} }
 const occOpts = { responsive:true, plugins:{legend:{display:false}}, scales:{y:{min:0,max:100}} }
+
+async function loadStatistics() {
+  try {
+    const { data } = await api.get('/marketing/statistiques')
+    analytics.value = {
+      reservationsParMois: Array.isArray(data?.reservationsParMois) ? data.reservationsParMois : [],
+      topHotels: Array.isArray(data?.topHotels) ? data.topHotels : [],
+      promotionEfficiency: Array.isArray(data?.promotionEfficiency) ? data.promotionEfficiency : [],
+    }
+  } catch {
+    analytics.value = { reservationsParMois: [], topHotels: [], promotionEfficiency: [] }
+  }
+}
+
+onMounted(loadStatistics)
 </script>

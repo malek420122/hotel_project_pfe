@@ -68,6 +68,7 @@ const routes = [
       { path: 'promo-codes', component: () => import('../pages/dashboard/marketing/PromoCodesPage.vue') },
       { path: 'statistics', component: () => import('../pages/dashboard/marketing/StatisticsPage.vue') },
       { path: 'reviews', component: () => import('../pages/dashboard/marketing/ReviewsPage.vue') },
+      { path: 'emails', component: () => import('../pages/dashboard/marketing/SendEmailOffers.vue') },
       { path: 'loyalty', component: () => import('../pages/dashboard/marketing/LoyaltyPage.vue') },
     ]
   },
@@ -89,7 +90,7 @@ router.beforeEach((to, _from, next) => {
 
   if (to.meta.requiresAuth) {
     if (!token || !user) {
-      next('/login')
+      next({ path: '/login', query: { redirect: to.fullPath } })
       return
     }
     if (to.meta.role && user.role !== 'admin' && user.role !== to.meta.role) {
@@ -102,6 +103,12 @@ router.beforeEach((to, _from, next) => {
 
   // Redirect logged-in users away from auth pages
   if ((to.path === '/login' || to.path === '/register') && token && user) {
+    const requested = typeof to.query.redirect === 'string' ? to.query.redirect : ''
+    if (requested && requested.startsWith('/')) {
+      next(requested)
+      return
+    }
+
     const roleMap = { client: '/hotels', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
     next(roleMap[user.role] || '/')
     return

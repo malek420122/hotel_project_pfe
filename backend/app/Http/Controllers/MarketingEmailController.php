@@ -6,6 +6,7 @@ use App\Mail\SpecialOfferMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class MarketingEmailController extends Controller
 {
@@ -29,6 +30,12 @@ class MarketingEmailController extends Controller
                 ));
             }
         }
+
+        // Audit log for marketing campaign dispatch in queued mode.
+        Log::info('Marketing offer emails queued', [
+            'subject' => (string) $request->subject,
+            'queued_count' => (int) $clients->count(),
+        ]);
 
         return response()->json([
             'message' => 'Offre speciale envoyee.',

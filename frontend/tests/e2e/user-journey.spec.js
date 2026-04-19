@@ -38,7 +38,7 @@ test('home -> register -> login -> reservation -> dashboard', async ({ page, req
   }
 
   await page.goto('/');
-  await expect(page).toHaveURL('http://127.0.0.1:5173/');
+  await expect(page).toHaveURL(/\/$/);
   await expect(page.getByText('HotelEase').first()).toBeVisible();
 
   const loginRes = await request.post(`${apiBase}/auth/login`, {

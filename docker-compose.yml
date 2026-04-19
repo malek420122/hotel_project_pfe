@@ -29,10 +29,11 @@ services:
     container_name: hotelease_backend
     restart: unless-stopped
     working_dir: /var/www/html
+    env_file:
+      - ./backend/.env
     environment:
       - APP_NAME=HotelEase
       - APP_ENV=${APP_ENV:-local}
-      - APP_KEY=${APP_KEY:-base64:CHANGE_ME_IN_PRODUCTION}
       - APP_DEBUG=${APP_DEBUG:-true}
       - APP_URL=http://localhost
       - DB_CONNECTION=mongodb
@@ -41,7 +42,6 @@ services:
       - DB_DATABASE=${MONGO_DB:-hotelease}
       - DB_USERNAME=${MONGO_APP_USER:-hotelease_app}
       - DB_PASSWORD=${MONGO_APP_PASSWORD:-hotelease_app_password}
-      - JWT_SECRET=${JWT_SECRET:-change_this_jwt_secret}
       - FILESYSTEM_DISK=local
       - QUEUE_CONNECTION=sync
     volumes:

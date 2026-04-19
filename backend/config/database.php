@@ -34,7 +34,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => env('SQLITE_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             'busy_timeout' => null,
@@ -114,11 +114,11 @@ return [
 
         'mongodb' => [
             'driver' => 'mongodb',
-            'host' => env('DB_HOST', 'mongodb'),
-            'port' => env('DB_PORT', 27017),
-            'database' => env('DB_DATABASE', 'hotelease'),
-            'username' => env('DB_USERNAME', ''),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('MONGO_HOST', env('DB_HOST', 'mongodb')),
+            'port' => env('MONGO_PORT', env('DB_PORT', 27017)),
+            'database' => env('MONGO_DATABASE', env('DB_DATABASE', 'hotelease')),
+            'username' => env('MONGO_USERNAME', env('DB_USERNAME', '')),
+            'password' => env('MONGO_PASSWORD', env('DB_PASSWORD', '')),
             'options' => [],
         ],
 

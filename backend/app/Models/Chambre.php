@@ -11,7 +11,7 @@ class Chambre extends Model
 
     protected $fillable = [
         'hotelId', 'type', 'nom', 'description', 'prix_base',
-        'maxVoyageurs', 'equipements', 'photos', 'estDisponible', 'etage'
+        'maxVoyageurs', 'equipements', 'photos', 'estDisponible', 'etage', 'statut'
     ];
 
     protected $attributes = [
@@ -20,5 +20,6 @@ class Chambre extends Model
         'photos' => [],
         'estDisponible' => true,
         'etage' => 1,
+        'statut' => 'LIBRE',
     ];
 }

@@ -10,11 +10,13 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
+        User::updateOrCreate([
+            'email' => 'admin@hotelease.com',
+        ], [
             'nom' => 'Admin',
             'prenom' => 'System',
             'email' => 'admin@hotelease.com',
-            'password' => Hash::make('Admin123'), // Meets the complexity requirements
+            'password' => Hash::make('Admin123!'),
             'telephone' => '0123456789',
             'role' => 'admin',
             'est_actif' => true,
