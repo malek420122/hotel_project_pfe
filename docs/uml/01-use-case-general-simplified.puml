@@ -1,99 +1,52 @@
 @startuml
 left to right direction
-skinparam packageStyle rectangle
 skinparam shadowing false
-skinparam linetype ortho
+' On garde le style d'acteur classique comme sur ton image
+skinparam actorStyle default
 
-actor Visiteur
-actor Client
-actor Receptionniste
-actor Administrateur as Admin
+actor "Client" as Client
+actor "Visiteur" as Visiteur
+actor "Réceptionniste" as Recep
+actor "Administrateur" as Admin
 actor "Responsable Marketing" as Marketing
 
+' Héritage : Le client peut faire tout ce que le visiteur fait
 Client --|> Visiteur
 
-rectangle "Systeme HotelEase" {
-  ' === CONSULTATION ===
-  usecase "Consulter hotels" as UC1
-  usecase "Rechercher / filtrer" as UC2
-  usecase "Voir details hotel" as UC3
-  
-  ' === AUTH ===
-  usecase "S inscrire" as UC4
-  usecase "Se connecter" as UC5
-  
-  ' === CLIENT ===
-  usecase "Reserver chambre" as UC6
-  usecase "Payer reservation" as UC7
-  usecase "Consulter mes reservations" as UC8
-  usecase "Gerer profil" as UC9
-  
-  ' === RECEPTION ===
-  usecase "Consulter file attente" as UC10
-  usecase "Effectuer check-in" as UC11
-  usecase "Effectuer check-out" as UC12
-  
-  ' === ADMIN ===
-  usecase "Gerer hotels" as UC13
-  usecase "Gerer chambres" as UC14
-  usecase "Gerer services" as UC15
-  usecase "Gerer utilisateurs" as UC16
-  
-  ' === MARKETING ===
-  usecase "Gerer promotions" as UC17
-  usecase "Moderer avis" as UC18
-  usecase "Verifier disponibilite" as UC19
+rectangle "Gestion de l'Application HotelEase" {
+
+    ' Actions du Visiteur / Client
+    (Consulter hôtels et disponibilités) as UC_Consulter
+    (Services et Chatbot IA) as UC_IA
+    (Effectuer une réservation) as UC_Reserve
+
+    ' Actions du Réceptionniste
+    (Gestion des Réservations) as UC_G_Reserve
+
+    ' Actions de l'Administrateur
+    (Gestion Administrative) as UC_Admin
+    (Gestion des Utilisateurs) as UC_Users
+
+    ' Actions Marketing
+    (Marketing et Feedback) as UC_Market
+
+    ' Notes identiques à ton image originale
+    note right of UC_IA : - Consulter les services (Spa, Resto)\n- Chatbot IA réservé aux clients
+    note right of UC_G_Reserve : - Gérer / confirmer / annuler\n- check-in / check-out
+    note right of UC_Admin : - Mise à jour tarifs/chambres\n- Validation des demandes
+
+    ' Liaisons
+    Visiteur --> UC_Consulter
+
+    ' Ajout de la liaison de réservation pour le client
+    Client --> UC_IA
+    Client --> UC_Reserve
+
+    Recep --> UC_G_Reserve
+
+    Admin --> UC_Admin
+    Admin --> UC_Users
+
+    Marketing --> UC_Market
 }
-
-' === VISITEUR ===
-Visiteur --> UC1
-Visiteur --> UC2
-Visiteur --> UC3
-Visiteur --> UC4
-Visiteur --> UC5
-
-' === CLIENT ===
-Client --> UC6
-Client --> UC7
-Client --> UC8
-Client --> UC9
-Client --> UC19
-
-' === RECEPTIONNISTE ===
-Receptionniste --> UC5
-Receptionniste --> UC10
-Receptionniste --> UC11
-Receptionniste --> UC12
-
-' === ADMIN ===
-Admin --> UC5
-Admin --> UC13
-Admin --> UC14
-Admin --> UC15
-Admin --> UC16
-
-' === MARKETING ===
-Marketing --> UC5
-Marketing --> UC17
-Marketing --> UC18
-
-' === DEPENDENCIES ===
-UC6 ..> UC5 : <<include>>
-UC6 ..> UC19 : <<include>>
-UC7 ..> UC5 : <<include>>
-UC8 ..> UC5 : <<include>>
-UC9 ..> UC5 : <<include>>
-
-UC10 ..> UC5 : <<include>>
-UC11 ..> UC5 : <<include>>
-UC12 ..> UC5 : <<include>>
-
-UC13 ..> UC5 : <<include>>
-UC14 ..> UC5 : <<include>>
-UC15 ..> UC5 : <<include>>
-UC16 ..> UC5 : <<include>>
-
-UC17 ..> UC5 : <<include>>
-UC18 ..> UC5 : <<include>>
-
 @enduml

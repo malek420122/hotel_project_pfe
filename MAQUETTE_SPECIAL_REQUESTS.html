@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demandes Spéciales - HotelEase Réceptionniste</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy-dark: #1a2e4a;
+            --navy-darker: #0f1f33;
+            --brown-dark: #3e2723;
+            --brown-rich: #5d4037;
+            --brown-light: #8d6e63;
+            --cream-white: #faf8f3;
+            --white-pure: #ffffff;
+            --gray-brown: #9a8b7e;
+            --gold-brush: #d4af8f;
+            --green-emerald: #2d7d5c;
+            --shadow-soft: 0 8px 32px rgba(15, 31, 51, 0.12);
+            --shadow-medium: 0 12px 48px rgba(15, 31, 51, 0.18);
+            --border-radius-soft: 16px;
+            --border-radius-pill: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f5f3ef;
+            color: var(--brown-dark);
+            line-height: 1.6;
+        }
+
+        /* ========== LAYOUT PRINCIPAL ========== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f3ef;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--navy-darker) 0%, var(--navy-dark) 100%);
+            padding: 32px 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            box-shadow: var(--shadow-medium);
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gold-brush);
+            margin-bottom: 48px;
+            letter-spacing: 0.5px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(212, 175, 143, 0.2);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            color: rgba(250, 248, 243, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .sidebar-nav-link:hover {
+            background-color: rgba(212, 175, 143, 0.1);
+            color: var(--cream-white);
+        }
+
+        .sidebar-nav-link.active {
+            background-color: rgba(212, 175, 143, 0.25);
+            color: var(--gold-brush);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: var(--gold-brush);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .sidebar-nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, #253d52 100%);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 14px;
+            color: rgba(250, 248, 243, 0.8);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .notification-bell:hover {
+            background-color: rgba(212, 175, 143, 0.15);
+        }
+
+        .bell-icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--gold-brush);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+            color: var(--cream-white);
+            font-weight: 500;
+            position: relative;
+        }
+
+        .language-selector:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .language-flag {
+            font-size: 14px;
+        }
+
+        .language-dropdown-arrow {
+            width: 8px;
+            height: 8px;
+            border-right: 1px solid var(--gold-brush);
+            border-bottom: 1px solid var(--gold-brush);
+            transform: rotate(-45deg);
+            margin-left: 4px;
+            opacity: 0.7;
+        }
+
+        /* User Avatar & Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-profile:hover .user-avatar {
+            box-shadow: 0 0 0 3px rgba(212, 175, 143, 0.3);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6d4c41 0%, #795548 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--cream-white);
+            border: 2px solid var(--gold-brush);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(212, 175, 143, 0.2);
+            transition: var(--transition);
+            position: relative;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .user-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .user-name {
+            font-size: 13px;
+            color: var(--cream-white);
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.2px;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: rgba(250, 248, 243, 0.6);
+            font-weight: 400;
+            letter-spacing: 0.1px;
+        }
+
+        /* ========== PAGE CONTENT ========== */
+        .page-content {
+            padding: 40px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--brown-rich);
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+        }
+
+        /* Filter Pills */
+        .filter-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background-color: var(--white-pure);
+            border: 1.5px solid #e8dfd5;
+            border-radius: var(--border-radius-pill);
+            color: var(--brown-dark);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-pill:hover {
+            border-color: var(--gold-brush);
+            box-shadow: 0 4px 12px rgba(212, 175, 143, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .filter-pill.active {
+            background-color: var(--brown-rich);
+            color: var(--cream-white);
+            border-color: var(--brown-rich);
+            box-shadow: 0 6px 16px rgba(93, 64, 55, 0.2);
+        }
+
+        .filter-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Filter Icon SVGs */
+        .icon-all {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, currentColor 0%, currentColor 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        /* ========== CONTENT PANEL ========== */
+        .content-panel {
+            background-color: var(--white-pure);
+            border-radius: var(--border-radius-soft);
+            padding: 48px;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Empty State Illustration */
+        .empty-illustration {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mailbox-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+        }
+
+        /* Empty State Text */
+        .empty-state-text {
+            font-size: 18px;
+            color: var(--gray-brown);
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.2px;
+            line-height: 1.6;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+
+            .content-panel {
+                padding: 24px;
+            }
+
+            .user-info {
+                display: none;
+            }
+        }
+
+        /* ========== SCROLLBAR STYLING ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f5f3ef;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d4af8f;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b8956a;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">ℌ</div>
+            <nav class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Tableau de Bord</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>File d'Attente</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">✓</span>
+                        <span>Check-in</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🚪</span>
+                        <span>Check-out</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛏️</span>
+                        <span>Chambres</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">⭐</span>
+                        <span>Demandes Spéciales</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Rapports</span>
+                    </a>
+                </li>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- HEADER -->
+            <header class="header">
+                <div class="header-left">
+                    <span class="header-title">Gestion Réceptionniste</span>
+                </div>
+                <div class="header-right">
+                    <!-- Notification Bell -->
+                    <div class="notification-bell">
+                        <svg class="bell-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <div class="notification-badge">3</div>
+                    </div>
+
+                    <!-- Language Selector -->
+                    <div class="language-selector">
+                        <span class="language-flag">🇫🇷</span>
+                        <span>FR</span>
+                        <div class="language-dropdown-arrow"></div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="user-profile">
+                        <div class="user-avatar">RT</div>
+                        <div class="user-info">
+                            <div class="user-name">Réceptionniste T.</div>
+                            <div class="user-role">Réceptionniste</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT -->
+            <div class="page-content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">Demandes Spéciales</h1>
+                </div>
+
+                <!-- Filter Pills -->
+                <div class="filter-container">
+                    <button class="filter-pill active">
+                        <span class="filter-icon">📄</span>
+                        <span>Tous</span>
+                    </button>
+                    <button class="filter-pill">
+                        <span class="filter-icon">⏳</span>
+                        <span>En attente</span>
+                    </button>
+                    <button class="filter-pill">
+                        <span class="filter-icon">✓</span>
+                        <span>Traité</span>
+                    </button>
+                </div>
+
+                <!-- Content Panel -->
+                <div class="content-panel">
+                    <!-- SVG Illustration: Mailbox with Floating Envelopes -->
+                    <div class="empty-illustration">
+                        <svg class="mailbox-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Mailbox Post -->
+                            <rect x="93" y="120" width="14" height="50" fill="#9a8b7e" opacity="0.6"/>
+
+                            <!-- Mailbox Body -->
+                            <path d="M 50 90 L 50 110 Q 50 120 60 120 L 140 120 Q 150 120 150 110 L 150 90 Q 150 70 130 70 L 70 70 Q 50 70 50 90 Z" fill="#d4af8f" stroke="#b8956a" stroke-width="1.5"/>
+
+                            <!-- Mailbox Door (Open) -->
+                            <path d="M 55 85 Q 55 75 65 75 L 135 75 Q 145 75 145 85 L 145 100 Q 145 105 140 105 L 60 105 Q 55 105 55 100 Z" 
+                                  fill="#c9985f" stroke="#b8956a" stroke-width="1.5" opacity="0.8" transform="translate(15 -20) rotate(-25)"/>
+
+                            <!-- Mailbox Door Handle -->
+                            <circle cx="132" cy="90" r="3" fill="#9a8b7e"/>
+
+                            <!-- Floating Envelope 1 -->
+                            <g transform="translate(70, 35) rotate(-15)">
+                                <rect x="0" y="0" width="35" height="22" rx="2" fill="#faf8f3" stroke="#d4af8f" stroke-width="1.2"/>
+                                <path d="M 0 0 L 17.5 12 L 35 0" fill="none" stroke="#d4af8f" stroke-width="1.2"/>
+                            </g>
+
+                            <!-- Floating Envelope 2 -->
+                            <g transform="translate(120, 45) rotate(20)">
+                                <rect x="0" y="0" width="35" height="22" rx="2" fill="#faf8f3" stroke="#d4af8f" stroke-width="1.2"/>
+                                <path d="M 0 0 L 17.5 12 L 35 0" fill="none" stroke="#d4af8f" stroke-width="1.2"/>
+                            </g>
+
+                            <!-- Floating Envelope 3 -->
+                            <g transform="translate(95, 20) rotate(-8)">
+                                <rect x="0" y="0" width="35" height="22" rx="2" fill="#faf8f3" stroke="#d4af8f" stroke-width="1.2" opacity="0.7"/>
+                                <path d="M 0 0 L 17.5 12 L 35 0" fill="none" stroke="#d4af8f" stroke-width="1.2" opacity="0.7"/>
+                            </g>
+
+                            <!-- Decorative Line Elements -->
+                            <line x1="30" y1="150" x2="55" y2="145" stroke="#d4af8f" stroke-width="0.8" opacity="0.3"/>
+                            <line x1="145" y1="150" x2="170" y2="145" stroke="#d4af8f" stroke-width="0.8" opacity="0.3"/>
+                        </svg>
+                    </div>
+
+                    <!-- Empty State Text -->
+                    <p class="empty-state-text">
+                        Aucune demande en attente
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,14 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#003580',
-        secondary: '#0071c2',
-        accent: '#FFB700',
-        dark: '#1a1a2e',
-        neutral: '#f5f6fa',
+        primary: '#D4820A',      // or chaud
+        'primary-600': '#E09A2D',
+        secondary: '#8B4513',    // brun
+        accent: '#EFB84D',       // doré clair
+        'bg-light': '#FAF6EE',
+        card: 'rgba(255, 252, 244, 0.86)',
+        text: '#3A1A04',
+        muted: '#7B5A3B',
+        'brand-brown': '#2D1B08',
+        'brand-gold': '#D4820A',
+        'brand-primary': '#8B4513',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        inter: ['DM Sans', 'system-ui', 'sans-serif'],
+        playfair: ['Playfair Display', 'serif'],
       },
     },
   },

@@ -5,9 +5,9 @@
       <div v-for="n in 3" :key="n" class="h-24 rounded-2xl bg-white/5 animate-pulse border border-white/8"></div>
     </div>
     <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <KpiCard icon="⏳" :label="t('reception.queue.waiting')" :value="stats.pendingReservations" color="gold" />
-      <KpiCard icon="🔑" :label="t('reception.queue.checkinsToday')" :value="stats.checkinsToday" color="blue" />
-      <KpiCard icon="🚪" :label="t('reception.queue.checkoutsToday')" :value="stats.checkoutsToday" color="green" />
+      <KpiCard :icon="Hourglass" :label="t('reception.queue.waiting')" :value="stats.pendingReservations" color="gold" />
+      <KpiCard :icon="KeyRound" :label="t('reception.queue.checkinsToday')" :value="stats.checkinsToday" color="blue" />
+      <KpiCard :icon="DoorOpen" :label="t('reception.queue.checkoutsToday')" :value="stats.checkoutsToday" color="green" />
     </div>
     <p v-if="errorMsg" class="mb-4 text-sm text-red-600">{{ errorMsg }}</p>
     <div class="card">
@@ -30,7 +30,7 @@
             <span :class="['px-2 py-1 rounded-full text-xs font-bold', item.type==='checkin' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700']">
               {{ item.type==='checkin' ? t('reception.queue.checkinLabel') : t('reception.queue.checkoutLabel') }}
             </span>
-            <button @click="process(item)" class="queue-btn queue-btn-process">{{ t('reception.queue.process') }}</button>
+
             <button v-if="item.type === 'checkin'" @click="process(item)" class="queue-btn queue-btn-checkin">{{ t('reception.queue.checkinAction') }}</button>
             <button v-else @click="process(item)" class="queue-btn queue-btn-checkout">{{ t('reception.queue.checkoutAction') }}</button>
           </div>
@@ -46,6 +46,7 @@ import { useI18n } from 'vue-i18n'
 import api from '../../../api'
 import KpiCard from '../../../components/KpiCard.vue'
 import { formatDate as formatLocalizedDate } from '../../../utils/formatDate'
+import { DoorOpen, Hourglass, KeyRound } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 
@@ -67,21 +68,32 @@ function toIsoDate(value) {
 
 const todayLocalIso = computed(() => toIsoDate(new Date()))
 
+function getResId(r) {
+  if (!r) return ''
+  const val = r._id || r.id
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object' && val.$oid) return val.$oid
+  return String(val)
+}
+
 async function loadQueue() {
   try {
-    errorMsg.value = ''
     loadingQueue.value = true
-    const [confirmedRes, inProgressRes, hotelsRes, statsRes] = await Promise.all([
-      api.get('/reservations', { params: { statut: 'CONFIRMEE' } }),
+    loadingStats.value = true
+    errorMsg.value = ''
+
+    const [confirmedRes, inProgressRes, statsRes, hotelsRes] = await Promise.all([
+      api.get('/receptionniste/checkin/today'),
       api.get('/reservations', { params: { statut: 'EN_COURS' } }),
-      api.get('/hotels', { params: { per_page: 200 } }),
       api.get('/receptionniste/queue/stats'),
+      api.get('/hotels'),
     ])
 
     const confirmed = Array.isArray(confirmedRes.data) ? confirmedRes.data : []
     const inProgress = Array.isArray(inProgressRes.data) ? inProgressRes.data : []
     const hotels = Array.isArray(hotelsRes.data?.data) ? hotelsRes.data.data : []
-    const hotelMap = new Map(hotels.map((h) => [String(h._id), h.nom]))
+    const hotelMap = new Map(hotels.map((h) => [getResId(h), h.nom]))
 
     stats.value = {
       pendingReservations: Number(statsRes.data?.pendingReservations ?? statsRes.data?.pending_reservations ?? confirmed.length),
@@ -90,9 +102,9 @@ async function loadQueue() {
     }
 
     const checkins = confirmed.map((r) => ({
-      id: String(r._id || ''),
+      id: getResId(r),
       client: [r?.client?.prenom, r?.client?.nom].filter(Boolean).join(' ') || t('reception.common.clientFallback'),
-      hotel: r?.hotel?.nom || hotelMap.get(String(r.hotelId || '')) || t('reception.common.hotelFallback'),
+      hotel: r?.hotel?.nom || hotelMap.get(getResId({ _id: r.hotelId })) || t('reception.common.hotelFallback'),
       chambre: r?.chambre?.numero || r?.chambre?.nom || String(r?.chambreId || t('reception.common.roomFallback')),
       formattedDate: formatLocalizedDate(r?.dateArrivee, locale.value, { day: '2-digit', month: 'short', year: 'numeric' }) || '-',
       dateIso: toIsoDate(r?.dateArrivee),
@@ -101,9 +113,9 @@ async function loadQueue() {
     }))
 
     const checkouts = inProgress.map((r) => ({
-      id: String(r._id || ''),
+      id: getResId(r),
       client: [r?.client?.prenom, r?.client?.nom].filter(Boolean).join(' ') || t('reception.common.clientFallback'),
-      hotel: r?.hotel?.nom || hotelMap.get(String(r.hotelId || '')) || t('reception.common.hotelFallback'),
+      hotel: r?.hotel?.nom || hotelMap.get(getResId({ _id: r.hotelId })) || t('reception.common.hotelFallback'),
       chambre: r?.chambre?.numero || r?.chambre?.nom || String(r?.chambreId || t('reception.common.roomFallback')),
       formattedDate: formatLocalizedDate(r?.dateDepart, locale.value, { day: '2-digit', month: 'short', year: 'numeric' }) || '-',
       dateIso: toIsoDate(r?.dateDepart),
@@ -124,11 +136,7 @@ async function loadQueue() {
 async function process(item) {
   try {
     errorMsg.value = ''
-    if (item.type === 'checkin') {
-      await api.put(`/reservations/${encodeURIComponent(item.id)}/checkin`)
-    } else {
-      await api.put(`/reservations/${encodeURIComponent(item.id)}/checkout`)
-    }
+    await api.put(`/reservations/${encodeURIComponent(item.id)}/${item.type}`)
     await loadQueue()
   } catch {
     errorMsg.value = t('reception.queue.processError', { name: item.client })

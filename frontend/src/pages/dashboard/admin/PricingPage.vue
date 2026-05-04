@@ -33,7 +33,7 @@
           </div>
           <div>
             <label class="block text-xs text-gray-500 mb-1">Taux d'occupation (%)</label>
-            <input v-model.number="sim.occupation" type="range" min="0" max="100" class="w-full accent-secondary" />
+            <input v-model.number="sim.occupation" type="range" min="0" max="100" class="w-full accent-[#D4820A]" />
             <span class="text-sm text-gray-600">{{ sim.occupation }}%</span>
           </div>
           <div>
@@ -44,9 +44,9 @@
               <option value="haute">Haute saison</option>
             </select>
           </div>
-          <div class="bg-blue-50 rounded-xl p-4 text-center">
+          <div class="rounded-xl p-4 text-center" style="background:#FDF3DC;color:#D4820A;">
             <p class="text-sm text-gray-500">Prix calculé</p>
-            <p class="text-4xl font-extrabold text-secondary">{{ calculatedPrice }}€</p>
+            <p class="text-4xl font-extrabold" style="color:#D4820A;">{{ calculatedPrice }}€</p>
             <p class="text-xs text-gray-400">/nuit</p>
           </div>
           <p class="text-xs text-gray-500">Simulation basee sur les indicateurs reels du tableau de bord admin.</p>
@@ -127,7 +127,7 @@ const priceChart = computed(() => ({
   datasets: [{
     label: 'Revenu mensuel (€)',
     data: stats.value.revenusMensuel.map((r) => Number(r?.total || 0)),
-    borderColor: '#0071c2',
+    borderColor: '#D4820A',
     backgroundColor: 'rgba(0,113,194,0.1)',
     fill: true,
     tension: 0.4,

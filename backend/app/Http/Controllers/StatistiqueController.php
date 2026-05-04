@@ -20,16 +20,22 @@ class StatistiqueController extends Controller
     public function clientStats()
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $userId = (string) $user->_id;
+        $userId = $user->id; 
         $today = Carbon::today();
 
-        $reservations = Reservation::where('clientId', $userId)
+        $reservations = Reservation::where(function($query) use ($user) {
+            $query->where('clientId', (string) $user->_id)
+                  ->orWhere('clientId', $user->_id);
+        })
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $reservationIds = $reservations->pluck('_id')->map(fn ($id) => (string) $id)->all();
+        $reservationIds = $reservations->pluck('_id')->all();
+        $reservationIdStrings = array_map(fn($id) => (string)$id, $reservationIds);
 
-        $paymentRows = Paiement::whereIn('reservationId', $reservationIds)->get();
+        $paymentRows = Paiement::whereIn('reservationId', $reservationIdStrings)
+            ->orWhereIn('reservationId', $reservationIds)
+            ->get();
 
         $paidStatuses = ['PAYE', 'PAID', 'COMPLETED'];
 
@@ -38,7 +44,7 @@ class StatistiqueController extends Controller
             ->sum('montant');
 
         if ($totalDepenses <= 0) {
-            $fallbackSpentStatuses = ['CONFIRMEE', 'CHECKIN', 'EN_COURS', 'CHECKOUT', 'TERMINEE'];
+            $fallbackSpentStatuses = ['CONFIRMEE', 'CHECKIN', 'EN_COURS', 'CHECKOUT', 'TERMINEE', 'EN_ATTENTE'];
             $totalDepenses = (float) $reservations
                 ->filter(fn (Reservation $reservation) => in_array(strtoupper((string) ($reservation->statut ?? '')), $fallbackSpentStatuses, true))
                 ->sum('prixTotal');
@@ -51,25 +57,18 @@ class StatistiqueController extends Controller
         $reservationsActives = $reservations
             ->filter(function (Reservation $reservation) use ($today) {
                 $status = strtoupper((string) ($reservation->statut ?? ''));
-                if ($status !== 'CONFIRMEE') {
+                // Active means it's either upcoming (confirmed/pending) or currently happening (checkin/en_cours)
+                if (!in_array($status, ['CONFIRMEE', 'EN_COURS', 'CHECKIN', 'EN_ATTENTE'], true)) {
                     return false;
                 }
 
                 $dateDepart = $reservation->dateDepart ? Carbon::parse((string) $reservation->dateDepart) : null;
-
+                // If it's already in the past, it's not active anymore (it should be TERMINEE or CHECKOUT)
                 return $dateDepart && $dateDepart->greaterThanOrEqualTo($today);
             })
             ->count();
 
-        $loyaltyRecord = LoyaltyPoint::where('user_id', $userId)->first();
-        if (! $loyaltyRecord) {
-            $loyaltyRecord = LoyaltyPoint::create([
-                'user_id' => $userId,
-                'points_total' => (int) ($user->points_fidelite ?? 0),
-            ]);
-        }
-
-        $loyaltyPoints = (int) ($loyaltyRecord->points_total ?? 0);
+        $loyaltyPoints = (int) ($user->points_fidelite ?? 0);
 
         $prochainSejour = $reservations
             ->filter(function (Reservation $reservation) {
@@ -92,10 +91,53 @@ class StatistiqueController extends Controller
             ->map(fn (Reservation $reservation) => $this->presentReservation($reservation))
             ->values();
 
+        // Loyalty Logic Consolidation
+        $niveaux = [
+            ['nom' => 'Bronze', 'min' => 0, 'max' => 999, 'icon' => '🥉', 'color' => '#CD7F32', 'avantages' => ['Accumulation de points', 'Accès aux offres spéciales']],
+            ['nom' => 'Argent', 'min' => 1000, 'max' => 4999, 'icon' => '🥈', 'color' => '#C0C0C0', 'avantages' => ['Accumulation de points', 'Accès aux offres spéciales', 'Petit-déjeuner offert (1 pers)', 'Check-out tardif']],
+            ['nom' => 'Or', 'min' => 5000, 'max' => 9999, 'icon' => '🥇', 'color' => '#FFD700', 'avantages' => ['Accumulation de points', 'Accès aux offres spéciales', 'Petit-déjeuner offert (2 pers)', 'Check-out tardif', 'Surclassement selon disponibilité']],
+            ['nom' => 'Platine', 'min' => 10000, 'max' => null, 'icon' => '💎', 'color' => '#E5E4E2', 'avantages' => ['Accumulation de points', 'Accès aux offres spéciales', 'Petit-déjeuner offert (tous)', 'Check-out tardif & Check-in tôt', 'Surclassement garanti', 'Accès au Lounge VIP']],
+        ];
+
+        $currentNiveau = $niveaux[0];
+        foreach ($niveaux as $n) {
+            if ($loyaltyPoints >= $n['min']) {
+                $currentNiveau = $n;
+            }
+        }
+
+        $nextNiveau = null;
+        $index = array_search($currentNiveau, $niveaux);
+        if ($index !== false && isset($niveaux[$index + 1])) {
+            $nextNiveau = $niveaux[$index + 1];
+        }
+
+        $loyaltyHistory = Reservation::where('clientId', (string) $user->_id)
+            ->where('statut', 'TERMINEE')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($r) {
+                $hotel = \App\Models\Hotel::find($r->hotelId);
+                return [
+                    'id' => (string) $r->_id,
+                    'date' => $r->checkoutAt ? Carbon::parse($r->checkoutAt)->format('d/m/Y') : Carbon::parse($r->created_at)->format('d/m/Y'),
+                    'label' => 'Séjour ' . ($hotel ? $hotel->nom : 'Hôtel'),
+                    'points' => (int) round($r->prixTotal / 10),
+                ];
+            });
+
         return response()->json([
+            'user_email' => $user->email,
             'total_depenses' => round($totalDepenses, 2),
             'points_fidelite' => $loyaltyPoints,
-            'loyalty_points' => $loyaltyPoints,
+            'loyalty' => [
+                'points' => $loyaltyPoints,
+                'niveau' => $currentNiveau,
+                'prochain' => $nextNiveau,
+                'historique' => $loyaltyHistory,
+                'niveaux' => $niveaux
+            ],
             'sejours_completes' => $sejoursCompletes,
             'reservations_actives' => $reservationsActives,
             'prochain_sejour' => $prochainSejour ? $this->presentReservation($prochainSejour) : null,
@@ -138,16 +180,20 @@ class StatistiqueController extends Controller
     {
         $today = Carbon::today();
 
+        $checkinsToday = Reservation::query()
+            ->whereIn('statut', ['CONFIRMEE', 'EN_COURS'])
+            ->whereDate('dateArrivee', $today)
+            ->count();
+
+        $checkoutsToday = Reservation::query()
+            ->whereIn('statut', ['EN_COURS'])
+            ->whereDate('dateDepart', $today)
+            ->count();
+
         return response()->json([
-            'checkins_today' => Reservation::query()
-                ->whereIn('statut', ['CONFIRMEE', 'EN_COURS'])
-                ->whereDate('dateArrivee', $today)
-                ->count(),
-            'checkouts_today' => Reservation::query()
-                ->whereIn('statut', ['EN_COURS'])
-                ->whereDate('dateDepart', $today)
-                ->count(),
-            'pending_reservations' => Reservation::query()->where('statut', 'EN_ATTENTE')->count(),
+            'checkins_today' => $checkinsToday,
+            'checkouts_today' => $checkoutsToday,
+            'pending_reservations' => $checkinsToday + $checkoutsToday,
         ]);
     }
 

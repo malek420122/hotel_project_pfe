@@ -41,8 +41,8 @@ const lineData = computed(() => ({
   datasets: [{
     label: 'Réservations',
     data: (analytics.value?.reservationsParMois || []).map((row) => Number(row.count || 0)),
-    borderColor: '#0071c2',
-    backgroundColor: 'rgba(0,113,194,0.1)',
+    borderColor: '#D4820A',
+    backgroundColor: 'rgba(212,130,10,0.08)',
     fill: true,
     tension: 0.4,
   }],
@@ -53,7 +53,7 @@ const barData = computed(() => ({
   datasets: [{
     label: 'Revenus (€)',
     data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.revenu || 0)),
-    backgroundColor: ['#003580', '#0071c2', '#FFB700', '#10b981', '#8b5cf6'],
+    backgroundColor: ['#D4820A', '#8B4513', '#EFB84D', '#A86A3B', '#f43f5e'],
     borderRadius: 6,
   }],
 }))
@@ -62,7 +62,7 @@ const doughnutData = computed(() => ({
   labels: (analytics.value?.promotionEfficiency || []).map((promo) => promo.label),
   datasets: [{
     data: (analytics.value?.promotionEfficiency || []).map((promo) => Number(promo.score || 0)),
-    backgroundColor: ['#003580', '#0071c2', '#FFB700', '#10b981', '#8b5cf6'],
+    backgroundColor: ['#D4820A', '#8B4513', '#EFB84D', '#A86A3B', '#f43f5e'],
   }],
 }))
 
@@ -71,7 +71,7 @@ const occData = computed(() => ({
   datasets: [{
     label: 'Performance (%)',
     data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.pct || 0)),
-    backgroundColor: '#10b981',
+    backgroundColor: '#D4820A',
     borderRadius: 4,
   }],
 }))

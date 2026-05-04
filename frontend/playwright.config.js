@@ -1,7 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const getDevPort = () => process.env.VITE_PORT || process.env.VITE_APP_PORT || '5173';
-const getBaseUrl = () => process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${getDevPort()}`;
+const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -16,7 +15,7 @@ export default defineConfig({
     ['html', { open: 'never' }],
   ],
   use: {
-    baseURL: getBaseUrl(),
+    baseURL: baseUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -32,7 +31,7 @@ export default defineConfig({
     {
       command: 'cmd /c "\"C:\\Program Files\\nodejs\\npm.cmd\" run dev"',
       cwd: '.',
-      url: getBaseUrl(),
+      url: baseUrl,
       reuseExistingServer: true,
       timeout: 120_000,
     },

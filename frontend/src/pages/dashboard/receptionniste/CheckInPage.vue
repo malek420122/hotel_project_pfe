@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ t('reception.checkin.title') }}</h2>
+    <h1 class="dashboard-title text-2xl font-bold text-gray-800 mb-6">{{ t('reception.checkin.title') }}</h1>
     <div class="card mb-4">
       <div v-if="loadingToday" class="space-y-3">
         <div class="h-5 w-40 rounded bg-gray-200 animate-pulse"></div>
@@ -27,6 +27,7 @@
     <div v-if="found" class="card border-2 border-secondary mb-6">
       <h3 class="text-[16px] font-medium text-secondary mb-4">{{ t('reception.checkin.reservationFound') }}</h3>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+        <div><p class="text-xs text-gray-500">{{ t('reception.checkin.reference') }}</p><p class="font-bold font-mono">{{ found.ref }}</p></div>
         <div><p class="text-xs text-gray-500">{{ t('reception.checkin.client') }}</p><p class="font-bold">{{ found.client }}</p></div>
         <div><p class="text-xs text-gray-500">{{ t('reception.checkin.hotelRoom') }}</p><p class="font-bold">{{ found.hotel }} · {{ found.chambre }}</p></div>
         <div><p class="text-xs text-gray-500">{{ t('reception.checkin.arrivalDeparture') }}</p><p class="font-bold">{{ found.arrivee }} → {{ found.depart }}</p></div>
@@ -35,10 +36,16 @@
         <div><p class="text-xs text-gray-500">{{ t('reception.checkin.paymentStatus') }}</p><StatusBadge :status="found.paiement" /></div>
       </div>
       <div v-if="found.demandes" class="bg-yellow-50 rounded-xl p-3 mb-4">
-        <p class="text-sm font-semibold text-yellow-800">📋 {{ t('reception.checkin.specialRequests') }}</p>
+        <p class="text-sm font-semibold text-yellow-800 flex items-center gap-2">
+          <ClipboardList :size="16" />
+          {{ t('reception.checkin.specialRequests') }}
+        </p>
         <p class="text-sm text-yellow-700">{{ found.demandes }}</p>
       </div>
-      <button @click="doCheckIn" class="btn-primary">🔑 {{ t('reception.checkin.performCheckIn') }}</button>
+      <button @click="doCheckIn" class="btn-primary flex items-center gap-2">
+        <Key :size="18" />
+        {{ t('reception.checkin.performCheckIn') }}
+      </button>
     </div>
     <div class="card">
       <div class="flex items-center justify-between mb-4">
@@ -75,6 +82,7 @@ import { useI18n } from 'vue-i18n'
 import api from '../../../api'
 import StatusBadge from '../../../components/StatusBadge.vue'
 import { formatDate as formatLocalizedDate } from '../../../utils/formatDate'
+import { ClipboardList, Key } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 const search = ref('')
@@ -82,6 +90,15 @@ const found = ref(null)
 const todayList = ref([])
 const errorMsg = ref('')
 const loadingToday = ref(true)
+
+function getResId(r) {
+  if (!r) return ''
+  const val = r._id || r.id
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object' && val.$oid) return val.$oid
+  return String(val)
+}
 
 function toIsoDate(value) {
   if (!value) return ''
@@ -147,7 +164,7 @@ function mapReservation(r) {
   const fullName = [r?.client?.prenom, r?.client?.nom].filter(Boolean).join(' ')
 
   return {
-    ref: String(r?._id || ''),
+    ref: getResId(r),
     client: fullName || t('reception.common.clientFallback'),
     initials: initialsOf(fullName || t('reception.common.clientFallback')),
     chambre: r?.chambre?.numero || r?.chambre?.nom || String(r?.chambreId || t('reception.common.roomFallback')),
@@ -183,8 +200,8 @@ onMounted(loadCheckIns)
   gap: 0.35rem;
   padding: 0.55rem 0.9rem;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563eb;
+  background: rgba(212,130,10,0.12);
+  color: #D4820A;
   font-weight: 700;
   font-size: 0.8rem;
 }
@@ -195,7 +212,7 @@ onMounted(loadCheckIns)
   gap: 0.85rem;
   padding: 0.85rem;
   border-radius: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.96);
 }
 
@@ -206,14 +223,14 @@ onMounted(loadCheckIns)
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #38bdf8, #2563eb);
-  color: white;
+  background: linear-gradient(135deg, rgba(212,130,10,0.08), rgba(139,69,19,0.06));
+  color: var(--text-primary);
   font-weight: 800;
   flex-shrink: 0;
 }
 
 .btn-success {
-  background: rgba(16, 185, 129, 0.14);
+  background: rgba(16, 185, 129, 0.12);
   color: #059669;
   border-radius: 0.7rem;
   font-weight: 700;

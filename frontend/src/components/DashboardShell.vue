@@ -49,21 +49,37 @@
         <div class="dashboard-header-right">
           <NotifBell />
           <LanguageSwitcher variant="dark" />
-          <button class="dashboard-profile-trigger" @click="userMenuOpen = !userMenuOpen">
+          <button class="dashboard-profile-trigger" :aria-expanded="userMenuOpen" @click="userMenuOpen = !userMenuOpen">
             <span class="dashboard-avatar">{{ userInitial }}</span>
             <span class="dashboard-profile-name">{{ userName }}</span>
           </button>
           <div v-if="userMenuOpen" class="dashboard-profile-menu">
-            <RouterLink to="/dashboard/client/profile" class="dashboard-profile-menu-item">Profile</RouterLink>
-            <button class="dashboard-profile-menu-item" @click="$emit('logout')">{{ t('auth.logout') }}</button>
+            <div class="dashboard-profile-menu-head">
+              <span class="dashboard-profile-menu-avatar">{{ userInitial }}</span>
+              <div class="dashboard-profile-menu-meta">
+                <p class="dashboard-profile-menu-name">{{ userName }}</p>
+                <p class="dashboard-profile-menu-email">{{ user?.email || '' }}</p>
+              </div>
+            </div>
+            <div class="dashboard-profile-menu-divider"></div>
+            <RouterLink to="/dashboard/client/profile" class="dashboard-profile-menu-item">
+              <UserCircleIcon class="dashboard-profile-menu-icon" />
+              <span>Mon profil</span>
+            </RouterLink>
+            <button class="dashboard-profile-menu-item dashboard-profile-menu-item-danger" @click="$emit('logout')">
+              <ArrowRightOnRectangleIcon class="dashboard-profile-menu-icon" />
+              <span>{{ t('auth.logout') }}</span>
+            </button>
           </div>
         </div>
       </header>
 
       <main class="dashboard-content">
-        <transition name="dashboard-page-fade" mode="out-in">
-          <RouterView />
-        </transition>
+        <RouterView v-slot="{ Component }">
+          <transition name="dashboard-page-fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </RouterView>
       </main>
     </div>
 
@@ -88,6 +104,7 @@
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
 import AppLogo from './AppLogo.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import NotifBell from './NotifBell.vue'

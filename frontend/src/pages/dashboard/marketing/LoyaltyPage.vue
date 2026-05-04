@@ -2,9 +2,9 @@
   <div>
     <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ t('dashboard.loyaltyProgram') }}</h2>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-      <KpiCard icon="🥉" :label="t('dashboard.membersBronze')" :value="kpis.Bronze ?? 0" color="blue" />
-      <KpiCard icon="🥈" :label="t('dashboard.membersSilver')" :value="kpis.Argent ?? 0" color="green" />
-      <KpiCard icon="🥇" :label="t('dashboard.membersGold')" :value="kpis.Or ?? 0" color="gold" />
+      <KpiCard :icon="Medal" :label="t('dashboard.membersBronze')" :value="kpis.Bronze ?? 0" color="blue" />
+      <KpiCard :icon="Medal" :label="t('dashboard.membersSilver')" :value="kpis.Argent ?? 0" color="green" />
+      <KpiCard :icon="Medal" :label="t('dashboard.membersGold')" :value="kpis.Or ?? 0" color="gold" />
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card">
@@ -34,8 +34,10 @@ import { useI18n } from 'vue-i18n'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import api from '../../../api'
-ChartJS.register(ArcElement, Tooltip, Legend)
 import KpiCard from '../../../components/KpiCard.vue'
+import { Medal } from 'lucide-vue-next'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 const { t } = useI18n()
 

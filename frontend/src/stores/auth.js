@@ -31,11 +31,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    try { await api.post('/auth/logout') } catch {}
     token.value = null
     user.value = null
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    try { api.post('/auth/logout') } catch {}
   }
 
   async function fetchMe() {

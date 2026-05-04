@@ -148,15 +148,15 @@ async function submitOffer() {
 
 <style scoped>
 .send-offers-page {
-  --bg-card: #1e293b;
-  --text-main: #e2e8f0;
-  --text-soft: #94a3b8;
-  --accent: #0ea5e9;
-  --border: rgba(148, 163, 184, 0.24);
-  --danger-bg: rgba(239, 68, 68, 0.16);
+  --bg-card: #FFFFFF;
+  --text-main: #3A1A04;
+  --text-soft: #A07040;
+  --accent: #D4820A;
+  --border: rgba(180,110,30,0.12);
+  --danger-bg: rgba(239, 68, 68, 0.08);
   --danger-text: #fca5a5;
-  --success-bg: rgba(16, 185, 129, 0.16);
-  --success-text: #86efac;
+  --success-bg: rgba(16, 185, 129, 0.08);
+  --success-text: #34d399;
 }
 
 .page-header {
@@ -177,16 +177,16 @@ async function submitOffer() {
 
 .premium-card {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
   color: var(--text-main);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
 .premium-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.36);
+  box-shadow: 0 10px 28px rgba(58,26,4,0.06);
 }
 
 .offer-form {
@@ -200,7 +200,7 @@ async function submitOffer() {
 }
 
 .label {
-  color: #cbd5e1;
+  color: var(--text-soft);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -210,16 +210,16 @@ async function submitOffer() {
   width: 100%;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(15, 23, 42, 0.72);
-  color: var(--text-main);
-  padding: 0.65rem 0.75rem;
+  background: rgba(255,255,255,0.95);
+  color: var(--text-primary);
+  padding: 0.6rem 0.7rem;
   outline: none;
 }
 
 .input:focus,
 .textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
+  box-shadow: 0 0 0 3px rgba(212,130,10,0.12);
 }
 
 .input:disabled,
@@ -263,9 +263,9 @@ async function submitOffer() {
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, #FDF3DC, #FCECCF);
+  color: var(--accent);
+  border: 1px solid rgba(212,130,10,0.12);
   border-radius: 10px;
   padding: 0.62rem 1rem;
   font-weight: 700;

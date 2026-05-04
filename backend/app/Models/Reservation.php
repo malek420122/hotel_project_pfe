@@ -13,6 +13,7 @@ class Reservation extends Model
         'reference', 'clientId', 'chambreId', 'hotelId',
         'dateArrivee', 'dateDepart', 'nbVoyageurs',
         'statut', 'prixTotal', 'demandesSpeciales',
+        'specialRequestStatus', 'specialRequestHandledAt',
         'servicesChoisis', 'codePromoApplique', 'remiseAppliquee',
         'motifRejet', 'checkinAt', 'checkoutAt'
     ];

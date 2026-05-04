@@ -287,13 +287,16 @@ class ReservationController extends Controller
 
     public function specialRequests()
     {
-        $reservations = Reservation::where(function ($query) {
-            $query->whereIn('statut', ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'])
-                ->where('demandesSpeciales', '!=', '')
-                ->orWhere('specialRequestStatus', 'TRAITE');
-        })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Use raw MongoDB $or to avoid Eloquent closure grouping issues with the MongoDB driver
+        $reservations = Reservation::whereRaw([
+            '$or' => [
+                [
+                    'statut'           => ['$in' => ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS']],
+                    'demandesSpeciales' => ['$exists' => true, '$nin' => ['', null]],
+                ],
+                ['specialRequestStatus' => 'TRAITE'],
+            ],
+        ])->orderBy('created_at', 'desc')->get();
 
         return response()->json($reservations->map(function (Reservation $reservation) {
             $presented = $this->presentReservation($reservation);
@@ -302,9 +305,9 @@ class ReservationController extends Controller
             $priority = 'NORMAL';
             $normalized = strtolower($specialText);
 
-            if (preg_match('/\b(urgent|emergency|medical|sos)\b/u', $normalized)) {
+            if (preg_match('/\b(urgent|urgence|urgences|emergency|medical|médical|sos|immédiat|immédiatement|critique|danger)\b/ui', $normalized)) {
                 $priority = 'URGENT';
-            } elseif (preg_match('/\b(light|minor|basic|simple)\b/u', $normalized)) {
+            } elseif (preg_match('/\b(light|minor|basic|simple|petit|petite|basique|normal)\b/ui', $normalized)) {
                 $priority = 'LOW';
             }
 
@@ -343,11 +346,12 @@ class ReservationController extends Controller
 
     public function checkinToday()
     {
-        $today = Carbon::today();
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
 
         return response()->json(
-            Reservation::whereIn('statut', ['CONFIRMEE', 'EN_COURS'])
-                ->whereDate('dateArrivee', $today)
+            Reservation::whereIn('statut', ['EN_ATTENTE', 'CONFIRMEE', 'EN_COURS'])
+                ->whereBetween('dateArrivee', [$start, $end])
                 ->orderBy('dateArrivee', 'asc')
                 ->get()
                 ->map(fn (Reservation $reservation) => $this->presentReservation($reservation))
@@ -372,7 +376,8 @@ class ReservationController extends Controller
 
                 return str_contains(mb_strtolower($clientName), $search)
                     || str_contains($clientEmail, $search)
-                    || str_contains($reference, $search);
+                    || str_contains($reference, $search)
+                    || str_contains(mb_strtolower((string)$reservation->_id), $search);
             })
             ->take(10)
             ->map(fn (Reservation $reservation) => $this->presentReservation($reservation))
@@ -434,7 +439,7 @@ class ReservationController extends Controller
     public function checkin($id)
     {
         $reservation = Reservation::findOrFail($id);
-        if ($reservation->statut !== 'CONFIRMEE') {
+        if (!in_array($reservation->statut, ['CONFIRMEE', 'EN_ATTENTE'])) {
             return response()->json(['error' => 'Check-in non autorise pour ce statut'], 422);
         }
 

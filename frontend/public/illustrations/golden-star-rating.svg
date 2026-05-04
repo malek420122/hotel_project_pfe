@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Rating illustration">
+  <defs>
+    <linearGradient id="starGold" x1="46" y1="46" x2="134" y2="136" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FEF3C7"/>
+      <stop offset="0.5" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#EA580C"/>
+    </linearGradient>
+    <linearGradient id="starSide" x1="58" y1="70" x2="124" y2="146" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#C2410C"/>
+    </linearGradient>
+    <filter id="starShadow" x="0" y="0" width="180" height="180" filterUnits="userSpaceOnUse">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+      <feOffset dy="10"/>
+      <feColorMatrix values="0 0 0 0 0.31 0 0 0 0 0.15 0 0 0 0 0.02 0 0 0 0.16 0"/>
+      <feBlend in2="SourceGraphic" mode="normal"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="88" cy="154" rx="52" ry="10" fill="#F59E0B" fill-opacity="0.14"/>
+
+  <g filter="url(#starShadow)">
+    <path d="M90 38l13.2 26.8 29.6 4.3-21.4 20.8 5 29.4L90 105.5 63.6 119.3l5-29.4L47.2 69.1l29.6-4.3L90 38Z" fill="url(#starGold)"/>
+    <path d="M90 48l10 20.4 22.6 3.3-16.3 15.9 3.8 22.5L90 100.5 69.9 110.1l3.8-22.5L57.4 71.7l22.6-3.3L90 48Z" fill="url(#starSide)"/>
+    <path d="M90 38l13.2 26.8 29.6 4.3-21.4 20.8 5 29.4L90 105.5 63.6 119.3l5-29.4L47.2 69.1l29.6-4.3L90 38Z" stroke="#FFF7ED" stroke-width="2"/>
+
+    <circle cx="130" cy="48" r="12" fill="#FFF7ED"/>
+    <path d="M130 42l2.1 4.4 4.9.7-3.6 3.5.8 5-4.2-2.2-4.2 2.2.8-5-3.6-3.5 4.9-.7 2.1-4.4Z" fill="#F59E0B"/>
+  </g>
+</svg>

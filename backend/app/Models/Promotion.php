@@ -20,4 +20,13 @@ class Promotion extends Model
         'estActive' => true,
         'nbUtilisations' => 0,
     ];
+
+    protected $casts = [
+        'dateDebut' => 'datetime',
+        'dateFin' => 'datetime',
+        'estActive' => 'boolean',
+        'remise_pourcent' => 'integer',
+        'nbUtilisations' => 'integer',
+        'limiteUtilisations' => 'integer',
+    ];
 }

@@ -22,7 +22,7 @@
       <div class="legend-bar">
         <div v-for="s in statuses" :key="s.val" class="flex items-center gap-2">
           <div :class="['w-3.5 h-3.5 rounded-full', s.color]"></div>
-          <span class="text-sm text-gray-100">{{ s.label }}</span>
+          <span class="text-sm text-gray-600">{{ s.label }}</span>
         </div>
       </div>
     </div>
@@ -163,7 +163,7 @@ onMounted(loadRooms)
   align-items: center;
   padding: 10px 14px;
   border-radius: 14px;
-  background: rgba(15, 23, 42, 0.9);
+  background: var(--bg-card);
 }
 
 .room-card {

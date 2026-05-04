@@ -14,7 +14,13 @@ class ChambreController extends Controller
         if ($request->has('hotelId')) {
             $query->where('hotelId', $request->hotelId);
         }
-        return response()->json($query->get());
+
+        $rooms = $query->get()
+            ->map(fn (Chambre $chambre) => $this->presentRoom($chambre))
+            ->sortBy(fn (array $room) => $this->roomSortValue((string) $room['number']))
+            ->values();
+
+        return response()->json($rooms);
     }
 
     public function store(Request $request)
@@ -75,5 +81,56 @@ class ChambreController extends Controller
         }
 
         return strtoupper(substr((string) $chambre->_id, -4));
+    }
+
+    private function presentRoom(Chambre $chambre): array
+    {
+        $row = $chambre->toArray();
+        $number = $row['number'] ?? $row['numero'] ?? $row['room_number'] ?? $this->deriveRoomNumber($chambre);
+
+        $row['number'] = (string) $number;
+        $row['numero'] = (string) ($row['numero'] ?? $number);
+        $row['type'] = $this->presentRoomType((string) ($row['type'] ?? 'Standard'));
+        $row['floor'] = (int) ($row['etage'] ?? $this->deriveFloor((string) $number));
+        $row['etage'] = $row['floor'];
+
+        return $row;
+    }
+
+    private function presentRoomType(string $type): string
+    {
+        $normalized = strtolower(trim($type));
+        $map = [
+            'simple' => 'Simple',
+            'single' => 'Simple',
+            'double' => 'Double',
+            'standard' => 'Standard',
+            'suite' => 'Suite',
+            'familiale' => 'Familiale',
+            'family' => 'Familiale',
+            'deluxe' => 'Deluxe',
+            'presidentielle' => 'Présidentielle',
+            'presidential' => 'Présidentielle',
+        ];
+
+        return $map[$normalized] ?? ucfirst(strtolower($type ?: 'Standard'));
+    }
+
+    private function deriveFloor(string $number): int
+    {
+        if (preg_match('/^\d+/', $number, $matches)) {
+            return max(0, (int) floor(((int) $matches[0]) / 100));
+        }
+
+        return 0;
+    }
+
+    private function roomSortValue(string $number): int
+    {
+        if (preg_match('/\d+/', $number, $matches)) {
+            return (int) $matches[0];
+        }
+
+        return PHP_INT_MAX;
     }
 }

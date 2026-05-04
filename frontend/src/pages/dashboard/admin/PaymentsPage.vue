@@ -2,7 +2,10 @@
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-800">Suivi des paiements</h2>
-      <button @click="fetchPayments" class="btn-primary text-sm">Actualiser</button>
+      <div class="flex gap-2">
+        <button @click="fetchPayments" class="btn-primary text-sm">Actualiser</button>
+        <button @click="exportPaymentsCSV" class="btn-outline text-sm">📥 {{ $t('dashboard.exportCsv') }}</button>
+      </div>
     </div>
     <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>
 
@@ -59,6 +62,23 @@ async function fetchPayments() {
   } catch {
     payments.value = []
     errorMsg.value = 'Impossible de charger les paiements.'
+  }
+}
+
+async function exportPaymentsCSV() {
+  try {
+    errorMsg.value = ''
+    const response = await api.get('/admin/payments/export-csv', { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `paiements-${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.parentNode.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch {
+    errorMsg.value = 'Impossible d\'exporter les paiements.'
   }
 }
 

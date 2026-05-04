@@ -1,56 +1,91 @@
 @startuml
 left to right direction
 skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam actorStyle default
 
-actor Client
+actor "Client" as Client
+entity "Système Stripe" as Stripe <<System>>
+entity "Chatbot IA" as Chatbot <<System>>
 
-rectangle "HotelEase - Espace Client" {
-  usecase "Se connecter" as C1
-  usecase "Consulter hotels" as C2
-  usecase "Filtrer/rechercher hotels" as C3
-  usecase "Voir details hotel/chambres/avis" as C4
-  usecase "Reserver chambre" as C5
-  usecase "Verifier disponibilite" as C6
-  usecase "Payer reservation" as C7
-  usecase "Appliquer promotion" as C8
-  usecase "Consulter mes reservations" as C9
-  usecase "Replanifier reservation" as C10
-  usecase "Annuler reservation" as C11
-  usecase "Telecharger facture" as C12
-  usecase "Laisser avis" as C13
-  usecase "Gerer profil" as C14
-  usecase "Consulter notifications" as C15
-  usecase "Utiliser chatbot" as C16
+rectangle "Espace Client HotelEase" {
+    (Consulter les hôtels) as UC_Hotels
+    (Recevoir des recommandations d'hôtels) as UC_Recommendations
+    (Filtrer par ville, dates,\nprix, étoiles et services) as UC_Filter
+    (Consulter le détail d'un hôtel) as UC_Detail
+    (Voir les chambres disponibles) as UC_Rooms
+    (Effectuer une réservation) as UC_Book
+    (Ajouter des services) as UC_Services
+    (Ajouter des demandes spéciales) as UC_Special
+    (Appliquer un code promo) as UC_Promo
+    (Payer la réservation) as UC_Pay
+    (Consulter mes réservations) as UC_MyBookings
+    (Modifier une réservation) as UC_EditBooking
+    (Annuler une réservation) as UC_CancelBooking
+    (Télécharger la facture) as UC_Invoice
+    (Consulter l'historique des paiements) as UC_PaymentHistory
+    (Laisser un avis) as UC_Review
+    (Consulter mes avis) as UC_MyReviews
+    (Consulter mes points fidélité) as UC_Loyalty
+    (Échanger des points) as UC_Redeem
+    (Signaler un problème) as UC_Signal
+    (Suivre mes signalements) as UC_SignalHistory
+    (Suivre les incidents liés) as UC_IncidentTracking
+    (Utiliser le chatbot IA) as UC_Chatbot
+    (Consulter mon dashboard) as UC_Dashboard
+    (Modifier mon profil) as UC_Profile
+    (Réinitialiser mes préférences) as UC_ResetPrefs
+    (Recevoir et lire notifications) as UC_Notifs
 }
 
-Client --> C1
-Client --> C2
-Client --> C3
-Client --> C4
-Client --> C5
-Client --> C9
-Client --> C10
-Client --> C11
-Client --> C12
-Client --> C13
-Client --> C14
-Client --> C15
-Client --> C16
+' Recherche et réservation
+Client --> UC_Hotels
+Client --> UC_Recommendations
+Client --> UC_Filter
+Client --> UC_Detail
+Client --> UC_Rooms
+Client --> UC_Book
+UC_Book ..> UC_Services : <<include>>
+UC_Book ..> UC_Special : <<extend>>
+UC_Book ..> UC_Promo : <<extend>>
+UC_Book ..> UC_Pay : <<include>>
+UC_Pay -- Stripe
 
-C5 ..> C1 : <<include>>
-C5 ..> C6 : <<include>>
-C5 ..> C7 : <<include>>
-C8 ..> C7 : <<extend>>
+' Gestion après réservation
+Client --> UC_MyBookings
+Client --> UC_EditBooking
+Client --> UC_CancelBooking
+Client --> UC_Invoice
+Client --> UC_PaymentHistory
 
-C9 ..> C1 : <<include>>
-C10 ..> C1 : <<include>>
-C11 ..> C1 : <<include>>
-C12 ..> C1 : <<include>>
-C13 ..> C1 : <<include>>
-C14 ..> C1 : <<include>>
-C15 ..> C1 : <<include>>
+' Avis et fidélité
+Client --> UC_Review
+Client --> UC_MyReviews
+Client --> UC_Loyalty
+Client --> UC_Redeem
 
-C10 ..> C9 : <<extend>>
-C11 ..> C9 : <<extend>>
-C12 ..> C9 : <<extend>>
+' Assistance
+Client --> UC_Signal
+Client --> UC_SignalHistory
+Client --> UC_IncidentTracking
+Client --> UC_Chatbot
+UC_Chatbot -- Chatbot
+
+' Compte
+Client --> UC_Dashboard
+Client --> UC_Profile
+Client --> UC_ResetPrefs
+Client --> UC_Notifs
+
+note right of UC_Recommendations
+  Le système recommande des hôtels
+  basés sur l'historique des réservations,
+  les avis et les préférences du client.
+end note
+
+note bottom of UC_Pay
+  Paiement sécurisé via Stripe.
+end note
+
 @enduml

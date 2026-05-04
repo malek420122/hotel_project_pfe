@@ -87,7 +87,7 @@ const cols = [
 async function loadRooms() {
   try {
     const { data } = await api.get('/admin/chambres', { params: selectedHotel.value ? { hotelId: selectedHotel.value } : {} })
-    rooms.value = data
+    rooms.value = data.data || data
   } catch {}
 }
 function editRoom(r) {

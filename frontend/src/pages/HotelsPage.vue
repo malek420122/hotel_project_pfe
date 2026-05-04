@@ -1,5 +1,9 @@
 <template>
   <div class="hotels-page min-h-screen bg-slate-50 text-slate-900">
+    <teleport to="head">
+      <title>HotelEase | {{ t('nav.hotels') }} {{ filters.ville ? '- ' + filters.ville : '' }}</title>
+      <meta name="description" content="Réservez votre séjour idéal parmi notre sélection d'hôtels de luxe. Filtrez par équipements, étoiles et prix." />
+    </teleport>
     <Navbar />
 
     <section class="hotels-hero relative overflow-visible">
@@ -44,12 +48,12 @@
 
             <div class="search-field">
               <p class="search-label">{{ t('searchbar.checkin') }}</p>
-              <input v-model="filters.dateArrivee" type="date" class="hero-input" />
+              <input v-model="filters.dateArrivee" type="date" class="hero-input premium-native-date-dark" />
             </div>
 
             <div class="search-field">
               <p class="search-label">{{ t('searchbar.checkout') }}</p>
-              <input v-model="filters.dateDepart" type="date" class="hero-input" />
+              <input v-model="filters.dateDepart" type="date" class="hero-input premium-native-date-dark" />
             </div>
 
             <div class="search-field">
@@ -114,29 +118,7 @@
 
           <div class="flex items-center gap-3">
             <label class="results-sort-label">{{ t('hotels.sortBy') }}</label>
-            <div ref="sortDropdownRef" class="custom-sort-select">
-              <button type="button" class="custom-sort-trigger" @click="toggleSortDropdown">
-                <span class="custom-sort-icon">{{ currentSortOption.icon }}</span>
-                <span class="custom-sort-label">{{ currentSortOption.label }}</span>
-                <span class="custom-sort-arrow">▼</span>
-              </button>
-
-              <transition name="sort-dropdown">
-                <div v-if="sortDropdownOpen" class="custom-sort-options-list">
-                  <button
-                    v-for="opt in sortOptions"
-                    :key="opt.value"
-                    type="button"
-                    :class="['custom-sort-option', sortBy === opt.value && 'custom-sort-option-active']"
-                    @click.stop="selectSortOption(opt)"
-                  >
-                    <span class="custom-sort-option-icon">{{ opt.icon }}</span>
-                    <span class="custom-sort-option-label">{{ opt.label }}</span>
-                    <span v-if="sortBy === opt.value" class="custom-sort-check">✓</span>
-                  </button>
-                </div>
-              </transition>
-            </div>
+                    <SortingDropdown :options="sortOptions" v-model="sortBy" @change="applyFilters" />
           </div>
         </div>
         <div class="gold-divider"></div>
@@ -217,7 +199,7 @@
         </aside>
 
         <div class="space-y-6">
-          <div class="md:block lg:hidden">
+          <div class="hidden md:block lg:hidden">
             <div class="tablet-panel">
               <button class="tablet-panel-toggle" @click="tabletPanelOpen = !tabletPanelOpen">
                 <span>{{ t('filters.title') }}</span>
@@ -312,8 +294,13 @@
             ref="gridRef"
             name="cards-stagger"
             tag="div"
-            :class="['grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6', gridInView && 'grid-visible']"
+            :class="['grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative', gridInView && 'grid-visible']"
           >
+            <!-- Loading Overlay for Filters -->
+            <div v-if="applyingFilters" class="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-30 rounded-3xl flex items-center justify-center transition-all">
+              <div class="w-10 h-10 border-4 border-[#D4820A] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+
             <RouterLink
               v-for="(hotel, index) in sortedHotels"
               :key="hotel._id || `${hotel.nom}-${index}`"
@@ -333,8 +320,10 @@
                 <div v-if="!imageLoadedState[String(hotel._id)]" class="hotel-image-skeleton shimmer"></div>
                 <img
                   :src="hotelImage(hotel)"
-                  :alt="hotel.nom"
+                  :alt="localize(hotel.nom)"
                   class="hotel-image"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
                   @load="onHotelImageLoad(hotel._id)"
                   @error="onHotelImageError($event, hotel._id)"
                 />
@@ -349,9 +338,8 @@
               </div>
 
               <div class="hotel-content">
-                <h3 class="hotel-title">{{ hotel.nom }}</h3>
+                <h3 class="hotel-title">{{ localize(hotel.nom) }}</h3>
                 <p class="hotel-city-text">{{ getVille(hotel) }}</p>
-                <p class="hotel-description">{{ getDescription(hotel) }}</p>
 
                 <div v-if="hotel.equipements?.length" class="service-chip-row">
                   <span
@@ -494,10 +482,12 @@
 import { ref, computed, onMounted, onBeforeUnmount, reactive, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { Sparkles, ArrowUpNarrowWide, ArrowDownWideNarrow, Star } from 'lucide-vue-next'
 import { useHotelStore } from '../stores/hotel'
 import api from '../api'
 import Navbar from '../components/Navbar.vue'
 import SearchAutocomplete from '../components/SearchAutocomplete.vue'
+import SortingDropdown from '../components/SortingDropdown.vue'
 import { getServiceLabel } from '../composables/useServiceLabel'
 
 const route = useRoute()
@@ -510,7 +500,6 @@ const bookingMessage = computed(() => {
 const isRTL = computed(() => locale.value === 'ar')
 
 const sortBy = ref('recommande')
-const sortDropdownOpen = ref(false)
 const applyingFilters = ref(false)
 const mobileFiltersOpen = ref(false)
 const tabletPanelOpen = ref(false)
@@ -519,27 +508,25 @@ const gridInView = ref(false)
 const animatedCount = ref(0)
 const imageLoadedState = reactive({})
 const gridRef = ref(null)
-const sortDropdownRef = ref(null)
 const priceBounds = reactive({ min: 0, max: 3000 })
 
 const sortOptions = computed(() => [
-  { value: 'recommande', icon: '⭐', label: t('hotels.sortRecommended') },
-  { value: 'prix_asc', icon: '💰', label: t('hotels.sortPriceAsc') },
-  { value: 'prix_desc', icon: '💸', label: t('hotels.sortPriceDesc') },
-  { value: 'note_desc', icon: '🏆', label: t('hotels.sortBestRated') },
+  { value: 'recommande', icon: Sparkles, label: 'Recommandé' },
+  { value: 'prix_asc', icon: ArrowUpNarrowWide, label: 'Prix croissant' },
+  { value: 'prix_desc', icon: ArrowDownWideNarrow, label: 'Prix décroissant' },
+  { value: 'note_desc', icon: Star, label: 'Mieux notés' },
 ])
 
-const currentSortOption = computed(
-  () => sortOptions.value.find((option) => option.value === sortBy.value) || sortOptions.value[0],
-)
-
 const amenityOptions = computed(() => [
-  { label: t('filters.spa'), value: 'spa' },
-  { label: t('filters.pool'), value: 'piscine' },
-  { label: t('filters.wifi'), value: 'wifi' },
-  { label: t('filters.parking'), value: 'parking' },
-  { label: t('filters.ac'), value: 'climatisation' },
-  { label: t('filters.restaurant'), value: 'restaurant' },
+  { label: 'Spa', value: 'spa' },
+  { label: 'Piscine', value: 'piscine' },
+  { label: 'WiFi', value: 'wifi' },
+  { label: 'Parking', value: 'parking' },
+  { label: 'Climatisation', value: 'climatisation' },
+  { label: 'Restaurant', value: 'restaurant' },
+  { label: 'Salle de sport', value: 'gym' },
+  { label: 'Vue sur mer', value: 'sea_view' },
+  { label: 'Plage privée', value: 'private_beach' },
 ])
 
 function normalizeAmenitiesQuery(value) {
@@ -570,30 +557,15 @@ function sortValueForApi(value) {
   return value === 'note_desc' ? 'note' : value
 }
 
-function toggleSortDropdown() {
-  sortDropdownOpen.value = !sortDropdownOpen.value
-}
-
-function closeSortDropdown() {
-  sortDropdownOpen.value = false
-}
-
-function selectSortOption(option) {
-  if (!option?.value) return
-  sortBy.value = option.value
-  closeSortDropdown()
-  applyFilters()
-}
-
 const sortedHotels = computed(() => assignUniquePreviewPhotos([...hotelStore.hotels]))
 
 const fallbackPool = [
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=1400&q=80',
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=600&q=80',
 ]
 
 function assignUniquePreviewPhotos(list) {
@@ -822,22 +794,21 @@ function formatPricePerNight(value) {
   return `${formatPrice(value)}/${t('hotels.perNight')}`
 }
 
-function getDescription(hotel) {
-  const lang = locale.value
-  const description = hotel?.description
-  if (description && typeof description === 'object' && !Array.isArray(description)) {
-    return description[lang] || description.fr || Object.values(description)[0] || ''
+function localize(field) {
+  if (!field) return ''
+  if (typeof field === 'string') return field
+  if (typeof field === 'object' && !Array.isArray(field)) {
+    return field[locale.value] || field.fr || field.en || Object.values(field)[0] || ''
   }
-  return description || ''
+  return String(field || '')
+}
+
+function getDescription(hotel) {
+  return localize(hotel?.description)
 }
 
 function getVille(hotel) {
-  const lang = locale.value
-  const city = hotel?.ville
-  if (city && typeof city === 'object' && !Array.isArray(city)) {
-    return city[lang] || city.fr || Object.values(city)[0] || ''
-  }
-  return city || ''
+  return localize(hotel?.ville)
 }
 
 function serviceClass(service) {
@@ -912,18 +883,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (observer) observer.disconnect()
-  document.removeEventListener('click', onDocumentClick)
-})
-
-function onDocumentClick(event) {
-  if (!sortDropdownRef.value) return
-  if (!sortDropdownRef.value.contains(event.target)) {
-    closeSortDropdown()
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', onDocumentClick)
 })
 </script>
 
@@ -941,7 +900,7 @@ onMounted(() => {
 .hotels-hero {
   position: relative;
   min-height: 280px;
-  background: linear-gradient(135deg, #0a1628 0%, #1a3a6b 50%, #1e56db 100%);
+  background: linear-gradient(135deg, rgba(212,130,10,0.08), rgba(212,130,10,0.04));
 }
 
 .hero-backdrop,
@@ -976,9 +935,9 @@ onMounted(() => {
 .bokeh-4 { width: 160px; height: 160px; bottom: 5%; right: 10%; animation-delay: -7s; }
 
 .search-shell {
-  margin-bottom: -56px;
-  padding: 18px;
-  border-radius: 28px;
+  margin-bottom: -40px;
+  padding: 12px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
@@ -1029,7 +988,7 @@ onMounted(() => {
   width: 100%;
   min-height: 48px;
   border-radius: 16px;
-  background: rgba(15, 23, 42, 0.86);
+  background: var(--bg-card);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 0.9rem 1rem;
@@ -1103,7 +1062,7 @@ onMounted(() => {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.22);
+  border: 1px solid var(--border);
   background: #ffffff;
   color: #0f172a;
   font-size: 1.05rem;
@@ -1124,7 +1083,7 @@ onMounted(() => {
   background: #fff;
   border-radius: 24px 24px 0 0;
   padding: 1.1rem 1.25rem;
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 36px rgba(58, 26, 4, 0.08);
 }
 
 .results-count {
@@ -1152,14 +1111,14 @@ onMounted(() => {
   min-width: 200px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0f172a;
-  color: #fff;
+  background: var(--bg-card);
+  color: var(--text-primary);
   padding: 0.78rem 0.9rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.22);
+  box-shadow: 0 16px 36px rgba(58, 26, 4, 0.12);
 }
 
 .custom-sort-icon {
@@ -1182,10 +1141,10 @@ onMounted(() => {
   top: calc(100% + 8px);
   left: 0;
   min-width: 100%;
-  background: #1e293b;
+  background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 20px 48px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 20px 48px rgba(58, 26, 4, 0.15);
   overflow: hidden;
   z-index: 40;
 }
@@ -1231,22 +1190,22 @@ onMounted(() => {
 }
 
 .filter-card {
-  background: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 1.25rem;
   overflow: hidden;
-  box-shadow: 0 22px 50px rgba(2, 6, 23, 0.22);
+  box-shadow: 0 22px 50px rgba(58, 26, 4, 0.08);
 }
 
 .filter-title {
-  color: #fff;
+  color: #3A1A04;
   font-weight: 800;
   font-size: 1.05rem;
 }
 
 .filter-reset-link {
-  color: #fbbf24;
+  color: #A07040;
   font-weight: 700;
   font-size: 0.9rem;
   transition: opacity 0.2s ease;
@@ -1257,7 +1216,7 @@ onMounted(() => {
 }
 
 .filter-label {
-  color: rgba(255, 255, 255, 0.8);
+  color: #8B4513;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -1288,16 +1247,18 @@ onMounted(() => {
 .toggle-chip {
   border-radius: 999px;
   padding: 0.72rem 1rem;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #3A1A04;
+  background: rgba(212, 130, 10, 0.06);
+  border: 1px solid rgba(180, 110, 30, 0.2);
   font-weight: 700;
   font-size: 0.88rem;
 }
 
 .toggle-chip-active {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-  box-shadow: 0 12px 24px rgba(245, 158, 11, 0.32);
+  background: rgba(212, 130, 10, 0.16);
+  color: #3A1A04;
+  border-color: rgba(180, 110, 30, 0.35);
+  box-shadow: 0 12px 24px rgba(180, 110, 30, 0.14);
 }
 
 .star-pill {
@@ -1307,21 +1268,22 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #e2e8f0;
+  background: rgba(212, 130, 10, 0.06);
+  border: 1px solid rgba(180, 110, 30, 0.2);
+  color: #3A1A04;
   font-size: 0.9rem;
   font-weight: 800;
 }
 
 .star-pill-active {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-  color: #fff;
-  box-shadow: 0 12px 24px rgba(245, 158, 11, 0.34);
+  background: rgba(212, 130, 10, 0.16);
+  color: #3A1A04;
+  border-color: rgba(180, 110, 30, 0.35);
+  box-shadow: 0 12px 24px rgba(180, 110, 30, 0.14);
 }
 
 .clear-chip {
-  color: #fbbf24;
+  color: #8B4513;
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -1332,7 +1294,7 @@ onMounted(() => {
   align-items: center;
   width: 100%;
   min-width: 0;
-  color: #fff;
+  color: #3A1A04;
   font-weight: 700;
   font-size: 0.92rem;
   margin-bottom: 0.45rem;
@@ -1471,7 +1433,7 @@ onMounted(() => {
 .hotel-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0.8) 100%);
 }
 
 .hotel-image-top-left,
@@ -1531,27 +1493,42 @@ onMounted(() => {
 
 .hotel-content {
   background: #fff;
-  padding: 1.1rem 1.1rem 1.25rem;
-  overflow: hidden;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  height: auto;
 }
 
 .hotel-title {
-  color: #0f172a;
-  font-size: 1.25rem;
-  line-height: 1.2;
-  font-weight: 800;
-  white-space: nowrap;
+  color: #2D1B08;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.58rem;
+  line-height: 1.45;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-rendering: optimizeLegibility;
+  padding: 3px 0;
+  transition: color 0.3s ease;
+}
+
+.premium-hotel-card:hover .hotel-title {
+  color: #D4820A;
 }
 
 .hotel-city-text {
-  color: #64748b;
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
+  color: #8B4513;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  margin-top: 0.22rem;
-  margin-bottom: 0.55rem;
+  margin-top: 0.1rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1561,12 +1538,11 @@ onMounted(() => {
   color: var(--he-slate-500);
   font-size: 0.95rem;
   line-height: 1.55;
-  line-clamp: 2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 3rem;
+  margin-bottom: auto;
 }
 
 .service-chip-row {
@@ -1585,11 +1561,11 @@ onMounted(() => {
 }
 
 .service-chip-spa { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
-.service-chip-pool { background: linear-gradient(135deg, #1e56db, #38bdf8); }
+.service-chip-pool { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); }
 .service-chip-restaurant { background: linear-gradient(135deg, #f59e0b, #f97316); }
 .service-chip-wifi { background: linear-gradient(135deg, #16a34a, #22c55e); }
 .service-chip-parking { background: linear-gradient(135deg, #64748b, #334155); }
-.service-chip-ac { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+.service-chip-ac { background: linear-gradient(135deg, var(--color-primary), rgba(212,130,10,0.28)); }
 
 .hotel-bottom-row {
   display: flex;
@@ -1605,7 +1581,7 @@ onMounted(() => {
 }
 
 .price-value {
-  color: #1e56db;
+  color: var(--color-primary);
   font-size: 1.5rem;
   font-weight: 900;
 }
@@ -1615,8 +1591,8 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   border-radius: 999px;
-  border: 1px solid #1e56db;
-  color: #1e56db;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
   padding: 0.72rem 1rem;
   font-weight: 800;
   font-size: 0.9rem;
@@ -1677,7 +1653,7 @@ onMounted(() => {
   border-radius: 999px;
   padding: 0 1rem;
   font-weight: 800;
-  border: 1px solid rgba(15, 23, 42, 0.14);
+  border: 1px solid var(--border);
 }
 
 .page-pill-inactive {
@@ -1721,7 +1697,7 @@ onMounted(() => {
   position: fixed;
   inset: 0;
   z-index: 80;
-  background: rgba(2, 6, 23, 0.62);
+  background: rgba(212, 130, 10, 0.12);
 }
 
 .mobile-sheet {
@@ -1821,6 +1797,32 @@ onMounted(() => {
 @media (min-width: 768px) {
   .search-shell {
     margin-bottom: -66px;
+    padding: 18px;
+    border-radius: 28px;
   }
+}
+.premium-native-date-dark {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  color: white;
+  font-size: 1rem;
+  padding: 0.5rem 0.25rem;
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+.premium-native-date-dark:focus {
+  outline: none;
+  border-bottom-color: #D4820A;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
 }
 </style>

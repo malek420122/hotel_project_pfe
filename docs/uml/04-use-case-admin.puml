@@ -1,40 +1,32 @@
 @startuml
 left to right direction
-skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
 
-actor Administrateur as Admin
+actor "Administrateur" as Admin
 
-rectangle "HotelEase - Espace Admin" {
-  usecase "Se connecter" as A0
-  usecase "Gerer hotels" as A1
-  usecase "Activer/Desactiver hotel" as A2
-  usecase "Gerer chambres" as A3
-  usecase "Gerer services" as A4
-  usecase "Gerer utilisateurs" as A5
-  usecase "Consulter stats globales" as A6
-  usecase "Consulter paiements" as A7
-  usecase "Exporter paiements CSV" as A8
+rectangle "Gestion Administrative et Système" {
+    (Gérer les hôtels) as UC_H
+    (Modifier statut de disponibilité) as UC_T
+    (Gérer les chambres) as UC_C
+    (Gérer les services) as UC_S
+    
+    (Gérer les utilisateurs) as UC_U
+    
+    (Consulter les paiements) as UC_P
+    (Exporter paiements CSV) as UC_CSV
+    (Consulter stats globales) as UC_Stats
+
+    ' Extensions logiques
+    UC_T .> UC_H : <<extend>>
+    UC_CSV .> UC_P : <<extend>>
+
+    ' Liaisons principales
+    Admin --> UC_H
+    Admin --> UC_C
+    Admin --> UC_S
+    Admin --> UC_U
+    Admin --> UC_P
+    Admin --> UC_Stats
 }
-
-Admin --> A0
-Admin --> A1
-Admin --> A2
-Admin --> A3
-Admin --> A4
-Admin --> A5
-Admin --> A6
-Admin --> A7
-Admin --> A8
-
-A1 ..> A0 : <<include>>
-A2 ..> A0 : <<include>>
-A3 ..> A0 : <<include>>
-A4 ..> A0 : <<include>>
-A5 ..> A0 : <<include>>
-A6 ..> A0 : <<include>>
-A7 ..> A0 : <<include>>
-A8 ..> A0 : <<include>>
-
-A2 ..> A1 : <<extend>>
-A8 ..> A7 : <<extend>>
 @enduml

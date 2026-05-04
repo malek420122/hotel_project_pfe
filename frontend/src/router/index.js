@@ -19,6 +19,7 @@ const routes = [
       { path: 'reservations', component: () => import('../pages/dashboard/client/ReservationsPage.vue') },
       { path: 'new-booking', component: () => import('../pages/dashboard/client/NewBookingPage.vue') },
       { path: 'services', component: () => import('../pages/dashboard/client/ServicesPage.vue') },
+      { path: 'incidents', component: () => import('../pages/dashboard/client/ClientIncidentPage.vue') },
       { path: 'payments', component: () => import('../pages/dashboard/client/PaymentsPage.vue') },
       { path: 'reviews', component: () => import('../pages/dashboard/client/ReviewsPage.vue') },
       { path: 'loyalty', component: () => import('../pages/dashboard/client/LoyaltyPage.vue') },
@@ -37,6 +38,8 @@ const routes = [
       { path: 'hotels', component: () => import('../pages/dashboard/admin/HotelsPage.vue') },
       { path: 'rooms', component: () => import('../pages/dashboard/admin/RoomsPage.vue') },
       { path: 'users', component: () => import('../pages/dashboard/admin/UsersPage.vue') },
+      { path: 'payments', component: () => import('../pages/dashboard/admin/PaymentsPage.vue') },
+      { path: 'incidents', component: () => import('../pages/dashboard/admin/IncidentsManagementPage.vue') },
       { path: 'pricing', component: () => import('../pages/dashboard/admin/PricingPage.vue') },
     ]
   },
@@ -52,6 +55,7 @@ const routes = [
       { path: 'checkin', component: () => import('../pages/dashboard/receptionniste/CheckInPage.vue') },
       { path: 'checkout', component: () => import('../pages/dashboard/receptionniste/CheckOutPage.vue') },
       { path: 'rooms', component: () => import('../pages/dashboard/receptionniste/RoomGridPage.vue') },
+      { path: 'incidents', component: () => import('../pages/dashboard/receptionniste/IncidentReportPage.vue') },
       { path: 'special-requests', component: () => import('../pages/dashboard/receptionniste/SpecialRequestsPage.vue') },
     ]
   },
@@ -93,8 +97,9 @@ router.beforeEach((to, _from, next) => {
       next({ path: '/login', query: { redirect: to.fullPath } })
       return
     }
-    if (to.meta.role && user.role !== 'admin' && user.role !== to.meta.role) {
-      // Admin can access everything, others are redirected
+    // Strict role-based access: only the required role (or visitor for public pages) can access
+    if (to.meta.role && user.role !== to.meta.role) {
+      // User's role doesn't match required role; redirect to their dashboard
       const roleMap = { client: '/hotels', admin: '/dashboard/admin', receptionniste: '/dashboard/receptionniste', marketing: '/dashboard/marketing' }
       next(roleMap[user.role] || '/')
       return

@@ -20,6 +20,9 @@
     "checkin": "Check-In",
     "checkout": "Check-Out",
     "room_grid": "Room grid",
+    "report_incident": "Report incident",
+    "report_problem": "Report a problem",
+    "incidents": "Incidents",
     "special_requests": "Special requests",
     "send_offers": "Send Offers"
   },
@@ -185,7 +188,9 @@
     "hotel": "Hotel",
     "room": "Room",
     "status": "Status",
-    "actions": "Actions"
+    "actions": "Actions",
+    "refresh": "Refresh",
+    "hide": "Hide"
   },
   "hotels": {
     "resultsCount": "hotels found",
@@ -213,7 +218,6 @@
     "bookStay": "Book your stay",
     "bookYourStay": "Book Your Stay",
     "bookNow": "Book Now",
-    "viewRooms": "View Available Rooms",
     "noReviewsYet": "No reviews yet",
     "customerReviews": "Guest Reviews ({count})"
   },
@@ -356,7 +360,8 @@
     "membersSilver": "Silver Members",
     "membersGold": "Gold Members",
     "levelDistribution": "Level distribution",
-    "stays": "stays"
+    "stays": "stays",
+    "exportCsv": "Export CSV"
   },
   "loyalty": {
     "levelPrefix": "Level",
@@ -638,7 +643,131 @@
       "priorityLow": "Low",
       "guestFallback": "Guest",
       "roomFallback": "Room",
-      "hotelFallback": "Hotel"
+      "hotelFallback": "Hotel",
+      "subtitle": "Manage personalized guest requests in real time."
+    }
+  },
+  "incidents": {
+    "client": {
+      "title": "Report a problem",
+      "subtitle": "Your room is detected automatically from your active stay.",
+      "timestampLabel": "Timestamped report",
+      "existingOpen": "You already have an open incident. Would you like to add a new one?",
+      "addNew": "Add a new report",
+      "showHistory": "View history",
+      "historyTitle": "My reported problems",
+      "noHistory": "No reports yet.",
+      "quickHelp": "Something wrong in your room? Let the team know in seconds.",
+      "descriptionPlaceholder": "Describe the problem you encountered in your room...",
+      "reportButton": "Report",
+      "confirmation": "Your report has been sent. The hotel team will contact you shortly.",
+      "roomUnavailable": "Room unavailable",
+      "noActiveStay": "No active stay with an assigned room was found.",
+      "contextLoadError": "Unable to retrieve your room right now.",
+      "severityHints": {
+        "low": "Small inconvenience",
+        "medium": "Annoying but manageable",
+        "high": "Urgent issue, please intervene quickly"
+      },
+      "messageLabel": "Your message",
+      "messagePlaceholder": "Briefly describe the problem you encountered...",
+      "sendButton": "Send",
+      "signalConfirmation": "Reception has received your report",
+      "signalError": "Unable to send your report right now.",
+      "signalsHistory": "My report history",
+      "incidentsHistory": "Incident tracking",
+      "noIncidents": "No incident linked to your reports yet.",
+      "waiting": "Pending"
+    },
+    "signals": {
+      "title": "Pending client reports",
+      "subtitle": "Turn client messages into structured incidents.",
+      "empty": "No pending client reports.",
+      "createIncident": "Create incident",
+      "prefilled": "Form pre-filled from the client report",
+      "pending": "Pending",
+      "processed": "Processed"
+    },
+    "report": {
+      "title": "Report an incident",
+      "subtitle": "Quickly report any issue detected in room operations or service."
+    },
+    "management": {
+      "title": "Incidents management"
+    },
+    "fields": {
+      "room": "Room",
+      "type": "Incident type",
+      "severity": "Severity",
+      "source": "Source",
+      "description": "Description"
+    },
+    "sources": {
+      "client": "Client",
+      "reception": "Reception",
+      "menage": "Housekeeping",
+      "appel": "Call"
+    },
+    "types": {
+      "cleanliness": "Cleanliness",
+      "maintenance": "Maintenance",
+      "security": "Security",
+      "noise": "Noise",
+      "other": "Other"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "status": {
+      "open": "Open",
+      "inProgress": "In progress",
+      "resolved": "Resolved"
+    },
+    "actions": {
+      "report": "Report incident",
+      "submitting": "Submitting...",
+      "changeStatus": "Change status"
+    },
+    "filters": {
+      "allStatus": "All statuses",
+      "allTypes": "All types",
+      "allSeverity": "All severities"
+    },
+    "columns": {
+      "date": "Reported at",
+      "room": "Room",
+      "type": "Type",
+      "severity": "Severity",
+      "status": "Status",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "stats": {
+      "total": "Total",
+      "open": "Open",
+      "inProgress": "In progress",
+      "resolvedToday": "Resolved today",
+      "avgResolution": "Average resolution time",
+      "last30Days": "Incidents over 30 days"
+    },
+    "messages": {
+      "reportSuccess": "Incident reported successfully.",
+      "reportError": "Unable to report incident right now.",
+      "roomsLoadError": "Unable to load rooms list.",
+      "loadError": "Unable to load incidents.",
+      "updateError": "Unable to update status.",
+      "noData": "No incidents found."
+    },
+    "validation": {
+      "required": "This field is required",
+      "descriptionMin": "Description must contain at least 5 characters"
+    },
+    "placeholders": {
+      "selectRoom": "Select a room",
+      "selectType": "Select an incident type",
+      "description": "Describe the issue in detail..."
     }
   },
   "home": {

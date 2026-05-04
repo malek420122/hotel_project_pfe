@@ -119,6 +119,119 @@ class SeedDemoCommand extends Command
             $this->info('Demo room photos added.');
         }
 
+        $tunisianHotels = [
+            [
+                'nom' => 'Mövenpick Hotel Gammarth Tunis',
+                'ville' => 'Tunis',
+                'description' => 'Vue mer, spa et élégance contemporaine au nord de Tunis',
+                'adresse' => 'Zone Touristique de Gammarth, Tunis',
+                'latitude' => 36.9286,
+                'longitude' => 10.3369,
+                'etoiles' => 5,
+                'prix_min' => 260,
+                'noteMoyenne' => 4.7,
+                'equipements' => ['spa', 'piscine', 'restaurant', 'wifi', 'parking'],
+                'photo_seed' => 'Movenpick Hotel Gammarth Tunis',
+                'room_name' => 'Chambre Standard Tunis',
+                'room_type' => 'DOUBLE',
+                'room_price' => 260,
+            ],
+            [
+                'nom' => 'Hasdrubal Thalassa & Spa Djerba',
+                'ville' => 'Djerba',
+                'description' => 'Grand resort thalasso face à la plage de Djerba',
+                'adresse' => 'Zone Touristique, Djerba',
+                'latitude' => 33.8076,
+                'longitude' => 10.8574,
+                'etoiles' => 5,
+                'prix_min' => 240,
+                'noteMoyenne' => 4.8,
+                'equipements' => ['spa', 'piscine', 'restaurant', 'wifi', 'plage'],
+                'photo_seed' => 'Hasdrubal Thalassa Spa Djerba',
+                'room_name' => 'Chambre Standard Djerba',
+                'room_type' => 'DOUBLE',
+                'room_price' => 240,
+            ],
+            [
+                'nom' => 'Sousse Pearl Marriott Resort & Spa',
+                'ville' => 'Sousse',
+                'description' => 'Resort moderne entre marina et plage en Tunisie',
+                'adresse' => 'Boulevard 14 Janvier, Sousse',
+                'latitude' => 35.8256,
+                'longitude' => 10.6416,
+                'etoiles' => 5,
+                'prix_min' => 210,
+                'noteMoyenne' => 4.6,
+                'equipements' => ['spa', 'piscine', 'restaurant', 'wifi', 'parking'],
+                'photo_seed' => 'Sousse Pearl Marriott Resort Spa',
+                'room_name' => 'Chambre Standard Sousse',
+                'room_type' => 'DOUBLE',
+                'room_price' => 210,
+            ],
+            [
+                'nom' => 'Radisson Blu Resort & Thalasso Hammamet',
+                'ville' => 'Hammamet',
+                'description' => 'Séjour balnéaire premium avec centre thalasso',
+                'adresse' => 'Avenue Hedi Nouira, Hammamet',
+                'latitude' => 36.4073,
+                'longitude' => 10.6187,
+                'etoiles' => 5,
+                'prix_min' => 230,
+                'noteMoyenne' => 4.7,
+                'equipements' => ['spa', 'piscine', 'restaurant', 'wifi', 'plage'],
+                'photo_seed' => 'Radisson Blu Resort Thalasso Hammamet',
+                'room_name' => 'Chambre Standard Hammamet',
+                'room_type' => 'DOUBLE',
+                'room_price' => 230,
+            ],
+        ];
+
+        foreach ($tunisianHotels as $hotelData) {
+            $seededHotel = Hotel::firstOrCreate(
+                ['nom' => $hotelData['nom'], 'ville' => $hotelData['ville']],
+                [
+                    'description' => $hotelData['description'],
+                    'adresse' => $hotelData['adresse'],
+                    'pays' => 'Tunisie',
+                    'latitude' => $hotelData['latitude'],
+                    'longitude' => $hotelData['longitude'],
+                    'etoiles' => $hotelData['etoiles'],
+                    'prix_min' => $hotelData['prix_min'],
+                    'noteMoyenne' => $hotelData['noteMoyenne'],
+                    'equipements' => $hotelData['equipements'],
+                    'services' => $hotelData['equipements'],
+                    'estActif' => true,
+                    'photos' => $this->buildPhotoSet($this->defaultHotelPhotos, $hotelData['photo_seed']),
+                ]
+            );
+
+            if (empty($seededHotel->photos)) {
+                $seededHotel->photos = $this->buildPhotoSet($this->defaultHotelPhotos, $hotelData['photo_seed']);
+                $seededHotel->save();
+            }
+
+            if (($seededHotel->pays ?? null) !== 'Tunisie') {
+                $seededHotel->pays = 'Tunisie';
+                $seededHotel->save();
+            }
+
+            Chambre::firstOrCreate(
+                ['hotelId' => (string) $seededHotel->_id, 'nom' => $hotelData['room_name']],
+                [
+                    'type' => $hotelData['room_type'],
+                    'description' => 'Chambre premium pour séjour de démonstration en Tunisie',
+                    'prix_base' => (float) $hotelData['room_price'],
+                    'maxVoyageurs' => 2,
+                    'equipements' => ['wifi', 'tv', 'climatisation'],
+                    'photos' => $this->buildPhotoSet($this->defaultRoomPhotos, $hotelData['photo_seed']),
+                    'estDisponible' => true,
+                    'etage' => 1,
+                ]
+            );
+
+            $this->info('Tunisian hotel ensured: ' . $seededHotel->nom . ' (' . $hotelData['ville'] . ')');
+        }
+
         $updatedHotels = 0;
         Hotel::query()->chunk(100, function ($hotels) use (&$updatedHotels) {
             foreach ($hotels as $item) {

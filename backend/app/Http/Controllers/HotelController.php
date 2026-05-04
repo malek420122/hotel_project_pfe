@@ -433,29 +433,64 @@ class HotelController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nom' => 'required|string',
-            'adresse' => 'required|string',
-            'ville' => 'required|string',
-            'etoiles' => 'required|integer|between:1,5',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+        try {
+            $validated = $request->validate([
+                'nom' => 'required|string|max:255',
+                'adresse' => 'required|string|max:500',
+                'ville' => 'required|string|max:100',
+                'description' => 'nullable|string',
+                'etoiles' => 'required|integer|between:1,5',
+                'prix_min' => 'nullable|numeric|min:0',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+            ]);
 
-        $hotel = Hotel::create($request->all());
-        return response()->json($hotel, 201);
+            $hotel = Hotel::create($validated);
+            Cache::flush();
+            return response()->json($hotel, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Hotel creation validation error:', ['errors' => $e->errors()]);
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Hotel creation error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['message' => 'Erreur lors de la création: ' . $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $hotel = Hotel::findOrFail($id);
-        $hotel->update($request->all());
-        return response()->json($hotel);
+        try {
+            $hotel = Hotel::findOrFail($id);
+            $validated = $request->validate([
+                'nom' => 'sometimes|string|max:255',
+                'adresse' => 'sometimes|string|max:500',
+                'ville' => 'sometimes|string|max:100',
+                'description' => 'nullable|string',
+                'etoiles' => 'sometimes|integer|between:1,5',
+                'prix_min' => 'nullable|numeric|min:0',
+                'latitude' => 'sometimes|numeric',
+                'longitude' => 'sometimes|numeric',
+            ]);
+            $hotel->update($validated);
+            Cache::flush();
+            return response()->json($hotel);
+        } catch (\Exception $e) {
+            \Log::error('Hotel update error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['message' => 'Erreur lors de la mise à jour: ' . $e->getMessage()], 500);
+        }
     }
+
     public function destroy($id)
     {
-        Hotel::findOrFail($id)->delete();
-        return response()->json(['message' => 'Hôtel supprimé']);
+        try {
+            $hotel = Hotel::findOrFail($id);
+            $hotel->delete();
+            Cache::flush();
+            return response()->json(['message' => 'Hôtel supprimé']);
+        } catch (\Exception $e) {
+            \Log::error('Hotel delete error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['message' => 'Erreur lors de la suppression: ' . $e->getMessage()], 500);
+        }
     }
 
     public function chambresDisponibles(Request $request, $id)
@@ -514,6 +549,9 @@ class HotelController extends Controller
     {
         $hotel = Hotel::findOrFail($id);
         $hotel->update(['estActif' => !$hotel->estActif]);
+        Cache::flush();
+
+        $hotel->refresh();
         return response()->json($hotel);
     }
 
@@ -795,10 +833,11 @@ class HotelController extends Controller
         }
 
         $cityCandidates = $this->extractLocalizedStringVariants($hotel->ville ?? null, $lang);
+        $countryCandidates = $this->extractLocalizedStringVariants($hotel->pays ?? null, $lang);
         $name = (string) ($hotel->nom ?? '');
         $address = (string) ($hotel->adresse ?? '');
 
-        $candidates = array_merge($cityCandidates, [$name, $address]);
+        $candidates = array_merge($cityCandidates, $countryCandidates, [$name, $address]);
 
         foreach ($candidates as $candidate) {
             if ($candidate === '') {

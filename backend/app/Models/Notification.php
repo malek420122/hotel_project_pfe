@@ -9,9 +9,16 @@ class Notification extends Model
     protected $connection = 'mongodb';
     protected $collection = 'notifications';
 
-    protected $fillable = ['userId', 'type', 'message', 'estLue'];
+    protected $fillable = ['userId', 'type', 'message', 'vu', 'estLue', 'createdAt'];
 
     protected $attributes = [
+        'vu' => false,
         'estLue' => false,
+    ];
+
+    protected $casts = [
+        'vu' => 'boolean',
+        'estLue' => 'boolean',
+        'createdAt' => 'datetime',
     ];
 }

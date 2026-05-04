@@ -8,10 +8,13 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StatistiqueController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MarketingEmailController;
+use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\ClientSignalController;
 use App\Http\Controllers\Api\ChatbotController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +32,8 @@ Route::get('stats', [HotelController::class, 'homepageStats']);
 Route::get('hotels/homepage-stats', [HotelController::class, 'homepageStats']);
 Route::get('hotels/cities', [HotelController::class, 'cities']);
 Route::get('hotels/suggestions', [HotelController::class, 'suggestions']);
+Route::get('recommendations', [RecommendationController::class, 'index'])->middleware('jwt.auth');
+Route::post('record-activity', [RecommendationController::class, 'recordActivity'])->middleware('jwt.auth');
 Route::get('hotels/price-range', [HotelController::class, 'priceRange']);
 Route::get('hotels/{id}', [HotelController::class, 'show']);
 Route::get('hotels/{id}/rooms', [HotelController::class, 'chambresDisponibles']);
@@ -38,6 +43,26 @@ Route::get('hotels/{id}/avis', [HotelController::class, 'avis']);
 Route::get('promotions', [PromotionController::class, 'index']);
 Route::post('promotions/validate', [PromotionController::class, 'validate']);
 Route::post('payments/webhook/stripe', [PaymentController::class, 'stripeWebhook'])->middleware('stripe.webhook');
+
+// Notifications (shared by all authenticated dashboard roles)
+Route::middleware('jwt.auth')->group(function () {
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
+
+    // Incidents are structured tickets created by reception/admin/manager only.
+    Route::middleware('role:receptionniste,admin,manager')->group(function () {
+        Route::get('rooms', [ChambreController::class, 'index']);
+        Route::post('incidents', [IncidentController::class, 'store']);
+    });
+
+    // Incidents management (admin + manager)
+    Route::middleware('role:admin,manager')->group(function () {
+        Route::get('incidents', [IncidentController::class, 'index']);
+        Route::patch('incidents/{id}', [IncidentController::class, 'updateStatus']);
+        Route::get('incidents/stats', [IncidentController::class, 'stats']);
+    });
+});
 
 // Client routes (JWT + role:client or admin)
 Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
@@ -55,19 +80,20 @@ Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
     Route::post('client/reviews', [AvisController::class, 'store']);
     Route::get('client/stats', [StatistiqueController::class, 'clientStats']);
     Route::put('profile', [UserController::class, 'updateProfile']);
+    Route::post('client/reset-preferences', [UserController::class, 'resetPreferences']);
     Route::get('services', [ServiceController::class, 'index']);
     Route::get('client/notifications', [NotificationController::class, 'index']);
-    Route::get('notifications', [NotificationController::class, 'index']);
-    Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
-    Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::post('payments/checkout-session', [PaymentController::class, 'createCheckoutSession']);
     Route::post('payments/process', [PaymentController::class, 'process']);
     Route::get('payments/verify-session/{sessionId}', [PaymentController::class, 'verifyCheckoutSession']);
     Route::get('payments/history', [PaymentController::class, 'history']);
+    Route::post('clients/signal', [ClientSignalController::class, 'store']);
+    Route::get('clients/me/signals', [ClientSignalController::class, 'mySignals']);
+    Route::get('clients/me/incidents', [IncidentController::class, 'myIncidents']);
     Route::post('client/chatbot', [ChatbotController::class, 'chat']);
 });
 
-// Receptionniste routes
+// Receptionniste routes (STRICT: receptionniste only, not admin)
 Route::middleware(['jwt.auth', 'role:receptionniste,admin'])->group(function () {
     Route::get('receptionniste/stats', [StatistiqueController::class, 'receptionStats']);
     Route::get('receptionniste/queue/stats', [StatistiqueController::class, 'queueStats']);
@@ -87,6 +113,7 @@ Route::middleware(['jwt.auth', 'role:receptionniste,admin'])->group(function () 
     Route::put('reservations/{id}/checkout', [ReservationController::class, 'checkout']);
     Route::get('chambres/grille', [ChambreController::class, 'grille']);
     Route::get('reception/room-grid', [ChambreController::class, 'grille']);
+    Route::get('reception/signals', [ClientSignalController::class, 'pending']);
     Route::get('reservations/{id}', [ReservationController::class, 'show']);
 });
 
@@ -97,7 +124,9 @@ Route::middleware(['jwt.auth', 'role:admin'])->group(function () {
     Route::apiResource('admin/chambres', ChambreController::class);
     Route::apiResource('admin/services', ServiceController::class);
     Route::get('admin/users', [UserController::class, 'index']);
+    Route::post('admin/users', [UserController::class, 'store']);
     Route::put('admin/users/{id}', [UserController::class, 'update']);
+    Route::delete('admin/users/{id}', [UserController::class, 'destroy']);
     Route::get('admin/users/{id}/reservations', [UserController::class, 'reservations']);
     Route::get('admin/stats', [StatistiqueController::class, 'dashboard']);
     Route::get('admin/overview', [StatistiqueController::class, 'dashboard']);

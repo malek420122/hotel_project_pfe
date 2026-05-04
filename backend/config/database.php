@@ -114,12 +114,15 @@ return [
 
         'mongodb' => [
             'driver' => 'mongodb',
-            'host' => env('MONGO_HOST', env('DB_HOST', 'mongodb')),
-            'port' => env('MONGO_PORT', env('DB_PORT', 27017)),
-            'database' => env('MONGO_DATABASE', env('DB_DATABASE', 'hotelease')),
-            'username' => env('MONGO_USERNAME', env('DB_USERNAME', '')),
-            'password' => env('MONGO_PASSWORD', env('DB_PASSWORD', '')),
-            'options' => [],
+            'host' => env('MONGO_HOST', 'mongodb'),
+            'port' => env('MONGO_PORT', 27017),
+            'database' => env('MONGO_DATABASE', 'hotelease'),
+            'username' => env('MONGO_USERNAME') ?: null,
+            'password' => env('MONGO_PASSWORD') ?: null,
+            'options' => array_filter([
+                'authSource' => env('MONGO_AUTH_SOURCE') ?: null,
+                'retryWrites' => true,
+            ]),
         ],
 
     ],

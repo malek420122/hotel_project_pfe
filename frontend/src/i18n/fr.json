@@ -20,6 +20,9 @@
     "checkin": "Check-In",
     "checkout": "Check-Out",
     "room_grid": "Grille chambres",
+    "report_incident": "Signaler un incident",
+    "report_problem": "Signaler un problème",
+    "incidents": "Incidents",
     "special_requests": "Demandes spéciales",
     "send_offers": "Envoyer Offres"
   },
@@ -185,7 +188,9 @@
     "hotel": "Hôtel",
     "room": "Chambre",
     "status": "Statut",
-    "actions": "Actions"
+    "actions": "Actions",
+    "refresh": "Actualiser",
+    "hide": "Masquer"
   },
   "hotels": {
     "resultsCount": "hôtels trouvés",
@@ -213,7 +218,6 @@
     "bookStay": "Réserver votre séjour",
     "bookYourStay": "Réservez votre séjour",
     "bookNow": "Réserver maintenant",
-    "viewRooms": "Voir les chambres disponibles",
     "noReviewsYet": "Pas encore d'avis",
     "customerReviews": "Avis clients ({count})"
   },
@@ -356,7 +360,8 @@
     "membersSilver": "Membres Argent",
     "membersGold": "Membres Or",
     "levelDistribution": "Répartition des niveaux",
-    "stays": "séjours"
+    "stays": "séjours",
+    "exportCsv": "Exporter CSV"
   },
   "loyalty": {
     "levelPrefix": "Niveau",
@@ -638,7 +643,131 @@
       "priorityLow": "Faible",
       "guestFallback": "Client",
       "roomFallback": "Chambre",
-      "hotelFallback": "Hôtel"
+      "hotelFallback": "Hôtel",
+      "subtitle": "Gérez les demandes personnalisées des clients en temps réel."
+    }
+  },
+  "incidents": {
+    "client": {
+      "title": "Signaler un problème",
+      "subtitle": "Votre chambre est détectée automatiquement depuis votre séjour en cours.",
+      "timestampLabel": "Signalement horodaté",
+      "existingOpen": "Vous avez déjà un incident en cours. Souhaitez-vous en ajouter un nouveau ?",
+      "addNew": "Ajouter un nouveau signalement",
+      "showHistory": "Voir l'historique",
+      "historyTitle": "Historique de mes signalements",
+      "noHistory": "Aucun signalement pour le moment.",
+      "quickHelp": "Un souci dans votre chambre ? Prévenez l'équipe en quelques secondes.",
+      "descriptionPlaceholder": "Décrivez le problème rencontré dans votre chambre...",
+      "reportButton": "Signaler",
+      "confirmation": "Votre signalement a bien été transmis. L'équipe de l'hôtel va vous contacter rapidement.",
+      "roomUnavailable": "Chambre indisponible",
+      "noActiveStay": "Aucun séjour actif avec chambre attribuée n'a été trouvé.",
+      "contextLoadError": "Impossible de récupérer votre chambre pour le moment.",
+      "severityHints": {
+        "low": "Petit désagrément",
+        "medium": "Gênant mais supportable",
+        "high": "Problème urgent, intervenez vite"
+      },
+      "messageLabel": "Votre message",
+      "messagePlaceholder": "Décrivez simplement le problème rencontré...",
+      "sendButton": "Envoyer",
+      "signalConfirmation": "La réception a bien reçu votre signalement",
+      "signalError": "Impossible d'envoyer votre signalement pour le moment.",
+      "signalsHistory": "Historique de mes signalements",
+      "incidentsHistory": "Suivi des incidents",
+      "noIncidents": "Aucun incident lié à vos signalements pour le moment.",
+      "waiting": "En attente"
+    },
+    "signals": {
+      "title": "Signalements clients en attente",
+      "subtitle": "Transformez les messages clients en incidents structurés.",
+      "empty": "Aucun signalement client en attente.",
+      "createIncident": "Créer un incident",
+      "prefilled": "Formulaire pré-rempli depuis le signalement client",
+      "pending": "En attente",
+      "processed": "Traité"
+    },
+    "report": {
+      "title": "Signaler un incident",
+      "subtitle": "Déclarez rapidement tout problème détecté en chambre ou en service."
+    },
+    "management": {
+      "title": "Gestion des incidents"
+    },
+    "fields": {
+      "room": "Chambre",
+      "type": "Type d'incident",
+      "severity": "Gravité",
+      "source": "Source",
+      "description": "Description"
+    },
+    "sources": {
+      "client": "Client",
+      "reception": "Réception",
+      "menage": "Ménage",
+      "appel": "Appel"
+    },
+    "types": {
+      "cleanliness": "Propreté",
+      "maintenance": "Maintenance",
+      "security": "Sécurité",
+      "noise": "Bruit",
+      "other": "Autre"
+    },
+    "severity": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute"
+    },
+    "status": {
+      "open": "Ouvert",
+      "inProgress": "En cours",
+      "resolved": "Résolu"
+    },
+    "actions": {
+      "report": "Signaler l'incident",
+      "submitting": "Envoi en cours...",
+      "changeStatus": "Changer le statut"
+    },
+    "filters": {
+      "allStatus": "Tous les statuts",
+      "allTypes": "Tous les types",
+      "allSeverity": "Toutes les gravités"
+    },
+    "columns": {
+      "date": "Date de signalement",
+      "room": "Chambre",
+      "type": "Type",
+      "severity": "Gravité",
+      "status": "Statut",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "stats": {
+      "total": "Total",
+      "open": "Ouverts",
+      "inProgress": "En cours",
+      "resolvedToday": "Résolus aujourd'hui",
+      "avgResolution": "Temps moyen de résolution",
+      "last30Days": "Incidents sur 30 jours"
+    },
+    "messages": {
+      "reportSuccess": "Incident signalé avec succès.",
+      "reportError": "Impossible de signaler l'incident pour le moment.",
+      "roomsLoadError": "Impossible de charger la liste des chambres.",
+      "loadError": "Impossible de charger les incidents.",
+      "updateError": "Impossible de modifier le statut.",
+      "noData": "Aucun incident trouvé."
+    },
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "descriptionMin": "La description doit contenir au moins 5 caractères"
+    },
+    "placeholders": {
+      "selectRoom": "Sélectionnez une chambre",
+      "selectType": "Sélectionnez un type d'incident",
+      "description": "Décrivez précisément le problème constaté..."
     }
   },
   "home": {

@@ -8,24 +8,16 @@
       xmlns="http://www.w3.org/2000/svg"
       class="shrink-0"
     >
-      <path
-        d="M14 52V24L32 13L50 24V52"
-        :fill="iconMain"
-        :fill-opacity="variant === 'dark' ? '0.18' : '0.1'"
-        :stroke="iconMain"
-        stroke-width="2"
-        stroke-linejoin="round"
-      />
-      <rect x="21" y="29" width="6" height="6" rx="1" :fill="iconMain" :fill-opacity="0.92" />
-      <rect x="37" y="29" width="6" height="6" rx="1" :fill="iconMain" :fill-opacity="0.92" />
-      <path d="M28 52V44C28 41.8 29.8 40 32 40V40C34.2 40 36 41.8 36 44V52" :stroke="iconMain" stroke-width="2.5" stroke-linecap="round" />
-      <path d="M26 52H38" :stroke="iconMain" stroke-width="2.5" stroke-linecap="round" />
-      <path d="M32 8L33.8 11.8L38 12.4L35 15.3L35.7 19.5L32 17.6L28.3 19.5L29 15.3L26 12.4L30.2 11.8L32 8Z" :fill="accent" />
-      <circle cx="48.5" cy="46.5" r="5.5" :stroke="accent" stroke-width="2" />
-      <path d="M52.8 50.8L57 55" :stroke="accent" stroke-width="2" stroke-linecap="round" />
+      <path d="M12 48V22L32 11L52 22V48" :fill="iconFill" :stroke="iconStroke" stroke-width="2" stroke-linejoin="round" />
+      <path d="M22 48V34H42V48" :fill="innerFill" :stroke="iconStroke" stroke-width="2" stroke-linejoin="round" />
+      <rect x="28" y="36" width="8" height="12" rx="2" :fill="accent" />
+      <path d="M18 24L32 16L46 24" :stroke="accent" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M26 30H38" :stroke="iconStroke" stroke-width="2.2" stroke-linecap="round" />
+      <circle cx="45.5" cy="16.5" r="4.2" :fill="accent" />
+      <path d="M45.5 12.6L46.4 14.9L48.9 15.1L47 16.7L47.6 19L45.5 17.8L43.4 19L44 16.7L42.1 15.1L44.6 14.9L45.5 12.6Z" fill="#fff8ea" />
     </svg>
 
-    <div class="leading-none">
+    <div class="leading-none brand-title">
       <span class="word-hotel" :style="{ color: textMain }">Hotel</span><span class="word-ease" :style="{ color: accent }">Ease</span>
     </div>
   </div>
@@ -47,9 +39,11 @@ const props = defineProps({
   },
 })
 
-const accent = '#f59e0b'
-const iconMain = computed(() => (props.variant === 'dark' ? '#ffffff' : '#1a3a6b'))
-const textMain = computed(() => (props.variant === 'dark' ? '#ffffff' : '#1a3a6b'))
+const accent = '#D4820A'
+const iconFill = computed(() => (props.variant === 'dark' ? 'rgba(255,255,255,0.16)' : 'rgba(212,130,10,0.10)'))
+const iconStroke = computed(() => (props.variant === 'dark' ? '#FFFFFF' : '#8B4513'))
+const innerFill = computed(() => (props.variant === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,248,232,0.9)'))
+const textMain = '#8B4513'
 
 const iconSize = computed(() => {
   if (props.size === 'sm') return 26
@@ -65,16 +59,22 @@ const sizeClass = computed(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+
+:host,
+div {
+  font-family: 'DM Sans', sans-serif;
+}
 
 .word-hotel {
   font-family: 'Playfair Display', serif;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
+  font-weight: 700;
 }
 
 .word-ease {
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
   margin-left: 1px;
 }
 
@@ -90,6 +90,6 @@ const sizeClass = computed(() => {
 
 .logo-lg .word-hotel,
 .logo-lg .word-ease {
-  font-size: 1.95rem;
+  font-size: 2rem;
 }
 </style>

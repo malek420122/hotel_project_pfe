@@ -16,6 +16,35 @@ class UserController extends Controller
         return response()->json(User::orderBy('created_at', 'desc')->get());
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:100',
+            'prenom' => 'required|string|max:100',
+            'email' => 'required|email|unique:mongodb.users,email',
+            'password' => 'required|string|min:8|regex:/^(?=.*[A-Z])(?=.*\d).+$/',
+            'telephone' => 'nullable|string|max:30',
+            'nationalite' => 'nullable|string|max:100',
+            'langue' => 'nullable|in:fr,en,ar',
+            'role' => 'nullable|in:client,receptionniste,admin,marketing',
+            'est_actif' => 'nullable|boolean',
+        ]);
+
+        $user = User::create([
+            'nom' => $validated['nom'],
+            'prenom' => $validated['prenom'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'telephone' => $validated['telephone'] ?? '',
+            'nationalite' => $validated['nationalite'] ?? '',
+            'langue' => $validated['langue'] ?? 'fr',
+            'role' => $validated['role'] ?? 'client',
+            'est_actif' => $request->has('est_actif') ? (bool) $validated['est_actif'] : true,
+        ]);
+
+        return response()->json($user, 201);
+    }
+
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -25,6 +54,20 @@ class UserController extends Controller
         }
         $user->update($data);
         return response()->json($user);
+    }
+
+    public function destroy($id)
+    {
+        $currentUser = JWTAuth::parseToken()->authenticate();
+
+        if ((string) $currentUser->_id === (string) $id) {
+            return response()->json(['message' => 'Vous ne pouvez pas supprimer votre propre compte'], 403);
+        }
+
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json(['message' => 'Utilisateur supprimé']);
     }
 
     public function updateProfile(Request $request)
@@ -123,6 +166,19 @@ class UserController extends Controller
             'message' => 'Récompense activée avec succès',
             'codePromo' => $promo->codePromo,
             'pointsRestants' => $newPoints,
+        ]);
+    }
+
+    public function resetPreferences(Request $request, \App\Services\RecommendationService $recommendationService)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userId = (string) ($user->_id ?? $user->id);
+
+        $recommendationService->resetUserActivities($userId);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Votre historique et vos recommandations ont été réinitialisés avec succès.'
         ]);
     }
 }

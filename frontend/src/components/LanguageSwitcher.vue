@@ -50,16 +50,16 @@ const buttonClass = computed(() => {
     return 'flex items-center gap-1.5 px-[10px] py-[6px] rounded-lg border border-white/25 bg-transparent hover:bg-white/10 transition-colors text-[13px] font-medium text-white'
   }
 
-  return 'flex items-center gap-1.5 px-[10px] py-[6px] rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-700'
+  return 'flex items-center gap-1.5 px-[10px] py-[6px] rounded-lg border border-[#8B4513]/10 hover:bg-[#8B4513]/5 transition-colors text-[13px] font-semibold text-[#8B4513]'
 })
 
-const arrowClass = computed(() => (props.variant === 'dark' ? 'text-white/90' : 'text-gray-400'))
+const arrowClass = computed(() => (props.variant === 'dark' ? 'text-white/90' : 'text-[#8B4513]/70'))
 
 const dropdownClass = computed(() => {
   if (props.variant === 'dark') {
-    return 'absolute right-0 mt-2 bg-[#1e293b] border border-white/10 rounded-xl shadow-2xl z-50 py-1 min-w-36'
+    return 'absolute right-0 mt-2 bg-white/90 border border-amber-100 rounded-xl shadow-2xl z-50 py-1 min-w-36'
   }
-  return 'absolute right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 min-w-36'
+  return 'absolute right-0 mt-2 bg-[#FDFBF7] border border-[#8B4513]/10 rounded-xl shadow-lg z-50 py-1 min-w-36'
 })
 
 function itemClass(code) {
@@ -67,12 +67,12 @@ function itemClass(code) {
   if (props.variant === 'dark') {
     return [
       'w-full text-left px-4 py-2 text-sm hover:bg-amber-500/20 flex items-center gap-2 transition-colors',
-      selected ? 'bg-amber-500/20 text-amber-300 font-semibold' : 'text-white',
+      selected ? 'bg-amber-500/20 text-amber-300 font-semibold' : 'text-[#8B4513]',
     ]
   }
   return [
-    'w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors',
-    selected ? 'bg-blue-50 text-secondary font-semibold' : 'text-gray-700',
+    'w-full text-left px-4 py-2 text-sm hover:bg-[#D4820A]/10 flex items-center gap-2 transition-colors',
+    selected ? 'bg-[#D4820A]/10 text-[#D4820A] font-semibold' : 'text-[#8B4513] font-medium',
   ]
 }
 

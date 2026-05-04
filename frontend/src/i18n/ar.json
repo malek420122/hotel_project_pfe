@@ -20,6 +20,9 @@
     "checkin": "تسجيل الوصول",
     "checkout": "تسجيل المغادرة",
     "room_grid": "شبكة الغرف",
+    "report_incident": "الإبلاغ عن حادث",
+    "report_problem": "الإبلاغ عن مشكلة",
+    "incidents": "الحوادث",
     "special_requests": "طلبات خاصة",
     "send_offers": "إرسال العروض"
   },
@@ -185,7 +188,9 @@
     "hotel": "الفندق",
     "room": "الغرفة",
     "status": "الحالة",
-    "actions": "الإجراءات"
+    "actions": "الإجراءات",
+    "refresh": "تحديث",
+    "hide": "إخفاء"
   },
   "hotels": {
     "resultsCount": "فندق تم العثور عليه",
@@ -213,7 +218,6 @@
     "bookStay": "احجز إقامتك",
     "bookYourStay": "احجز إقامتك",
     "bookNow": "احجز الآن",
-    "viewRooms": "عرض الغرف المتاحة",
     "noReviewsYet": "لا توجد تقييمات بعد",
     "customerReviews": "آراء النزلاء ({count})"
   },
@@ -356,7 +360,8 @@
     "membersSilver": "أعضاء الفضي",
     "membersGold": "أعضاء الذهبي",
     "levelDistribution": "توزيع المستويات",
-    "stays": "إقامات"
+    "stays": "الإقامات",
+    "exportCsv": "تصدير CSV"
   },
   "loyalty": {
     "levelPrefix": "المستوى",
@@ -638,7 +643,131 @@
       "priorityLow": "منخفض",
       "guestFallback": "عميل",
       "roomFallback": "غرفة",
-      "hotelFallback": "فندق"
+      "hotelFallback": "فندق",
+      "subtitle": "إدارة طلبات الضيوف المخصصة في الوقت الفعلي."
+    }
+  },
+  "incidents": {
+    "client": {
+      "title": "الإبلاغ عن مشكلة",
+      "subtitle": "يتم تحديد غرفتك تلقائياً من إقامتك الحالية.",
+      "timestampLabel": "بلاغ مؤرخ",
+      "existingOpen": "لديك بلاغ مفتوح حالياً. هل ترغب في إضافة بلاغ جديد؟",
+      "addNew": "إضافة بلاغ جديد",
+      "showHistory": "عرض السجل",
+      "historyTitle": "سجل بلاغاتي",
+      "noHistory": "لا توجد بلاغات حتى الآن.",
+      "quickHelp": "هل توجد مشكلة في غرفتك؟ أبلغ الفريق خلال ثوانٍ.",
+      "descriptionPlaceholder": "صف المشكلة التي واجهتها في غرفتك...",
+      "reportButton": "إبلاغ",
+      "confirmation": "تم إرسال بلاغك بنجاح. سيتواصل معك فريق الفندق قريباً.",
+      "roomUnavailable": "الغرفة غير متاحة",
+      "noActiveStay": "لم يتم العثور على إقامة نشطة بغرفة مخصصة.",
+      "contextLoadError": "تعذر استرداد غرفتك حالياً.",
+      "severityHints": {
+        "low": "إزعاج بسيط",
+        "medium": "مزعج لكنه محتمل",
+        "high": "مشكلة عاجلة، يرجى التدخل بسرعة"
+      },
+      "messageLabel": "رسالتك",
+      "messagePlaceholder": "صف المشكلة التي واجهتها باختصار...",
+      "sendButton": "إرسال",
+      "signalConfirmation": "استلمت الاستقبال بلاغك",
+      "signalError": "تعذر إرسال بلاغك حالياً.",
+      "signalsHistory": "سجل بلاغاتي",
+      "incidentsHistory": "متابعة الحوادث",
+      "noIncidents": "لا توجد حوادث مرتبطة ببلاغاتك حتى الآن.",
+      "waiting": "في الانتظار"
+    },
+    "signals": {
+      "title": "بلاغات العملاء المعلقة",
+      "subtitle": "حوّل رسائل العملاء إلى حوادث منظمة.",
+      "empty": "لا توجد بلاغات عملاء معلقة.",
+      "createIncident": "إنشاء حادث",
+      "prefilled": "تم ملء النموذج من بلاغ العميل",
+      "pending": "في الانتظار",
+      "processed": "تمت المعالجة"
+    },
+    "report": {
+      "title": "الإبلاغ عن حادث",
+      "subtitle": "أبلغ بسرعة عن أي مشكلة تم اكتشافها في الغرفة أو الخدمة."
+    },
+    "management": {
+      "title": "إدارة الحوادث"
+    },
+    "fields": {
+      "room": "الغرفة",
+      "type": "نوع الحادث",
+      "severity": "الخطورة",
+      "source": "المصدر",
+      "description": "الوصف"
+    },
+    "sources": {
+      "client": "العميل",
+      "reception": "الاستقبال",
+      "menage": "التنظيف",
+      "appel": "اتصال"
+    },
+    "types": {
+      "cleanliness": "النظافة",
+      "maintenance": "الصيانة",
+      "security": "الأمن",
+      "noise": "الضوضاء",
+      "other": "أخرى"
+    },
+    "severity": {
+      "low": "منخفضة",
+      "medium": "متوسطة",
+      "high": "مرتفعة"
+    },
+    "status": {
+      "open": "مفتوح",
+      "inProgress": "قيد المعالجة",
+      "resolved": "تم الحل"
+    },
+    "actions": {
+      "report": "الإبلاغ عن الحادث",
+      "submitting": "جارٍ الإرسال...",
+      "changeStatus": "تغيير الحالة"
+    },
+    "filters": {
+      "allStatus": "كل الحالات",
+      "allTypes": "كل الأنواع",
+      "allSeverity": "كل درجات الخطورة"
+    },
+    "columns": {
+      "date": "تاريخ الإبلاغ",
+      "room": "الغرفة",
+      "type": "النوع",
+      "severity": "الخطورة",
+      "status": "الحالة",
+      "description": "الوصف",
+      "actions": "الإجراءات"
+    },
+    "stats": {
+      "total": "الإجمالي",
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "resolvedToday": "المحلولة اليوم",
+      "avgResolution": "متوسط وقت الحل",
+      "last30Days": "الحوادث خلال 30 يوماً"
+    },
+    "messages": {
+      "reportSuccess": "تم الإبلاغ عن الحادث بنجاح.",
+      "reportError": "تعذر الإبلاغ عن الحادث حالياً.",
+      "roomsLoadError": "تعذر تحميل قائمة الغرف.",
+      "loadError": "تعذر تحميل الحوادث.",
+      "updateError": "تعذر تحديث الحالة.",
+      "noData": "لا توجد حوادث."
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "descriptionMin": "يجب أن يحتوي الوصف على 5 أحرف على الأقل"
+    },
+    "placeholders": {
+      "selectRoom": "اختر غرفة",
+      "selectType": "اختر نوع الحادث",
+      "description": "صف المشكلة بالتفصيل..."
     }
   },
   "home": {

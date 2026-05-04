@@ -14,6 +14,12 @@
       </template>
       <template #actions="{ row }">
         <div class="flex gap-2">
+          <button
+            @click="toggleHotel(row)"
+            :class="['text-xs px-3 py-1.5 rounded-lg', row.estActif ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100']"
+          >
+            {{ row.estActif ? '🔒 Masquer' : '👁️ Afficher' }}
+          </button>
           <button @click="openModal(row)" class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">✏️ Modifier</button>
           <button @click="confirmDelete(row)" class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">🗑️ Supprimer</button>
         </div>
@@ -71,7 +77,10 @@ const cols = [
   { key: 'nom', label: 'Nom' }, { key: 'ville', label: 'Ville' }, { key: 'etoiles', label: 'Étoiles' },
   { key: 'prix_min', label: 'Prix min' }, { key: 'noteMoyenne', label: 'Note' }, { key: 'statut', label: 'Statut' }, { key: 'actions', label: 'Actions' }
 ]
-async function fetchHotels() { const { data } = await api.get('/admin/hotels'); hotels.value = data.data || data }
+async function fetchHotels() {
+  const { data } = await api.get('/admin/hotels', { params: { per_page: 100 } })
+  hotels.value = data.data || data
+}
 function openModal(hotel) {
   if (hotel) Object.assign(form, { ...hotel, _id: hotel._id })
   else Object.assign(form, { _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null })
@@ -86,11 +95,26 @@ async function saveHotel() {
     await fetchHotels()
   } catch(e) { errorMsg.value = e.response?.data?.message || 'Erreur' }
 }
+async function toggleHotel(hotel) {
+  try {
+    errorMsg.value = ''
+    await api.put(`/admin/hotels/${hotel._id}/toggle`)
+    await fetchHotels()
+  } catch (e) {
+    errorMsg.value = e.response?.data?.message || 'Erreur lors du changement de statut'
+  }
+}
 function confirmDelete(hotel) { deleteModal.value = { show: true, hotel } }
 async function doDelete() {
-  await api.delete(`/admin/hotels/${deleteModal.value.hotel._id}`)
-  deleteModal.value.show = false
-  await fetchHotels()
+  try {
+    errorMsg.value = ''
+    await api.delete(`/admin/hotels/${deleteModal.value.hotel._id}`)
+    deleteModal.value.show = false
+    await fetchHotels()
+  } catch (e) {
+    errorMsg.value = e.response?.data?.message || 'Erreur lors de la suppression'
+    deleteModal.value.show = false
+  }
 }
 onMounted(fetchHotels)
 </script>

@@ -88,7 +88,7 @@ const chartPlugins = [
       const counts = (analytics.value?.topHotels || []).map((item) => item.reservationsCount || 0)
 
       ctx.save()
-      ctx.fillStyle = '#e2e8f0'
+      ctx.fillStyle = '#A07040'
       ctx.font = '600 11px Inter, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'bottom'
@@ -109,7 +109,7 @@ const hotelChart = computed(() => ({
   datasets: [{
     label: t('marketing.revenueLabel'),
     data: (analytics.value?.topHotels || []).map((hotel) => Number(hotel.revenu || 0)),
-    backgroundColor: '#38bdf8',
+    backgroundColor: '#D4820A',
     borderRadius: 10,
     maxBarThickness: 44,
   }],
@@ -138,13 +138,13 @@ const hotelChartOpts = computed(() => ({
     },
   },
   scales: {
-    x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    x: { ticks: { color: '#A07040' }, grid: { color: 'rgba(180,110,30,0.06)' } },
     y: {
       ticks: {
-        color: '#cbd5e1',
+        color: '#A07040',
         callback: (value) => formatEuro(value),
       },
-      grid: { color: 'rgba(255,255,255,0.05)' },
+      grid: { color: 'rgba(180,110,30,0.06)' },
     },
   },
 }))
@@ -161,8 +161,8 @@ const promotionChartOpts = computed(() => ({
     },
   },
   scales: {
-    x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-    y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    x: { ticks: { color: '#A07040' }, grid: { color: 'rgba(180,110,30,0.06)' } },
+    y: { ticks: { color: '#A07040' }, grid: { color: 'rgba(180,110,30,0.06)' } },
   },
 }))
 
@@ -202,9 +202,9 @@ onMounted(loadAnalytics)
 
 <style scoped>
 .marketing-page {
-  --bg-card: #1e293b;
-  --text-main: #e2e8f0;
-  --text-soft: #94a3b8;
+  --bg-card: #FFFFFF;
+  --text-main: #3A1A04;
+  --text-soft: #A07040;
 }
 
 .marketing-head {
@@ -257,7 +257,7 @@ onMounted(loadAnalytics)
 
 .premium-card {
   background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
   color: var(--text-main);
@@ -266,7 +266,7 @@ onMounted(loadAnalytics)
 
 .premium-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.36);
+  box-shadow: 0 10px 28px rgba(58,26,4,0.06);
 }
 
 .kpi-label,

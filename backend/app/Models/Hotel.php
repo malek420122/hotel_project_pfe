@@ -35,6 +35,16 @@ class Hotel extends Model
             'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400&q=80',
             'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1400&q=80',
         ],
+        'le meurice' => [
+            'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1400',
+            'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1400',
+            'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1400',
+        ],
+        'royal mansour' => [
+            'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1400',
+            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400',
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1400',
+        ],
     ];
 
     private const REAL_HOTEL_PHOTOS_FALLBACK = [
@@ -47,12 +57,13 @@ class Hotel extends Model
 
     protected $fillable = [
         'nom', 'description', 'adresse', 'ville',
-        'latitude', 'longitude', 'etoiles', 'photos',
+        'pays', 'latitude', 'longitude', 'etoiles', 'prix_min', 'photos',
         'noteMoyenne', 'equipements', 'services', 'estActif'
     ];
 
     protected $attributes = [
         'etoiles' => 3,
+        'prix_min' => 0,
         'photos' => [],
         'equipements' => [],
         'services' => [],

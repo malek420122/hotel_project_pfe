@@ -19,7 +19,7 @@ onMounted(() => {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map)
   const icon = L.divIcon({
-    html: `<div style="background:#003580;color:white;padding:6px 10px;border-radius:8px;font-weight:bold;font-size:12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🏨 ${props.hotel.nom}</div>`,
+    html: `<div style="background:#8B4513;color:white;padding:6px 10px;border-radius:8px;font-weight:bold;font-size:12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.12)">🏨 ${props.hotel.nom}</div>`,
     className: '',
     iconAnchor: [60, 20],
   })

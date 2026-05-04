@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
 
 .invoice-btn:hover {
   border-color: rgba(30, 41, 59, 0.6);
-  color: #1e293b;
+  color: var(--text-primary);
   background: rgba(148, 163, 184, 0.08);
 }
 
@@ -379,11 +379,11 @@ onBeforeUnmount(() => {
 
 .modify-modal {
   position: relative;
-  background: var(--bg-secondary, #1e293b);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: #ffffff;
-  box-shadow: 0 28px 70px rgba(2, 6, 23, 0.5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
 }
 
 .modify-close-btn {
@@ -394,8 +394,8 @@ onBeforeUnmount(() => {
   height: 2rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-soft);
+  background: rgba(255,255,255,0.98);
   font-size: 1.2rem;
   line-height: 1;
 }
@@ -405,7 +405,7 @@ onBeforeUnmount(() => {
 }
 
 .modify-title {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 18px;
   font-weight: 700;
   padding-right: 2rem;
@@ -424,30 +424,30 @@ onBeforeUnmount(() => {
 }
 
 .modal-label {
-  color: #e2e8f0;
+  color: var(--text-primary);
   display: inline-block;
   margin-bottom: 0.4rem;
 }
 
 .modify-input {
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.96);
+  color: var(--text-primary);
   padding: 0.6rem 0.75rem;
   outline: none;
 }
 
 .modify-input:focus {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
+  border-color: rgba(212,130,10,0.3);
+  box-shadow: 0 0 0 2px rgba(212,130,10,0.12);
 }
 
 .modal-cancel-btn {
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  color: #f8fafc;
+  color: var(--text-primary);
   background: transparent;
   padding: 0.58rem 1rem;
   font-weight: 600;
@@ -460,8 +460,8 @@ onBeforeUnmount(() => {
 .modal-save-btn {
   border: none;
   border-radius: 12px;
-  color: #111827;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: var(--text-primary);
+  background: linear-gradient(135deg, #FDF3DC, #FCECCF);
   padding: 0.58rem 1rem;
   font-weight: 700;
 }

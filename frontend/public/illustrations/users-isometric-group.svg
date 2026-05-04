@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Clients illustration">
+  <defs>
+    <linearGradient id="usersBase" x1="36" y1="106" x2="144" y2="156" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DCFCE7"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="usersBack" x1="54" y1="48" x2="126" y2="126" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF7ED"/>
+      <stop offset="1" stop-color="#FB923C"/>
+    </linearGradient>
+    <linearGradient id="usersFront" x1="44" y1="56" x2="138" y2="146" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+    <filter id="usersShadow" x="0" y="0" width="180" height="180" filterUnits="userSpaceOnUse">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+      <feOffset dy="10"/>
+      <feColorMatrix values="0 0 0 0 0.13 0 0 0 0 0.23 0 0 0 0 0.18 0 0 0 0.16 0"/>
+      <feBlend in2="SourceGraphic" mode="normal"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="88" cy="154" rx="56" ry="10" fill="#10B981" fill-opacity="0.15"/>
+
+  <g filter="url(#usersShadow)">
+    <path d="M38 112L90 84l52 28-52 28-52-28Z" fill="url(#usersBase)"/>
+    <path d="M38 112v20l52 28v-20l-52-28Z" fill="#059669"/>
+    <path d="M142 112v20l-52 28v-20l52-28Z" fill="#047857"/>
+
+    <circle cx="70" cy="78" r="17" fill="url(#usersBack)"/>
+    <path d="M57 118c3-16 11-24 13-24s10 8 13 24" fill="#FB923C"/>
+    <circle cx="110" cy="72" r="19" fill="url(#usersFront)"/>
+    <path d="M95 120c3-17 11-26 15-26s12 9 15 26" fill="#14B8A6"/>
+    <circle cx="130" cy="84" r="15" fill="#FEF3C7"/>
+    <path d="M118 120c2-13 8-20 12-20s10 7 12 20" fill="#F59E0B"/>
+
+    <circle cx="70" cy="77" r="6" fill="#7C2D12"/>
+    <circle cx="110" cy="71" r="7" fill="#0F172A"/>
+    <circle cx="130" cy="84" r="5" fill="#B45309"/>
+
+    <rect x="58" y="53" width="22" height="6" rx="3" fill="#F59E0B" transform="rotate(-18 58 53)"/>
+    <path d="M123 46c6 1 9 4 9 9" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

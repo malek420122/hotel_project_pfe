@@ -29,22 +29,6 @@ function Stop-PortProcess {
     }
 }
 
-function Get-FreePort {
-    param(
-        [int]$StartPort = 5173,
-        [int]$EndPort = 5180
-    )
-
-    for ($port = $StartPort; $port -le $EndPort; $port++) {
-        $isUsed = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
-        if (-not $isUsed) {
-            return $port
-        }
-    }
-
-    throw "No free port found in range $StartPort-$EndPort"
-}
-
 # 1. Stop likely conflicting server processes.
 Stop-PortProcess -Port 8010
 Stop-PortProcess -Port 5173
@@ -80,8 +64,8 @@ if (-not $backendUp) {
     throw 'Backend failed to start on http://127.0.0.1:8010'
 }
 
-# 4. Select frontend port and start Vite.
-$frontendPort = Get-FreePort -StartPort 5173 -EndPort 5180
+# 4. Start frontend on a fixed port.
+$frontendPort = 5173
 $env:VITE_PORT = [string]$frontendPort
 $env:VITE_APP_PORT = [string]$frontendPort
 $env:PLAYWRIGHT_BASE_URL = "http://localhost:$frontendPort"

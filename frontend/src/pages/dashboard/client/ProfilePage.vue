@@ -1,41 +1,41 @@
 <template>
-  <div class="max-w-xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ t('profile.title') }}</h2>
+  <div class="profile-page max-w-2xl mx-auto">
+    <h2 class="profile-title">{{ t('profile.title') }}</h2>
     <div class="card profile-card" dir="auto">
       <div class="flex items-center gap-4 mb-6">
-        <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center text-white text-3xl font-bold">
+        <div class="profile-avatar">
           {{ auth.user?.prenom?.[0] || 'U' }}
         </div>
         <div>
-          <h3 class="text-xl font-bold text-gray-800">{{ auth.user?.prenom }} {{ auth.user?.nom }}</h3>
-          <p class="text-gray-500">{{ auth.user?.email }}</p>
-          <span class="text-xs bg-secondary text-white px-3 py-1 rounded-full mt-1 inline-block">{{ t('profile.clientBadge') }}</span>
+          <h3 class="profile-name">{{ auth.user?.prenom }} {{ auth.user?.nom }}</h3>
+          <p class="profile-email">{{ auth.user?.email }}</p>
+          <span class="profile-badge">{{ t('profile.clientBadge') }}</span>
         </div>
       </div>
       <form @submit.prevent="save" class="space-y-4">
-        <p v-if="message" :class="['text-sm', message.type === 'success' ? 'text-green-600' : 'text-red-500']">
+        <p v-if="message" :class="['profile-message', message.type === 'success' ? 'profile-message-success' : 'profile-message-error']">
           {{ message.text }}
         </p>
         <div class="profile-grid-two gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('profile.firstName') }}</label>
+            <label class="profile-label">{{ t('profile.firstName') }}</label>
             <input v-model="form.prenom" class="input-field" />
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('profile.lastName') }}</label>
+            <label class="profile-label">{{ t('profile.lastName') }}</label>
             <input v-model="form.nom" class="input-field" />
           </div>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('profile.email') }}</label>
+          <label class="profile-label">{{ t('profile.email') }}</label>
           <input v-model="form.email" type="email" class="input-field ltr-value" readonly />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('profile.phone') }}</label>
+          <label class="profile-label">{{ t('profile.phone') }}</label>
           <input v-model="form.telephone" class="input-field ltr-value" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('profile.preferredLanguage') }}</label>
+          <label class="profile-label">{{ t('profile.preferredLanguage') }}</label>
           <div class="lang-dropdown">
             <div class="lang-trigger" dir="auto" @click="langOpen = !langOpen">
               <span>{{ selectedLangLabel }}</span>
@@ -141,8 +141,26 @@
             </button>
           </div>
         </div>
-        <button type="submit" class="btn-primary w-full">{{ t('profile.saveButton') }}</button>
+        <button type="submit" class="profile-save-btn w-full">{{ t('profile.saveButton') }}</button>
       </form>
+
+      <!-- RGPD Reset Preferences Section -->
+      <div class="mt-10 pt-6 border-t border-[rgba(180,110,30,0.16)]">
+        <h3 class="text-lg font-bold text-[#3A1A04] mb-2">Confidentialité & Données</h3>
+        <p class="text-sm text-[#7a5b38] mb-4">
+          Vous pouvez réinitialiser votre historique de navigation. Cela effacera vos recommandations personnalisées.
+        </p>
+        
+        <button 
+          type="button"
+          @click="handleResetPreferences" 
+          :disabled="isResetting"
+          class="flex items-center justify-center px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors w-full sm:w-auto font-bold border border-red-100"
+        >
+          <Trash2 :size="18" class="mr-2" />
+          <span>{{ isResetting ? 'Effacement en cours...' : 'Réinitialiser mes préférences' }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -153,6 +171,7 @@ import { useAuthStore } from '../../../stores/auth'
 import { usePasswordToggle } from '../../../composables/usePasswordToggle'
 import api from '../../../api'
 import { changeLanguage } from '../../../i18n'
+import { Trash2 } from 'lucide-vue-next'
 const auth = useAuthStore()
 const { locale, t } = useI18n()
 const message = ref(null)
@@ -227,11 +246,107 @@ async function save() {
     message.value = { type: 'error', text: e.response?.data?.message || t('profile.updateError') }
   }
 }
+
+const isResetting = ref(false)
+
+const handleResetPreferences = async () => {
+  if (!confirm("Êtes-vous sûr de vouloir réinitialiser votre algorithme de recommandation ?")) return;
+
+  isResetting.value = true;
+  try {
+    const response = await api.post('/client/reset-preferences');
+    alert(response.data.message);
+    window.location.reload(); 
+  } catch (error) {
+    console.error("Erreur lors de la réinitialisation", error);
+    alert("Une erreur est survenue lors de la réinitialisation.");
+  } finally {
+    isResetting.value = false;
+  }
+};
 </script>
 
 <style scoped>
 .profile-card {
   overflow: visible;
+  border: 1px solid rgba(180,110,30,0.16);
+  background: rgba(255,252,245,0.96);
+  box-shadow: 0 18px 48px rgba(58,26,4,0.08);
+  border-radius: 20px;
+}
+
+.profile-page {
+  color: var(--text-primary);
+}
+
+.profile-title {
+  margin-bottom: 1.25rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #3A1A04;
+}
+
+.profile-avatar {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0f6fc4, #1e88e5);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  text-transform: lowercase;
+  box-shadow: 0 10px 24px rgba(15,111,196,0.2);
+}
+
+.profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #3A1A04;
+}
+
+.profile-email {
+  color: var(--text-soft);
+  margin-top: 0.2rem;
+}
+
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.45rem;
+  padding: 0.26rem 0.65rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0f6fc4, #1e88e5);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(15,111,196,0.18);
+}
+
+.profile-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #7a5b38;
+}
+
+.profile-message {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.profile-message-success {
+  color: #0f8a55;
+}
+
+.profile-message-error {
+  color: #b91c1c;
 }
 
 .profile-grid-two {
@@ -244,11 +359,11 @@ async function save() {
 }
 
 .lang-trigger {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
-  padding: 10px 14px;
-  border-radius: 8px;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(180,110,30,0.16);
+  color: #3A1A04;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -261,25 +376,26 @@ async function save() {
   left: 0;
   right: 0;
   z-index: 50;
-  background: #1e2535;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
+  background: #fffdfa;
+  border: 1px solid rgba(180,110,30,0.16);
+  border-radius: 12px;
   margin-top: 4px;
   overflow: hidden;
+  box-shadow: 0 14px 34px rgba(58,26,4,0.08);
 }
 
 .lang-option {
   padding: 10px 14px;
   cursor: pointer;
-  color: white;
+  color: #3A1A04;
 }
 
 .lang-option:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(212,130,10,0.08);
 }
 
 .lang-option-active {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(212,130,10,0.12);
 }
 
 .password-field-wrapper {
@@ -294,7 +410,7 @@ async function save() {
   background: none;
   border: none;
   padding: 0;
-  color: rgba(255, 255, 255, 0.6);
+  color: #8B4513;
   cursor: pointer;
 }
 
@@ -304,12 +420,12 @@ async function save() {
 }
 
 .dashboard-password-input {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-  box-shadow: 0 0 0px 1000px #1a2035 inset;
-  -webkit-box-shadow: 0 0 0px 1000px #1a2035 inset;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #3A1A04 !important;
+  -webkit-text-fill-color: #3A1A04 !important;
+  box-shadow: 0 0 0px 1000px #fffdfa inset;
+  -webkit-box-shadow: 0 0 0px 1000px #fffdfa inset;
+  border: 1px solid rgba(180,110,30,0.16);
   padding-inline-end: 42px;
 }
 
@@ -322,9 +438,38 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  box-shadow: 0 0 0px 1000px #13192b inset !important;
-  -webkit-box-shadow: 0 0 0px 1000px #13192b inset !important;
-  -webkit-text-fill-color: white !important;
-  caret-color: white;
+  box-shadow: 0 0 0px 1000px #fffdfa inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fffdfa inset !important;
+  -webkit-text-fill-color: #3A1A04 !important;
+  caret-color: #3A1A04;
+}
+
+.profile-save-btn {
+  width: 100%;
+  border: 1px solid rgba(180,110,30,0.14);
+  background: linear-gradient(180deg, #fffaf1 0%, #f7ead6 100%);
+  color: #3A1A04;
+  box-shadow: 0 10px 22px rgba(58,26,4,0.06);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  font-weight: 800;
+}
+
+.profile-save-btn:hover {
+  background: linear-gradient(180deg, #fff7e8 0%, #f4e0bf 100%);
+}
+
+@media (max-width: 640px) {
+  .profile-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-title {
+    font-size: 1.7rem;
+  }
+
+  .profile-card {
+    padding: 1rem;
+  }
 }
 </style>

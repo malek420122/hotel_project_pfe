@@ -12,11 +12,11 @@
       @keyup.enter="onEnter"
     />
 
-    <Teleport to="body" :disabled="!isFixedOverlayMode">
+    <Teleport to="body">
       <transition name="dropdown-fade-slide">
         <div
           v-if="showSuggestions"
-          :class="dropdownClass"
+          :class="[dropdownClass, 'autocomplete-dropdown-fixed', 'shadow-lg', 'ring-1', 'ring-black/5', 'border', 'border-white/60']"
           :style="dropdownStyle"
         >
           <div v-if="suggestionsLoading" class="dropdown-loading">{{ t('common.loadingSuggestions') }}</div>
@@ -28,21 +28,12 @@
             @mousedown.prevent="selectSuggestion(item)"
           >
             <span class="dropdown-item-main">
-              <span class="dropdown-icon" aria-hidden="true">{{ item.type === 'hotel' ? '🏨' : '📍' }}</span>
+              <MapPin v-if="item.type !== 'hotel'" class="dropdown-icon text-[#FF8C00]" aria-hidden="true" />
+              <Building2 v-else class="dropdown-icon text-[#FF8C00]" aria-hidden="true" />
               <span class="dropdown-value">{{ displayValue(item) }}</span>
             </span>
-            <span
-              v-if="item.type !== 'hotel'"
-              class="dropdown-badge dropdown-badge-city"
-            >
-              {{ t('searchbar.cityBadge') }}
-            </span>
-            <span
-              v-else
-              class="dropdown-badge dropdown-badge-hotel"
-            >
-              {{ t('searchbar.hotelBadge') }}
-            </span>
+            <span v-if="item.type !== 'hotel'" class="dropdown-badge dropdown-badge-city">{{ t('searchbar.cityBadge') }}</span>
+            <span v-else class="dropdown-badge dropdown-badge-hotel">{{ t('searchbar.hotelBadge') }}</span>
           </button>
           <div v-if="!suggestionsLoading && !suggestions.length" class="dropdown-empty">
             <span aria-hidden="true">🔍</span>
@@ -57,6 +48,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { MapPin, Building2 } from 'lucide-vue-next'
 import api from '../api'
 
 const props = defineProps({
@@ -76,7 +68,7 @@ const props = defineProps({
     validator: (value) => ['self', 'full-search-bar'].includes(value),
   },
   dropdownContainerSelector: { type: String, default: '' },
-  dropdownZIndex: { type: Number, default: 999999 },
+  dropdownZIndex: { type: Number, default: 2147483000 },
   dropdownMaxHeight: { type: Number, default: 350 },
 })
 
@@ -100,14 +92,7 @@ function getContainerElement() {
 }
 
 function updateDropdownPosition() {
-  if (!isFixedOverlayMode.value || !showSuggestions.value) {
-    dropdownStyle.value = {
-      zIndex: String(props.dropdownZIndex),
-      maxHeight: `${props.dropdownMaxHeight}px`,
-      overflowY: 'auto',
-    }
-    return
-  }
+  if (!showSuggestions.value) return
 
   const inputEl = inputRef.value
   const containerEl = getContainerElement()
@@ -116,11 +101,15 @@ function updateDropdownPosition() {
   const inputRect = inputEl.getBoundingClientRect()
   const containerRect = containerEl ? containerEl.getBoundingClientRect() : inputRect
 
+  // Always render the dropdown in the document body as fixed to avoid stacking/context issues.
+  const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || 0
+  const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0
+
   dropdownStyle.value = {
     position: 'fixed',
-    left: `${containerRect.left}px`,
-    top: `${inputRect.bottom + 8}px`,
-    width: `${containerRect.width}px`,
+    left: `${(containerRect.left || inputRect.left) + scrollX}px`,
+    top: `${(inputRect.bottom || inputRect.top) + scrollY + 8}px`,
+    width: `${(containerRect.width || inputRect.width)}px`,
     zIndex: String(props.dropdownZIndex),
     maxHeight: `${props.dropdownMaxHeight}px`,
     overflowY: 'auto',
@@ -241,7 +230,6 @@ onBeforeUnmount(() => {
   width: 100%;
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   z-index: 999999;
   overflow-y: auto;
   max-height: 350px;
@@ -262,8 +250,8 @@ onBeforeUnmount(() => {
   gap: 12px;
   text-align: left;
   padding: 14px 20px;
-  font-size: 16px;
-  color: #1e293b;
+  font-size: 17px;
+  color: #2D1B08;
   background: #ffffff;
   border-left: 3px solid transparent;
   transition: background 0.2s ease, border-left-color 0.2s ease;
@@ -288,7 +276,7 @@ onBeforeUnmount(() => {
 
 .dropdown-value {
   font-weight: 600;
-  color: #1e293b;
+  color: #2D1B08;
   white-space: normal;
   word-break: break-word;
 }
@@ -298,18 +286,21 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  color: #ffffff;
-  padding: 3px 10px;
+  padding: 3px 8px;
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .dropdown-badge-city {
-  background: #1a56db;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
 }
 
 .dropdown-badge-hotel {
   background: #f59e0b;
+  color: #ffffff;
 }
 
 .dropdown-empty {
@@ -339,5 +330,12 @@ onBeforeUnmount(() => {
 .dropdown-fade-slide-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Force the dropdown to the very top of stacking contexts */
+.autocomplete-dropdown-fixed {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  will-change: transform;
 }
 </style>

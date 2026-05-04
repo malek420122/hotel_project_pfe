@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { imagetools } from 'vite-imagetools'
 
 const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8010'
-const devPort = Number(process.env.VITE_APP_PORT || process.env.VITE_PORT || 5173)
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), imagetools()],
   server: {
-    port: devPort,
-    strictPort: false,
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: apiProxyTarget,
