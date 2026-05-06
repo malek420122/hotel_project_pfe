@@ -2,31 +2,102 @@
 left to right direction
 skinparam shadowing false
 skinparam actorStyle awesome
+skinparam roundcorner 10
+skinparam backgroundColor #FFFFFF
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #888888
+  FontSize 12
+  FontName Arial
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  FontSize 12
+  FontName Arial
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #CCBB88
+  FontSize 11
+  FontName Arial
+}
+skinparam ArrowColor #888888
+skinparam ArrowFontSize 10
 
 actor "Administrateur" as Admin
 
 rectangle "Gestion Administrative et Système" {
-    (Gérer les hôtels) as UC_H
-    (Modifier statut de disponibilité) as UC_T
-    (Gérer les chambres) as UC_C
-    (Gérer les services) as UC_S
-    
-    (Gérer les utilisateurs) as UC_U
-    
-    (Consulter les paiements) as UC_P
-    (Exporter paiements CSV) as UC_CSV
-    (Consulter stats globales) as UC_Stats
+  (Gérer les hôtels) as UC_H
+  (Ajouter un hôtel) as UC_H_Add
+  (Modifier l'hôtel) as UC_H_Edit
+  (Supprimer l'hôtel) as UC_H_Del
+  (Masquer l'hôtel) as UC_H_Hide
 
-    ' Extensions logiques
-    UC_T .> UC_H : <<extend>>
-    UC_CSV .> UC_P : <<extend>>
+  (Gérer les chambres) as UC_C
+  (Ajouter une chambre) as UC_C_Add
+  (Modifier la chambre) as UC_C_Edit
+  (Modifier le statut) as UC_C_Status
+  (Supprimer la chambre) as UC_C_Del
 
-    ' Liaisons principales
-    Admin --> UC_H
-    Admin --> UC_C
-    Admin --> UC_S
-    Admin --> UC_U
-    Admin --> UC_P
-    Admin --> UC_Stats
+  (Gérer les utilisateurs) as UC_U
+  (Modifier rôles et statuts) as UC_U_Ext
+
+  (Consulter les paiements) as UC_P
+  (Exporter paiements CSV) as UC_CSV
+  (Consulter stats globales) as UC_Stats
+
+  (Gérer les incidents) as UC_Inc
+  (Changer le statut d'un incident) as UC_Inc_Stat
+  (Filtrer les incidents) as UC_Inc_Filt
+
+  UC_H_Add .up.> UC_H : <<extend>>
+  UC_H_Edit .up.> UC_H : <<extend>>
+  UC_H_Del .up.> UC_H : <<extend>>
+  UC_H_Hide .up.> UC_H : <<extend>>
+
+  UC_C_Add .up.> UC_C : <<extend>>
+  UC_C_Edit .up.> UC_C : <<extend>>
+  UC_C_Status .up.> UC_C : <<extend>>
+  UC_C_Del .up.> UC_C : <<extend>>
+
+  UC_U_Ext .up.> UC_U : <<extend>>
+
+  UC_CSV .up.> UC_P : <<extend>>
+
+  UC_Inc_Stat .up.> UC_Inc : <<extend>>
+  UC_Inc_Filt .up.> UC_Inc : <<extend>>
+
+  note right of UC_C_Status
+    Changer rapidement le statut d'une chambre
+    (Libre, Occupé, Nettoyage, Entretien).
+  end note
+
+  note right of UC_U
+    Consulter la liste de tous les comptes
+    enregistrés.
+  end note
+
+  note right of UC_P
+    Visualiser l'historique des transactions financières.
+  end note
+
+  note right of UC_CSV
+    Télécharger les rapports financiers pour une
+    analyse externe.
+  end note
+
+  note right of UC_Inc
+    Cette action permet de suivre les pannes signalées
+    et l'avancement des réparations.
+  end note
+
+  Admin --> UC_H
+  Admin --> UC_C
+  Admin --> UC_U
+  Admin --> UC_P
+  Admin --> UC_Stats
+  Admin --> UC_Inc
 }
 @enduml

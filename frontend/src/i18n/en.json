@@ -732,6 +732,7 @@
     },
     "filters": {
       "allStatus": "All statuses",
+      "allHotels": "All hotels",
       "allTypes": "All types",
       "allSeverity": "All severities"
     },

@@ -43,6 +43,14 @@ echo "=== ADDING ROOMS ===\n";
 });
 echo "Total rooms: " . \App\Models\Chambre::count() . "\n\n";
 
+// Fix 1.5: Set random statuses for rooms
+echo "=== SETTING ROOM STATUSES ===\n";
+$statuses = ['LIBRE', 'OCCUPE', 'ENTRETIEN', 'NETTOYAGE'];
+\App\Models\Chambre::all()->each(function($room) use ($statuses) {
+    $room->update(['statut' => $statuses[array_rand($statuses)]]);
+});
+echo "Updated statuses for all rooms\n\n";
+
 // Fix 2: Add reviews from completed reservations
 echo "=== ADDING REVIEWS ===\n";
 $completed = \App\Models\Reservation::whereIn('statut', ['checkout', 'confirmee'])->get();

@@ -1,91 +1,94 @@
 @startuml
 left to right direction
-skinparam packageStyle rectangle
 skinparam shadowing false
-skinparam roundcorner 10
 skinparam actorStyle default
+skinparam roundcorner 10
 
+' --- ACTEURS ---
 actor "Client" as Client
-entity "Système Stripe" as Stripe <<System>>
-entity "Chatbot IA" as Chatbot <<System>>
+entity "Passerelle de Paiement" as Stripe <<System>>
+entity "Assistant IA" as Chatbot <<System>>
+entity "Moteur de Suggestion" as Reco <<System>>
 
-rectangle "Espace Client HotelEase" {
-    (Consulter les hôtels) as UC_Hotels
-    (Recevoir des recommandations d'hôtels) as UC_Recommendations
-    (Filtrer par ville, dates,\nprix, étoiles et services) as UC_Filter
-    (Consulter le détail d'un hôtel) as UC_Detail
-    (Voir les chambres disponibles) as UC_Rooms
+rectangle "Gestion des Réservations et Paiments" {
+    
+    ' --- RECHERCHE & RECOMMANDATION ---
+    (Rechercher et Filtrer) as UC_Search
+    (Consulter les recommandations) as UC_Reco
+    
+    ' --- RÉSERVATION & PAIEMENT ---
     (Effectuer une réservation) as UC_Book
-    (Ajouter des services) as UC_Services
-    (Ajouter des demandes spéciales) as UC_Special
+    (Gérer les demandes spéciales) as UC_Special
     (Appliquer un code promo) as UC_Promo
     (Payer la réservation) as UC_Pay
-    (Consulter mes réservations) as UC_MyBookings
-    (Modifier une réservation) as UC_EditBooking
-    (Annuler une réservation) as UC_CancelBooking
+    
+    ' --- GESTION DES RÉSERVATIONS ---
+    (Gérer ses réservations) as UC_Manage
+    (Consulter par statut) as UC_View
+    (Modifier une réservation) as UC_Modify
+    (Annuler une réservation) as UC_Cancel
     (Télécharger la facture) as UC_Invoice
-    (Consulter l'historique des paiements) as UC_PaymentHistory
-    (Laisser un avis) as UC_Review
-    (Consulter mes avis) as UC_MyReviews
-    (Consulter mes points fidélité) as UC_Loyalty
+    
+    ' --- FIDÉLITÉ & SUPPORT ---
+    (Gérer son programme fidélité) as UC_Loyalty
     (Échanger des points) as UC_Redeem
-    (Signaler un problème) as UC_Signal
-    (Suivre mes signalements) as UC_SignalHistory
-    (Suivre les incidents liés) as UC_IncidentTracking
     (Utiliser le chatbot IA) as UC_Chatbot
-    (Consulter mon dashboard) as UC_Dashboard
-    (Modifier mon profil) as UC_Profile
-    (Réinitialiser mes préférences) as UC_ResetPrefs
-    (Recevoir et lire notifications) as UC_Notifs
+
+    ' --- LIAISONS CLIENT ---
+    Client --> UC_Search
+    Client --> UC_Reco
+    Client --> UC_Book
+    Client --> UC_Manage
+    Client --> UC_Loyalty
+    Client --> UC_Chatbot
+
+    ' --- RELATIONS INTERNES ---
+    UC_Book ..> UC_Pay : <<include>>
+    UC_Special ..> UC_Book : <<extend>>
+    UC_Promo ..> UC_Pay : <<extend>>
+    
+    UC_Manage ..> UC_View : <<include>>
+    UC_Manage ..> UC_Modify : <<include>>
+    UC_Manage ..> UC_Cancel : <<include>>
+    UC_Manage ..> UC_Invoice : <<include>>
+    
+    UC_Redeem ..> UC_Loyalty : <<extend>>
+    UC_Loyalty ..> UC_Promo : <<extend>>
+
+    ' --- LIAISONS SYSTÈMES ---
+    UC_Pay -- Stripe
+    UC_Chatbot -- Chatbot
+    UC_Reco -- Reco
+
+    ' --- NOTES DE PRÉCISION ---
+    note top of UC_Cancel
+      **Conditions d'annulation :**
+      - Remboursement total (J-48h)
+      - Frais de 50% (J-24h)
+    end note
+
+    note right of UC_View
+      **Statuts :** En cours, 
+      Annulés ou Passés.
+    end note
+
+    note right of UC_Modify
+      Ex: Changer les dates, 
+      type de chambre, nombre de personnes.
+    end note
+
+    note right of UC_Special
+      Ex: Lit bébé, Allergies, 
+    end note
+
+    note bottom of UC_Chatbot
+      Message envoyé à la réception 
+      pour traitement.
+    end note
+
+    note right of UC_Redeem
+      Ex: Échange 1000 points 
+      pour une réduction de 10%.
+    end note
 }
-
-' Recherche et réservation
-Client --> UC_Hotels
-Client --> UC_Recommendations
-Client --> UC_Filter
-Client --> UC_Detail
-Client --> UC_Rooms
-Client --> UC_Book
-UC_Book ..> UC_Services : <<include>>
-UC_Book ..> UC_Special : <<extend>>
-UC_Book ..> UC_Promo : <<extend>>
-UC_Book ..> UC_Pay : <<include>>
-UC_Pay -- Stripe
-
-' Gestion après réservation
-Client --> UC_MyBookings
-Client --> UC_EditBooking
-Client --> UC_CancelBooking
-Client --> UC_Invoice
-Client --> UC_PaymentHistory
-
-' Avis et fidélité
-Client --> UC_Review
-Client --> UC_MyReviews
-Client --> UC_Loyalty
-Client --> UC_Redeem
-
-' Assistance
-Client --> UC_Signal
-Client --> UC_SignalHistory
-Client --> UC_IncidentTracking
-Client --> UC_Chatbot
-UC_Chatbot -- Chatbot
-
-' Compte
-Client --> UC_Dashboard
-Client --> UC_Profile
-Client --> UC_ResetPrefs
-Client --> UC_Notifs
-
-note right of UC_Recommendations
-  Le système recommande des hôtels
-  basés sur l'historique des réservations,
-  les avis et les préférences du client.
-end note
-
-note bottom of UC_Pay
-  Paiement sécurisé via Stripe.
-end note
-
 @enduml

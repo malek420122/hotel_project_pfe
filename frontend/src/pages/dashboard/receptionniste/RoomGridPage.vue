@@ -51,11 +51,31 @@
     <Teleport to="body">
       <div v-if="selected" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="selected = null">
         <div class="bg-white rounded-xl p-6 w-80 shadow-2xl">
-          <h3 class="text-lg font-bold mb-3">{{ t('reception.rooms.room') }} {{ displayRoomNumber(selected) }}</h3>
-          <p>{{ t('reception.rooms.type') }}: {{ selected.type }}</p>
-          <p>{{ t('reception.rooms.status') }}: {{ selected.statut || (selected.estDisponible ? 'LIBRE' : 'OCCUPE') }}</p>
-          <p v-if="selected.hotel">{{ t('reception.rooms.hotel') }}: {{ selected.hotel.nom }}</p>
-          <button @click="selected = null" class="btn-outline w-full mt-4">{{ t('common.close') }}</button>
+          <h3 class="text-lg font-bold mb-4">{{ t('reception.rooms.room') }} {{ displayRoomNumber(selected) }}</h3>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('reception.rooms.type') }}</label>
+              <p class="text-gray-800">{{ selected.type }}</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('reception.rooms.status') }}</label>
+              <select v-model="selected.statut" @change="updateRoomStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="LIBRE">🟢 {{ t('reception.rooms.free') }}</option>
+                <option value="OCCUPE">🔴 {{ t('reception.rooms.occupied') }}</option>
+                <option value="NETTOYAGE">🟡 {{ t('reception.rooms.cleaning') }}</option>
+                <option value="ENTRETIEN">⚪ {{ t('reception.rooms.maintenance') }}</option>
+              </select>
+            </div>
+            
+            <div v-if="selected.hotel">
+              <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('reception.rooms.hotel') }}</label>
+              <p class="text-gray-800">{{ selected.hotel.nom }}</p>
+            </div>
+          </div>
+          
+          <button @click="selected = null" class="btn-outline w-full mt-6">{{ t('common.close') }}</button>
         </div>
       </div>
     </Teleport>
@@ -127,6 +147,21 @@ function displayRoomNumber(room) {
 
 function selectRoom(room) {
   selected.value = room
+}
+
+async function updateRoomStatus() {
+  try {
+    await api.put(`/admin/chambres/${selected.value._id}`, { statut: selected.value.statut })
+    // Update the room in the local array
+    const index = rooms.value.findIndex(r => r._id === selected.value._id)
+    if (index !== -1) {
+      rooms.value[index].statut = selected.value.statut
+    }
+  } catch (e) {
+    console.error('Failed to update status', e)
+    // Revert on error
+    selected.value.statut = rooms.value.find(r => r._id === selected.value._id)?.statut
+  }
 }
 
 async function loadRooms() {

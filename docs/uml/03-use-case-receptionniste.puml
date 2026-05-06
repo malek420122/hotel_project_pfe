@@ -1,46 +1,77 @@
 @startuml
 left to right direction
-skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam roundcorner 10
+skinparam backgroundColor #FFFFFF
 
-actor Receptionniste
-
-rectangle "HotelEase - Espace Reception" {
-  usecase "Se connecter" as R0
-  usecase "Consulter file d attente" as R1
-  usecase "Confirmer reservation" as R2
-  usecase "Rejeter reservation" as R3
-  usecase "Effectuer check-in" as R4
-  usecase "Effectuer check-out" as R5
-  usecase "Traiter demandes speciales" as R6
-  usecase "Consulter grille des chambres" as R7
-  usecase "Consulter reservations" as R8
-  usecase "Consulter statistiques de reception" as R9
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #888888
+  FontSize 12
+  FontName Arial
 }
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  FontSize 12
+  FontName Arial
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #CCBB88
+  FontSize 11
+  FontName Arial
+}
+skinparam ArrowColor #888888
+skinparam ArrowFontSize 10
 
-Receptionniste --> R0
-Receptionniste --> R1
-Receptionniste --> R2
-Receptionniste --> R3
-Receptionniste --> R4
-Receptionniste --> R5
-Receptionniste --> R6
-Receptionniste --> R7
-Receptionniste --> R8
-Receptionniste --> R9
+actor "Réceptionniste" as Reception
 
-R1 ..> R0 : <<include>>
-R2 ..> R0 : <<include>>
-R3 ..> R0 : <<include>>
-R4 ..> R0 : <<include>>
-R5 ..> R0 : <<include>>
-R6 ..> R0 : <<include>>
-R7 ..> R0 : <<include>>
-R8 ..> R0 : <<include>>
-R9 ..> R0 : <<include>>
+rectangle "Gestion du séjour client" {
 
-R2 ..> R1 : <<extend>>
-R3 ..> R1 : <<extend>>
-R4 ..> R8 : <<include>>
-R5 ..> R8 : <<include>>
-R6 ..> R8 : <<include>>
+  ' --- ACTIONS PRINCIPALES ---
+  (Consulter la file d'attente) as UC_Queue
+  (Effectuer check-in) as UC_In
+  (Effectuer check-out) as UC_Out
+  (Consulter la grille des chambres) as UC_Rooms
+  (Gérer les incidents) as UC_Inc
+  (Traiter les demandes spéciales) as UC_Req
+
+  ' --- EXTENSIONS ---
+  (Confirmer réservation) as UC_Confirm
+  (Rejeter réservation) as UC_Reject
+  (Rechercher un client) as UC_Search
+  (Modifier statut chambre) as UC_Stat
+  (Signaler incident) as UC_Prio
+  (Marquer comme traitée) as UC_Done
+
+  ' --- RELATIONS EXTEND ---
+  UC_Confirm .up.> UC_Queue : <<extend>>
+  UC_Reject .up.> UC_Queue : <<extend>>
+  UC_Search .up.> UC_In : <<extend>>
+  UC_Search .up.> UC_Out : <<extend>>
+  UC_Stat .up.> UC_Rooms : <<extend>>
+  UC_Prio .up.> UC_Inc : <<extend>>
+  UC_Done .up.> UC_Req : <<extend>>
+
+  ' --- LIAISONS RÉCEPTIONNISTE ---
+  Reception --> UC_Queue
+  Reception --> UC_In
+  Reception --> UC_Out
+  Reception --> UC_Rooms
+  Reception --> UC_Inc
+  Reception --> UC_Req
+
+  ' --- NOTES ---
+  note bottom of UC_Rooms
+    Changer le statut : Libre,
+    Occupé, Nettoyage ou Entretien.
+  end note
+
+  note bottom of UC_Inc
+    Suivre les pannes et
+    les réparations.
+  end note
+}
 @enduml

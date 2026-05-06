@@ -16,6 +16,7 @@ class Incident extends Model
         'description',
         'status',
         'source',
+        'hotelId',
         'signalId',
         'reportedBy',
         'assignedTo',

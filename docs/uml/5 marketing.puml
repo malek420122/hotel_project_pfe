@@ -1,0 +1,90 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam roundcorner 10
+skinparam backgroundColor #FFFFFF
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #888888
+  FontSize 12
+  FontName Arial
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  FontSize 12
+  FontName Arial
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #CCBB88
+  FontSize 11
+  FontName Arial
+}
+skinparam ArrowColor #888888
+skinparam ArrowFontSize 10
+
+actor "Responsable Marketing" as Marketing
+
+rectangle "HotelEase - Espace Marketing" {
+
+  usecase "Gérer les promotions" as M1
+  usecase "Gérer les codes promo" as M2
+  usecase "Envoyer des offres email" as M3
+  usecase "Modérer les avis" as M4
+
+  usecase "Créer une promotion" as M1_1
+  usecase "Modifier une promotion" as M1_2
+  usecase "Activer une promotion" as M1_3
+  usecase "Désactiver une promotion" as M1_4
+  usecase "Supprimer une promotion" as M1_5
+
+  usecase "Créer un code promo" as M2_1
+  usecase "Activer un code" as M2_2
+  usecase "Désactiver un code" as M2_3
+  usecase "Suivre utilisations et expiration" as M2_4
+
+  usecase "Approuver un avis" as M4_1
+  usecase "Rejeter un avis" as M4_2
+  usecase "Répondre à un avis" as M4_3
+  usecase "Exporter les avis CSV" as M4_4
+
+  M1_1 .up.> M1 : <<extend>>
+  M1_2 .up.> M1 : <<extend>>
+  M1_3 .up.> M1 : <<extend>>
+  M1_4 .up.> M1 : <<extend>>
+  M1_5 .up.> M1 : <<extend>>
+
+  M2_1 .up.> M2 : <<extend>>
+  M2_2 .up.> M2 : <<extend>>
+  M2_3 .up.> M2 : <<extend>>
+  M2_4 .up.> M2 : <<extend>>
+
+  M4_1 .up.> M4 : <<extend>>
+  M4_2 .up.> M4 : <<extend>>
+  M4_3 .up.> M4 : <<extend>>
+  M4_4 .up.> M4 : <<extend>>
+
+  Marketing --> M1
+  Marketing --> M2
+  Marketing --> M3
+  Marketing --> M4
+
+  note right of M1
+    ex: "Nuit gratuite" -25%,
+    valable du 01/06 au 30/06/2026.
+  end note
+
+  note right of M2
+    ex: "ETE2026" -15%,
+    expire le 31/08/2026.
+  end note
+
+  note right of M3
+    ex: "Offre spéciale été"
+    avec code ETE2026 intégré.
+  end note
+}
+@enduml

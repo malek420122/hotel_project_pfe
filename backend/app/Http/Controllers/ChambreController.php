@@ -65,7 +65,7 @@ class ChambreController extends Controller
 
         $chambres = $query->get()->map(function (Chambre $chambre) {
             $row = $chambre->toArray();
-            $row['hotel'] = Hotel::find($chambre->hotelId);
+            $row['hotel'] = Hotel::find($chambre->hotel_id);
             $row['numero'] = $row['numero'] ?? $row['room_number'] ?? $this->deriveRoomNumber($chambre);
             return $row;
         });

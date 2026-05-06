@@ -31,8 +31,12 @@ class IncidentController extends Controller
         $signalId = (string) ($data['signalId'] ?? $data['clientSignalId'] ?? '');
         $source = $signalId !== '' ? 'client' : (string) ($data['source'] ?? 'reception');
 
+        $room = Chambre::find($data['room']);
+        $hotelId = $room ? (string) $room->hotelId : null;
+
         $incident = Incident::create([
             'room' => trim((string) $data['room']),
+            'hotelId' => $hotelId,
             'type' => (string) $data['type'],
             'severity' => (string) $data['severity'],
             'description' => trim((string) $data['description']),
@@ -64,12 +68,22 @@ class IncidentController extends Controller
             }
         }
 
+        // Notify admins about the new incident
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $this->notify($this->modelId($admin), 'Un nouvel incident a été signalé', 'NOUVEL_INCIDENT');
+        }
+
         return response()->json($this->presentIncident($incident), 201);
     }
 
     public function index(Request $request)
     {
         $query = Incident::query();
+
+        if ($request->filled('hotelId')) {
+            $query->where('hotelId', (string) $request->input('hotelId'));
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $this->normalizeStatus((string) $request->input('status')));
@@ -111,14 +125,32 @@ class IncidentController extends Controller
             ->values()
             ->all();
 
-        if (empty($signalIds)) {
+        $activeRooms = \App\Models\Reservation::where('clientId', $userId)
+            ->where('statut', 'EN_COURS')
+            ->pluck('chambreId')
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($signalIds) && empty($activeRooms)) {
             return response()->json([]);
         }
 
-        $incidents = Incident::query()
-            ->whereIn('signalId', $signalIds)
-            ->orderBy('reportedAt', 'desc')
-            ->get();
+        $query = Incident::query();
+        
+        $query->where(function ($q) use ($signalIds, $activeRooms) {
+            if (!empty($signalIds)) {
+                $q->whereIn('signalId', $signalIds);
+            }
+            if (!empty($activeRooms)) {
+                $q->orWhere(function ($q2) use ($activeRooms) {
+                    $q2->whereIn('room', $activeRooms)
+                       ->where('reportedAt', '>=', now()->subDays(14));
+                });
+            }
+        });
+
+        $incidents = $query->orderBy('reportedAt', 'desc')->get();
 
         return response()->json($incidents->map(fn (Incident $incident) => $this->presentIncident($incident, true))->values());
     }
@@ -286,12 +318,23 @@ class IncidentController extends Controller
     private function clientIdForIncident(Incident $incident): string
     {
         $signalId = (string) ($incident->signalId ?? '');
-        if ($signalId === '') {
-            return '';
+        if ($signalId !== '') {
+            $signal = ClientSignal::find($signalId);
+            if ($signal && ($signal->userId || $signal->clientId)) {
+                return (string) ($signal->userId ?? $signal->clientId);
+            }
         }
 
-        $signal = ClientSignal::find($signalId);
-        return $signal ? (string) ($signal->userId ?? $signal->clientId ?? '') : '';
+        if ($incident->room) {
+            $reservation = \App\Models\Reservation::where('chambreId', $incident->room)
+                ->where('statut', 'EN_COURS')
+                ->first();
+            if ($reservation && $reservation->clientId) {
+                return (string) $reservation->clientId;
+            }
+        }
+
+        return '';
     }
 
     private function notify(string $userId, string $message, string $type): void

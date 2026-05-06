@@ -54,11 +54,11 @@ Route::middleware('jwt.auth')->group(function () {
     Route::middleware('role:receptionniste,admin,manager')->group(function () {
         Route::get('rooms', [ChambreController::class, 'index']);
         Route::post('incidents', [IncidentController::class, 'store']);
+        Route::get('incidents', [IncidentController::class, 'index']); // Added for reception
     });
 
     // Incidents management (admin + manager)
     Route::middleware('role:admin,manager')->group(function () {
-        Route::get('incidents', [IncidentController::class, 'index']);
         Route::patch('incidents/{id}', [IncidentController::class, 'updateStatus']);
         Route::get('incidents/stats', [IncidentController::class, 'stats']);
     });

@@ -57,6 +57,11 @@
           <option value="résolu">{{ t('incidents.status.resolved') }}</option>
         </select>
 
+        <select v-model="filters.hotelId" class="rounded-xl border border-gray-300 px-3 py-2" @change="fetchIncidents">
+          <option value="">{{ t('incidents.filters.allHotels') }}</option>
+          <option v-for="hotel in hotels" :key="hotel._id" :value="hotel._id">{{ hotel.nom }}</option>
+        </select>
+
         <select v-model="filters.type" class="rounded-xl border border-gray-300 px-3 py-2" @change="fetchIncidents">
           <option value="">{{ t('incidents.filters.allTypes') }}</option>
           <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
@@ -151,18 +156,23 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '../../../api'
+import { useHotelStore } from '../../../stores/hotel'
 
 const { t } = useI18n()
+const hotelStore = useHotelStore()
 
 const loading = ref(false)
 const incidents = ref([])
 const errorMsg = ref('')
 let refreshInterval = null
 
+const hotels = computed(() => hotelStore.hotels)
+
 const filters = reactive({
   status: '',
   type: '',
   severity: '',
+  hotelId: '',
 })
 
 const stats = reactive({
@@ -289,6 +299,7 @@ async function fetchIncidents() {
     if (filters.status) params.status = filters.status
     if (filters.type) params.type = filters.type
     if (filters.severity) params.severity = filters.severity
+    if (filters.hotelId) params.hotelId = filters.hotelId
 
     const { data } = await api.get('/incidents', { params })
     incidents.value = Array.isArray(data) ? data : []
@@ -332,6 +343,9 @@ async function updateStatus(status) {
 }
 
 async function refreshData() {
+  if (hotelStore.hotels.length === 0) {
+    await hotelStore.fetchHotels()
+  }
   await Promise.all([fetchIncidents(), fetchStats()])
 }
 
@@ -339,6 +353,7 @@ function resetFilters() {
   filters.status = ''
   filters.type = ''
   filters.severity = ''
+  filters.hotelId = ''
   fetchIncidents()
 }
 

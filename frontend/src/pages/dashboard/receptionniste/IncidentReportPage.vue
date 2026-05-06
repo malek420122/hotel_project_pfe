@@ -121,11 +121,30 @@
         </div>
       </form>
     </div>
+
+    <!-- Recent Incidents History -->
+    <div class="card max-w-3xl">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">{{ t('incidents.management.title') }} (Historique)</h3>
+      <div v-if="incidentsLoading" class="text-sm text-gray-500">{{ t('common.loading') }}</div>
+      <div v-else-if="!recentIncidents.length" class="text-sm text-gray-500">Aucun incident récent</div>
+      <div v-else class="space-y-3">
+        <div v-for="incident in recentIncidents" :key="incident._id" class="rounded-xl border border-gray-200 p-3">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-gray-800">{{ typeLabel(incident.type) }} - #{{ incident.room?.number || '-' }}</p>
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="incidentStatusClass(incident.status)">
+              {{ statusLabel(incident.status) }}
+            </span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">{{ formatDate(incident.reportedAt) }}</p>
+          <p class="mt-2 text-sm text-gray-700">{{ incident.description }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '../../../api'
 
@@ -133,7 +152,9 @@ const { t, locale } = useI18n()
 
 const rooms = ref([])
 const pendingSignals = ref([])
+const recentIncidents = ref([])
 const signalsLoading = ref(false)
+const incidentsLoading = ref(false)
 const submitting = ref(false)
 const submitted = ref(false)
 const activeSignal = ref(null)
@@ -238,6 +259,23 @@ function formatDate(value) {
   return date.toLocaleString(locale.value)
 }
 
+function typeLabel(type) {
+  const found = incidentTypes.value.find((item) => item.value === type)
+  return found?.label || type || '-'
+}
+
+function statusLabel(status) {
+  if (status === 'ouvert') return t('incidents.status.open')
+  if (status === 'résolu') return t('incidents.status.resolved')
+  return t('incidents.status.inProgress')
+}
+
+function incidentStatusClass(status) {
+  if (status === 'résolu') return 'bg-green-100 text-green-700'
+  if (status === 'en_cours') return 'bg-amber-100 text-amber-700'
+  return 'bg-red-100 text-red-700'
+}
+
 function clearErrors() {
   errors.room = ''
   errors.type = ''
@@ -309,8 +347,20 @@ async function fetchSignals() {
   }
 }
 
+async function fetchRecentIncidents() {
+  incidentsLoading.value = true
+  try {
+    const { data } = await api.get('/incidents')
+    recentIncidents.value = Array.isArray(data) ? data.slice(0, 15) : []
+  } catch {
+    recentIncidents.value = []
+  } finally {
+    incidentsLoading.value = false
+  }
+}
+
 async function refreshAll() {
-  await Promise.all([fetchRooms(), fetchSignals()])
+  await Promise.all([fetchRooms(), fetchSignals(), fetchRecentIncidents()])
 }
 
 async function submitIncident() {
@@ -339,15 +389,35 @@ async function submitIncident() {
     feedback.type = 'success'
     feedback.message = t('incidents.messages.reportSuccess')
     resetForm()
-    await fetchSignals()
+    await Promise.all([fetchSignals(), fetchRecentIncidents()])
   } catch (error) {
+    console.error('Incident submission error:', error)
     const backendMessage = error?.response?.data?.message
+    const validationErrors = error?.response?.data?.errors
+    
     feedback.type = 'error'
-    feedback.message = backendMessage || t('incidents.messages.reportError')
+    if (validationErrors) {
+      const firstError = Object.values(validationErrors)[0]
+      feedback.message = Array.isArray(firstError) ? firstError[0] : String(firstError)
+    } else {
+      feedback.message = backendMessage || t('incidents.messages.reportError')
+    }
   } finally {
     submitting.value = false
   }
 }
 
-onMounted(refreshAll)
+let refreshInterval = null
+
+onMounted(async () => {
+  await refreshAll()
+  refreshInterval = setInterval(fetchSignals, 45000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+    refreshInterval = null
+  }
+})
 </script>

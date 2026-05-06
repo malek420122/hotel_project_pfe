@@ -732,6 +732,7 @@
     },
     "filters": {
       "allStatus": "كل الحالات",
+      "allHotels": "كل الفنادق",
       "allTypes": "كل الأنواع",
       "allSeverity": "كل درجات الخطورة"
     },

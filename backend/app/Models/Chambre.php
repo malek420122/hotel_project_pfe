@@ -10,7 +10,7 @@ class Chambre extends Model
     protected $collection = 'chambres';
 
     protected $fillable = [
-        'hotelId', 'type', 'nom', 'description', 'prix_base',
+        'hotel_id', 'hotelId', 'type', 'nom', 'description', 'prix_base',
         'maxVoyageurs', 'equipements', 'photos', 'estDisponible', 'etage', 'statut'
     ];
 

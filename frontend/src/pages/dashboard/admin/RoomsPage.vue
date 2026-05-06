@@ -17,7 +17,13 @@
         <StatusBadge :status="row.statut" />
       </template>
       <template #actions="{ row }">
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
+          <select @change="changeStatus(row, $event)" :value="row.statut" class="text-xs px-2 py-1 rounded border">
+            <option value="LIBRE">Libre</option>
+            <option value="OCCUPE">Occupé</option>
+            <option value="ENTRETIEN">Entretien</option>
+            <option value="NETTOYAGE">Nettoyage</option>
+          </select>
           <button @click="editRoom(row)" class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600">✏️ Modifier</button>
           <button @click="deleteRoom(row)" class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600">🗑️ Supprimer</button>
         </div>
@@ -108,6 +114,17 @@ async function saveRoom() {
 }
 function deleteRoom(r) {
   deleteModal.value = { show: true, room: r }
+}
+
+async function changeStatus(room, event) {
+  const newStatus = event.target.value
+  try {
+    await api.put(`/admin/chambres/${room._id}`, { statut: newStatus })
+    room.statut = newStatus // Update local data
+  } catch (e) {
+    errorMsg.value = e.response?.data?.message || 'Erreur lors du changement de statut'
+    event.target.value = room.statut // Revert on error
+  }
 }
 
 async function confirmDeleteRoom() {

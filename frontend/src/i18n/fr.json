@@ -698,7 +698,7 @@
     "fields": {
       "room": "Chambre",
       "type": "Type d'incident",
-      "severity": "Gravité",
+      "severity": "Priorité",
       "source": "Source",
       "description": "Description"
     },
@@ -732,14 +732,15 @@
     },
     "filters": {
       "allStatus": "Tous les statuts",
+      "allHotels": "Tous les hôtels",
       "allTypes": "Tous les types",
-      "allSeverity": "Toutes les gravités"
+      "allSeverity": "Toutes les priorités"
     },
     "columns": {
       "date": "Date de signalement",
       "room": "Chambre",
       "type": "Type",
-      "severity": "Gravité",
+      "severity": "Priorité",
       "status": "Statut",
       "description": "Description",
       "actions": "Actions"
