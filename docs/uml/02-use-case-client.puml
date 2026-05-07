@@ -4,91 +4,123 @@ skinparam shadowing false
 skinparam actorStyle default
 skinparam roundcorner 10
 
-' --- ACTEURS ---
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #888888
+  FontSize 12
+  FontName Arial
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+  FontSize 12
+  FontName Arial
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #CCBB88
+  FontSize 11
+  FontName Arial
+}
+skinparam ArrowColor #888888
+skinparam ArrowFontSize 10
+
 actor "Client" as Client
 entity "Passerelle de Paiement" as Stripe <<System>>
 entity "Assistant IA" as Chatbot <<System>>
 entity "Moteur de Suggestion" as Reco <<System>>
 
-rectangle "Gestion des Réservations et Paiments" {
-    
-    ' --- RECHERCHE & RECOMMANDATION ---
-    (Rechercher et Filtrer) as UC_Search
-    (Consulter les recommandations) as UC_Reco
-    
-    ' --- RÉSERVATION & PAIEMENT ---
-    (Effectuer une réservation) as UC_Book
-    (Gérer les demandes spéciales) as UC_Special
-    (Appliquer un code promo) as UC_Promo
-    (Payer la réservation) as UC_Pay
-    
-    ' --- GESTION DES RÉSERVATIONS ---
-    (Gérer ses réservations) as UC_Manage
-    (Consulter par statut) as UC_View
-    (Modifier une réservation) as UC_Modify
-    (Annuler une réservation) as UC_Cancel
-    (Télécharger la facture) as UC_Invoice
-    
-    ' --- FIDÉLITÉ & SUPPORT ---
-    (Gérer son programme fidélité) as UC_Loyalty
-    (Échanger des points) as UC_Redeem
-    (Utiliser le chatbot IA) as UC_Chatbot
+rectangle "Gestion des Réservations et Paiements" {
 
-    ' --- LIAISONS CLIENT ---
-    Client --> UC_Search
-    Client --> UC_Reco
-    Client --> UC_Book
-    Client --> UC_Manage
-    Client --> UC_Loyalty
-    Client --> UC_Chatbot
+  ' --- RECHERCHE ---
+  usecase "Rechercher et Filtrer" as UC_Search
+  usecase "Consulter les recommandations" as UC_Reco
 
-    ' --- RELATIONS INTERNES ---
-    UC_Book ..> UC_Pay : <<include>>
-    UC_Special ..> UC_Book : <<extend>>
-    UC_Promo ..> UC_Pay : <<extend>>
-    
-    UC_Manage ..> UC_View : <<include>>
-    UC_Manage ..> UC_Modify : <<include>>
-    UC_Manage ..> UC_Cancel : <<include>>
-    UC_Manage ..> UC_Invoice : <<include>>
-    
-    UC_Redeem ..> UC_Loyalty : <<extend>>
-    UC_Loyalty ..> UC_Promo : <<extend>>
+  ' --- RÉSERVATION ---
+  usecase "Effectuer une réservation" as UC_Book
+  usecase "Gérer les demandes spéciales" as UC_Special
+  usecase "Appliquer un code promo" as UC_Promo
+  usecase "Payer la réservation" as UC_Pay
 
-    ' --- LIAISONS SYSTÈMES ---
-    UC_Pay -- Stripe
-    UC_Chatbot -- Chatbot
-    UC_Reco -- Reco
+  ' --- GESTION ---
+  usecase "Gérer ses réservations" as UC_Manage
+  usecase "Consulter par statut" as UC_View
+  usecase "Modifier une réservation" as UC_Modify
+  usecase "Annuler une réservation" as UC_Cancel
+  usecase "Télécharger la facture" as UC_Invoice
 
-    ' --- NOTES DE PRÉCISION ---
-    note top of UC_Cancel
-      **Conditions d'annulation :**
-      - Remboursement total (J-48h)
-      - Frais de 50% (J-24h)
-    end note
+  ' --- FIDÉLITÉ ---
+  usecase "Gérer son programme fidélité" as UC_Loyalty
+  usecase "Échanger des points contre un code" as UC_Redeem
 
-    note right of UC_View
-      **Statuts :** En cours, 
-      Annulés ou Passés.
-    end note
+  ' --- SUPPORT ---
+  usecase "Utiliser le chatbot IA" as UC_Chatbot
 
-    note right of UC_Modify
-      Ex: Changer les dates, 
-      type de chambre, nombre de personnes.
-    end note
+  ' --- ORDRE VERTICAL ---
+  UC_Search -[hidden]down-> UC_Book
+  UC_Book -[hidden]down-> UC_Manage
+  UC_Manage -[hidden]down-> UC_Loyalty
+  UC_Loyalty -[hidden]down-> UC_Chatbot
 
-    note right of UC_Special
-      Ex: Lit bébé, Allergies, 
-    end note
+  ' --- LIAISONS CLIENT ---
+  Client --> UC_Search
+  Client --> UC_Reco
+  Client --> UC_Book
+  Client --> UC_Manage
+  Client --> UC_Loyalty
+  Client --> UC_Chatbot
 
-    note bottom of UC_Chatbot
-      Message envoyé à la réception 
-      pour traitement.
-    end note
+  ' --- RELATIONS INTERNES ---
+  UC_Book ..> UC_Pay : <<include>>
+  UC_Special .up.> UC_Book : <<extend>>
+  UC_Promo .up.> UC_Pay : <<extend>>
 
-    note right of UC_Redeem
-      Ex: Échange 1000 points 
-      pour une réduction de 10%.
-    end note
+  UC_Manage ..> UC_View : <<include>>
+  UC_Manage ..> UC_Modify : <<include>>
+  UC_Manage ..> UC_Cancel : <<include>>
+  UC_Manage ..> UC_Invoice : <<include>>
+
+  UC_Redeem .up.> UC_Loyalty : <<extend>>
+  UC_Redeem .up.> UC_Promo : <<extend>>
+
+  ' --- LIAISONS SYSTÈMES ---
+  UC_Pay -- Stripe
+  UC_Chatbot -- Chatbot
+  UC_Reco -- Reco
+
+  ' --- NOTES ---
+  note right of UC_Cancel
+    Remboursement total (J-48h),
+    frais 50% (J-24h).
+  end note
+
+  note right of UC_View
+    Statuts : En cours,
+    Annulés ou Passés.
+  end note
+
+  note right of UC_Modify
+    ex: dates, chambre,
+    nombre de personnes.
+  end note
+
+  note right of UC_Special
+    ex: Lit bébé, Allergies.
+  end note
+
+  note right of UC_Chatbot
+    Message transmis à
+    la réception.
+  end note
+
+  note right of UC_Redeem
+    1€ = 0,1 pt.
+    Code valable 3 mois.
+  end note
+
+  note right of UC_Loyalty
+    Niveaux : Bronze, Argent,
+    Or, Platine.
+  end note
 }
 @enduml
