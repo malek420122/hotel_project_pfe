@@ -234,11 +234,9 @@ class StatistiqueController extends Controller
             'taux_conversion' => $conversionRate,
             'note_moyenne' => $avgRating !== null ? round((float) $avgRating, 1) : 0.0,
             'codes_promo_utilises' => (int) $promoCodesUsed,
-            'promotions_actives' => (int) Promotion::query()->where(function ($query) {
-                $query->where('estActive', true)->orWhere('actif', true);
-            })->count(),
+            'promotions_actives' => (int) Promotion::query()->where('estActive', true)->count(),
             'total_avis' => (int) Avis::query()->count(),
-            'avis_en_attente' => (int) Avis::query()->whereIn('statut', ['EN_ATTENTE', 'pending'])->count(),
+            'avis_en_attente' => (int) Avis::query()->whereIn('statut', ['EN_ATTENTE', 'pending', 'EN_COURS'])->count(),
             'avis_ce_mois' => (int) Avis::query()->where('created_at', '>=', $monthStart)->where('created_at', '<', $nextMonth)->count(),
             'membres_fidelite' => (int) LoyaltyPoint::query()->count(),
             'revenus_par_hotel' => $revenusParHotel,
@@ -247,9 +245,7 @@ class StatistiqueController extends Controller
             'avg_rating' => $avgRating !== null ? round((float) $avgRating, 1) : 0.0,
             'total_reviews' => (int) Avis::query()->count(),
             'reviews_this_month' => (int) Avis::query()->where('created_at', '>=', $monthStart)->where('created_at', '<', $nextMonth)->count(),
-            'active_promotions' => (int) Promotion::query()->where(function ($query) {
-                $query->where('estActive', true)->orWhere('actif', true);
-            })->count(),
+            'active_promotions' => (int) Promotion::query()->where('estActive', true)->count(),
             'loyalty_members' => (int) LoyaltyPoint::query()->count(),
         ]);
     }
@@ -485,9 +481,7 @@ class StatistiqueController extends Controller
             ->filter(fn (Reservation $reservation) => trim((string) ($reservation->codePromoApplique ?? '')) !== '')
             ->count();
 
-        $promotionsActives = (int) Promotion::query()->where(function ($query) {
-            $query->where('estActive', true)->orWhere('actif', true);
-        })->count();
+        $promotionsActives = (int) Promotion::query()->where('estActive', true)->count();
 
         $noteMoyenne = round((float) ($allAvis->avg('note') ?? 0), 1);
 
@@ -524,7 +518,7 @@ class StatistiqueController extends Controller
             'Or' => $clients->where('niveau_fidelite', 'Or')->count(),
         ];
 
-        $topMembers = $clients->take(5)->map(function (User $user) {
+        $topMembers = $clients->take(10)->map(function (User $user) {
             $sejours = Reservation::where('clientId', (string) $user->_id)->where('statut', 'TERMINEE')->count();
 
             return [

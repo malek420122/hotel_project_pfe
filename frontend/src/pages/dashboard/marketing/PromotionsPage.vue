@@ -13,12 +13,12 @@
         <h3 class="text-lg font-bold text-gray-800 mb-1">{{ promo.titre }}</h3>
         <p class="text-gray-500 text-sm mb-3">{{ promo.description }}</p>
         <div class="flex justify-between text-sm mb-3">
-          <span class="text-green-600 font-bold">-{{ promo.remise }}%</span>
+          <span class="text-green-600 font-bold">-{{ promo.remiseFormatted }}</span>
           <span class="text-gray-400">{{ promo.debut }} → {{ promo.fin }}</span>
         </div>
         <div class="mb-3">
           <div class="flex justify-between text-xs text-gray-500 mb-1">
-            <span>{{ promo.utilisations }} utilisations</span>
+            <span>{{ promo.utilisations }} {{ t('dashboard.uses') }}</span>
             <span>Max: {{ promo.maxUtil }}</span>
           </div>
           <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -26,9 +26,9 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <button class="btn-outline text-xs py-1.5 px-3 flex-1" @click="editPromo(promo)">✏️ Modifier</button>
+          <button class="btn-outline text-xs py-1.5 px-3 flex-1" @click="editPromo(promo)">✏️ {{ t('common.edit') }}</button>
           <button @click="togglePromo(promo)" :class="['text-xs py-1.5 px-3 rounded-xl font-semibold flex-1', promo.statut === 'ACTIVE' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600']">
-            {{ promo.statut === 'ACTIVE' ? '⏸ Pause' : '▶ Activer' }}
+            {{ promo.statut === 'ACTIVE' ? '⏸ ' + t('dashboard.pause') : '▶ ' + t('dashboard.activate') }}
           </button>
         </div>
       </div>
@@ -36,7 +36,7 @@
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div class="bg-white rounded-xl p-6 w-full max-w-lg">
-          <h3 class="text-xl font-bold mb-4">{{ form._id ? 'Modifier la promotion' : $t('dashboard.new_promotion') }}</h3>
+          <h3 class="text-xl font-bold mb-4">{{ form._id ? t('dashboard.edit_promotion') : t('dashboard.new_promotion') }}</h3>
           <form @submit.prevent="savePromo" class="space-y-3">
             <input v-model="form.titre" :placeholder="$t('dashboard.promo_title')" class="input-field" required />
             <textarea v-model="form.description" :placeholder="$t('dashboard.description')" rows="2" class="input-field"></textarea>
@@ -64,26 +64,35 @@
 </template>
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '../../../api'
 import StatusBadge from '../../../components/StatusBadge.vue'
+
+const { t } = useI18n()
 
 const showModal = ref(false)
 const promotions = ref([])
 const form = reactive({ _id: null, titre: '', description: '', remise_pourcent: 10, codePromo: '', dateDebut: '', dateFin: '', nbUtilisations: 0, limiteUtilisations: 100, estActive: true })
 
 function promoToView(promo) {
+  const pId = String(promo._id || promo.id || Math.random())
+  const type = promo.type || 'POURCENTAGE'
+  const val = Number(promo.valeur || promo.remise_pourcent || 0)
+  
   return {
-    id: String(promo._id || promo.codePromo),
-    _id: promo._id,
+    id: pId,
+    _id: pId,
     icon: promo.estActive ? '🎯' : '⏸️',
-    titre: promo.titre,
-    description: promo.description,
-    remise: Number(promo.remise_pourcent || 0),
-    debut: promo.dateDebut,
-    fin: promo.dateFin,
+    titre: promo.titre || t('dashboard.promotion'),
+    description: promo.description || '',
+    remise: val,
+    remiseFormatted: type === 'POURCENTAGE' ? `${val}%` : `${val} €`,
+    type: type,
+    debut: promo.dateDebut || '?',
+    fin: promo.dateFin || '?',
     statut: promo.estActive ? 'ACTIVE' : 'INACTIVE',
     utilisations: Number(promo.nbUtilisations || 0),
-    maxUtil: Number(promo.limiteUtilisations || 100),
+    maxUtil: Number(promo.limiteUtilisations || 1), // Avoid division by zero
     codePromo: promo.codePromo,
     nbUtilisations: Number(promo.nbUtilisations || 0),
     limiteUtilisations: Number(promo.limiteUtilisations || 100),
@@ -94,7 +103,8 @@ async function loadPromotions() {
   try {
     const { data } = await api.get('/marketing/promotions')
     promotions.value = (Array.isArray(data) ? data : []).map(promoToView)
-  } catch {
+  } catch (err) {
+    console.error('Failed to load promotions:', err)
     promotions.value = []
   }
 }
@@ -116,23 +126,35 @@ function editPromo(promo) {
 }
 
 async function savePromo() {
-  const payload = { ...form, estActive: form.estActive !== false }
-  if (form._id) {
-    await api.put(`/marketing/promotions/${form._id}`, payload)
-  } else {
-    await api.post('/marketing/promotions', payload)
+  try {
+    const payload = { ...form }
+    payload.estActive = Boolean(form.estActive)
+    
+    if (form._id) {
+      await api.put(`/marketing/promotions/${form._id}`, payload)
+    } else {
+      await api.post('/marketing/promotions', payload)
+    }
+    showModal.value = false
+    await loadPromotions()
+  } catch (err) {
+    console.error('Failed to save promotion:', err)
   }
-  showModal.value = false
-  await loadPromotions()
 }
 
 async function togglePromo(promo) {
-  await api.put(`/marketing/promotions/${promo._id}`, { estActive: promo.statut !== 'ACTIVE' })
-  await loadPromotions()
+  try {
+    await api.put(`/marketing/promotions/${promo._id}`, { estActive: promo.statut !== 'ACTIVE' })
+    await loadPromotions()
+  } catch (err) {
+    console.error('Failed to toggle promotion:', err)
+  }
 }
 
 function toPctClass(value) {
-  const normalized = Math.max(0, Math.min(100, Math.round((Number(value || 0) / 5)) * 5))
+  const num = Number(value)
+  if (isNaN(num)) return 'w-pct-0'
+  const normalized = Math.max(0, Math.min(100, Math.round(num / 5) * 5))
   return `w-pct-${normalized}`
 }
 

@@ -10,7 +10,7 @@ class Promotion extends Model
     protected $collection = 'promotions';
 
     protected $fillable = [
-        'titre', 'description', 'remise_pourcent',
+        'titre', 'description', 'remise_pourcent', 'type', 'valeur',
         'codePromo', 'dateDebut', 'dateFin',
         'chambresIds', 'estActive', 'nbUtilisations', 'limiteUtilisations'
     ];
@@ -22,8 +22,6 @@ class Promotion extends Model
     ];
 
     protected $casts = [
-        'dateDebut' => 'datetime',
-        'dateFin' => 'datetime',
         'estActive' => 'boolean',
         'remise_pourcent' => 'integer',
         'nbUtilisations' => 'integer',

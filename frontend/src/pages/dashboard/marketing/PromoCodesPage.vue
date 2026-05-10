@@ -22,8 +22,8 @@
           <h3 class="text-xl font-bold mb-4">{{ $t('dashboard.new_promo_code') }}</h3>
           <form @submit.prevent="createCode" class="space-y-3">
             <div class="flex gap-2">
-              <input v-model="form.code" placeholder="CODE2025" class="input-field flex-1 font-mono uppercase" required />
-              <button type="button" @click="form.code = genCode()" class="btn-outline px-3">🔀</button>
+              <input v-model="form.codePromo" placeholder="CODE2025" class="input-field flex-1 font-mono uppercase" required />
+              <button type="button" @click="form.codePromo = genCode()" class="btn-outline px-3">🔀</button>
             </div>
             <select v-model="form.type" class="input-field">
               <option value="POURCENTAGE">{{ $t('dashboard.percentage') }}</option>
@@ -31,7 +31,7 @@
             </select>
             <input v-model.number="form.valeur" type="number" :placeholder="form.type === 'POURCENTAGE' ? $t('dashboard.percent_value_placeholder') : $t('dashboard.fixed_value_placeholder')" class="input-field" required />
             <div class="grid grid-cols-2 gap-3">
-              <input v-model="form.dateExpiration" type="date" class="input-field" />
+              <input v-model="form.dateFin" type="date" class="input-field" />
               <input v-model.number="form.nbUtilisationsMax" type="number" :placeholder="$t('dashboard.nb_max_uses')" class="input-field" />
             </div>
             <div class="flex gap-3 justify-end">
@@ -54,7 +54,7 @@ import api from '../../../api'
 const { t } = useI18n()
 
 const showModal = ref(false)
-const form = reactive({ code: '', type: 'POURCENTAGE', valeur: 10, dateExpiration: '', nbUtilisationsMax: 100 })
+const form = reactive({ codePromo: '', type: 'POURCENTAGE', valeur: 10, dateFin: '', nbUtilisationsMax: 100 })
 const codes = ref([])
 const copiedCode = ref('')
 const cols = computed(() => [
@@ -86,14 +86,18 @@ async function copyCode(c) {
 }
 
 function promotionToCode(promo) {
+  const pId = String(promo._id || promo.id || Math.random())
+  const type = promo.type || (Number(promo.remise_pourcent || 0) > 0 ? 'POURCENTAGE' : 'MONTANT_FIXE')
+  const val = Number(promo.valeur || promo.remise_pourcent || 0)
+  
   return {
-    _id: promo._id,
+    _id: pId,
     code: promo.codePromo,
-    type: Number(promo.remise_pourcent || 0) >= 0 ? 'POURCENTAGE' : 'MONTANT_FIXE',
-    valeur: `${promo.remise_pourcent || 0}%`,
+    type: type,
+    valeur: type === 'POURCENTAGE' ? `${val}%` : `${val}€`,
     utilise: promo.nbUtilisations || 0,
     max: promo.limiteUtilisations || 0,
-    expiration: promo.dateFin,
+    expiration: promo.dateFin || '?',
     statut: promo.estActive ? 'ACTIVE' : 'INACTIVE',
   }
 }
@@ -114,12 +118,14 @@ async function toggleCode(code) {
 
 async function createCode() {
   await api.post('/marketing/promotions', {
-    titre: form.code,
+    titre: form.codePromo,
     description: form.type === 'POURCENTAGE' ? `${form.valeur}%` : `${form.valeur}€`,
-    remise_pourcent: Number(form.valeur || 0),
-    codePromo: form.code,
-    dateDebut: form.dateExpiration || new Date().toISOString().slice(0, 10),
-    dateFin: form.dateExpiration || new Date().toISOString().slice(0, 10),
+    type: form.type,
+    valeur: Number(form.valeur || 0),
+    remise_pourcent: form.type === 'POURCENTAGE' ? Number(form.valeur || 0) : 0,
+    codePromo: form.codePromo,
+    dateDebut: new Date().toISOString().slice(0, 10),
+    dateFin: form.dateFin || new Date().toISOString().slice(0, 10),
     nbUtilisations: 0,
     limiteUtilisations: Number(form.nbUtilisationsMax || 0),
     estActive: true,

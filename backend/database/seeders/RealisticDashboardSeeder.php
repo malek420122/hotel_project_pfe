@@ -20,10 +20,10 @@ class RealisticDashboardSeeder extends Seeder
     public function run(): void
     {
         $clients = collect([
-            ['prenom' => 'Demo', 'nom' => 'User', 'email' => 'demo.user@example.com', 'points' => 8420, 'niveau' => 'Or', 'nationalite' => 'France'],
-            ['prenom' => 'Ahmed', 'nom' => 'Benali', 'email' => 'ahmed.benali@example.com', 'points' => 6180, 'niveau' => 'Or', 'nationalite' => 'Maroc'],
-            ['prenom' => 'Laura', 'nom' => 'Dupont', 'email' => 'laura.dupont@example.com', 'points' => 4920, 'niveau' => 'Argent', 'nationalite' => 'France'],
-            ['prenom' => 'Maria', 'nom' => 'Santos', 'email' => 'maria.santos@example.com', 'points' => 2960, 'niveau' => 'Argent', 'nationalite' => 'Espagne'],
+            ['prenom' => 'Sondess', 'nom' => 'Gharbi', 'email' => 'sondess@example.com', 'points' => 8420, 'niveau' => 'Or', 'nationalite' => 'Tunisie'],
+            ['prenom' => 'Mariem', 'nom' => 'Zouari', 'email' => 'mariem@example.com', 'points' => 6180, 'niveau' => 'Or', 'nationalite' => 'Tunisie'],
+            ['prenom' => 'Malek', 'nom' => 'Benhamida', 'email' => 'malek@example.com', 'points' => 5500, 'niveau' => 'Or', 'nationalite' => 'Tunisie'],
+            ['prenom' => 'Yasmine', 'nom' => 'Trabelsi', 'email' => 'yasmine@example.com', 'points' => 2960, 'niveau' => 'Argent', 'nationalite' => 'Tunisie'],
         ])->map(function (array $data) {
             return User::updateOrCreate([
                 'email' => $data['email'],
@@ -59,11 +59,17 @@ class RealisticDashboardSeeder extends Seeder
         ], [
             'nom' => 'Marketing',
             'prenom' => 'Team',
-            'email' => 'marketing@example.com',
             'password' => Hash::make('Marketing123!'),
             'telephone' => '0600000002',
             'role' => 'marketing',
             'est_actif' => true,
+        ]);
+
+        // Ensure mimi@gmail.com is not named Malek Benhamida
+        User::where('email', 'mimi@gmail.com')->update([
+            'nom' => 'Admin',
+            'prenom' => 'Marketing',
+            'role' => 'marketing'
         ]);
 
         $hotels = Hotel::orderBy('created_at')->get();
@@ -195,10 +201,12 @@ class RealisticDashboardSeeder extends Seeder
         }
 
         foreach ($hotels as $index => $hotel) {
-            Chambre::where('hotelId', (string) $hotel->_id)->take(1)->update(['statut' => 'OCCUPE', 'estDisponible' => false]);
-            Chambre::where('hotelId', (string) $hotel->_id)->skip(1)->take(1)->update(['statut' => 'NETTOYAGE', 'estDisponible' => false]);
-            if ($index % 3 === 0) {
-                Chambre::where('hotelId', (string) $hotel->_id)->skip(2)->take(1)->update(['statut' => 'ENTRETIEN', 'estDisponible' => false]);
+            // Marquer seulement une chambre par hôtel comme indisponible pour laisser plus de choix
+            if ($index % 2 === 0) { // Un hôtel sur deux a une chambre occupée
+                Chambre::where('hotelId', (string) $hotel->_id)->take(1)->update(['statut' => 'OCCUPE', 'estDisponible' => false]);
+            }
+            if ($index % 4 === 0) { // Un hôtel sur quatre a une chambre en nettoyage
+                Chambre::where('hotelId', (string) $hotel->_id)->skip(1)->take(1)->update(['statut' => 'NETTOYAGE', 'estDisponible' => false]);
             }
         }
     }

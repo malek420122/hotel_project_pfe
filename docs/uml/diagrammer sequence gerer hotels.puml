@@ -1,0 +1,26 @@
+@startuml
+skinparam shadowing false
+
+actor "Administrateur" as admin
+participant "Interface" as vue
+participant "Contrôleur" as api
+participant "Base de données" as db
+
+admin -> vue : Saisir les informations du nouvel hôtel
+activate vue
+vue -> api : Transmettre les données de création
+activate api
+
+api -> api : Vérifier les droits d'administration
+
+api -> db : Enregistrer les informations de l'hôtel
+activate db
+db --> api : Confirmer l'enregistrement
+deactivate db
+
+api --> vue : Confirmer la création
+vue --> admin : Afficher le succès et mettre à jour la liste
+
+deactivate api
+deactivate vue
+@enduml

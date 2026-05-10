@@ -34,7 +34,12 @@ class ChambreController extends Controller
             'statut' => 'nullable|in:LIBRE,OCCUPE,ENTRETIEN,NETTOYAGE',
         ]);
 
-        $chambre = Chambre::create($request->all());
+        $data = $request->all();
+        if (isset($data['statut'])) {
+            $data['estDisponible'] = ($data['statut'] === 'LIBRE');
+        }
+
+        $chambre = Chambre::create($data);
         return response()->json($chambre, 201);
     }
 
@@ -46,7 +51,11 @@ class ChambreController extends Controller
     public function update(Request $request, $id)
     {
         $chambre = Chambre::findOrFail($id);
-        $chambre->update($request->all());
+        $data = $request->all();
+        if (isset($data['statut'])) {
+            $data['estDisponible'] = ($data['statut'] === 'LIBRE');
+        }
+        $chambre->update($data);
         return response()->json($chambre);
     }
 

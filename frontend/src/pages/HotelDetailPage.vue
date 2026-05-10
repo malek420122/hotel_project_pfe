@@ -114,6 +114,13 @@
                         </div>
                       </div>
                       <p class="text-slate-600 leading-relaxed italic text-lg">"{{ avis.commentaire }}"</p>
+                      
+                      <!-- Hotel Reply -->
+                      <div v-if="avis.reponse" class="mt-4 bg-slate-50 border-l-4 border-secondary p-4 rounded-r-lg">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Réponse de l'établissement</p>
+                        <p class="text-slate-600 text-sm italic">"{{ avis.reponse }}"</p>
+                      </div>
+
                       <p class="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mt-4">{{ formatDisplayDate(avis.createdAt) }}</p>
                     </div>
                   </div>

@@ -292,8 +292,14 @@ async function applyPromo() {
 
   try {
     const { data } = await api.post('/promotions/validate', { code: booking.codePromo })
-    const discountPercent = data.remise_pourcent || 0
-    promoDiscount.value = Math.round((chambreTotal.value + servicesTotal.value) * discountPercent) / 100
+    
+    if (data.type === 'MONTANT_FIXE') {
+      promoDiscount.value = Number(data.valeur || 0)
+    } else {
+      const discountPercent = Number(data.remise_pourcent || 0)
+      promoDiscount.value = Math.round((chambreTotal.value + servicesTotal.value) * discountPercent) / 100
+    }
+
     promoMessage.value = { ok: true, text: `${t('booking.promoValid')} -${promoDiscount.value}€` }
   } catch {
     promoDiscount.value = 0

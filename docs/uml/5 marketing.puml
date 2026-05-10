@@ -28,7 +28,7 @@ skinparam ArrowFontSize 10
 
 actor "Responsable Marketing" as Marketing
 
-rectangle "HotelEase - Espace Marketing" {
+rectangle "Gestion des Offres et Promotions" {
 
   usecase "Gérer les promotions" as M1
   usecase "Gérer les codes promo" as M2

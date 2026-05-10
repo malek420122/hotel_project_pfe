@@ -1,0 +1,49 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+
+actor "Client" as client
+participant "Interface" as vue
+participant "Contrôleur" as api
+participant "Système de Paiement" as stripe
+participant "Base de données" as db
+
+== Initialisation du paiement en ligne ==
+
+client -> vue : Demander le paiement en ligne
+activate vue
+vue -> api : Transmettre demande d'initialisation
+activate api
+api -> db : Récupérer les détails de la réservation
+api -> stripe : Créer une session de paiement
+activate stripe
+stripe --> api : Lien de paiement sécurisé
+deactivate stripe
+api --> vue : Transmettre le lien
+deactivate api
+vue --> client : Rediriger vers Stripe
+deactivate vue
+
+== Saisie des informations bancaires ==
+
+client -> stripe : Saisir les informations et valider
+activate stripe
+stripe --> client : Rediriger vers la page de succès
+deactivate stripe
+
+== Confirmation asynchrone (Webhook) ==
+
+note left of client
+  Paiement réussi
+end note
+
+stripe -> api : Notifier le succès (Webhook)
+activate api
+api -> api : Vérifier l'authenticité
+api -> db : Marquer le paiement comme réglé
+api -> db : Confirmer la réservation
+api --> stripe : Accuser réception
+deactivate api
+
+@enduml

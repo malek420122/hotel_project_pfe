@@ -1,0 +1,60 @@
+@startuml
+skinparam shadowing false
+
+actor "Visiteur" as user
+participant "Interface" as vue
+participant "Contrôleur" as api
+participant "Base de données" as db
+
+alt [Nouveau compte]
+    user -> vue : Saisir les informations d'inscription
+    activate vue
+    vue -> api : Transmettre les données d'inscription
+    activate api
+    
+    api -> api : Vérifier le format et l'unicité de l'email
+    activate db
+    db --> api : Retourner le résultat de la vérification
+    deactivate db
+    
+    alt [Email déjà utilisé]
+        api --> vue : Refuser la demande d'inscription
+        vue --> user : Afficher un message d'erreur
+    else [Email disponible]
+        api -> api : Sécuriser le mot de passe
+        api -> db : Enregistrer le nouveau compte
+        activate db
+        db --> api : Confirmer l'enregistrement
+        deactivate db
+        api --> vue : Confirmer la création du compte
+        vue --> user : Afficher le succès et rediriger
+    end
+    deactivate api
+    deactivate vue
+
+else [Compte existant]
+    user -> vue : Saisir les identifiants de connexion
+    activate vue
+    vue -> api : Transmettre la demande d'authentification
+    activate api
+    
+    api -> db : Rechercher le compte correspondant
+    activate db
+    db --> api : Retourner les informations du compte
+    deactivate db
+    
+    api -> api : Vérifier la validité du mot de passe
+    alt [Identifiants incorrects]
+        api --> vue : Refuser la demande d'authentification
+        vue --> user : Afficher un message d'erreur
+    else [Identifiants corrects]
+        api -> api : Générer une session sécurisée
+        api --> vue : Confirmer l'authentification et transmettre le profil
+        
+        vue -> vue : Sauvegarder la session active
+        vue --> user : Rediriger vers le tableau de bord
+    end
+    deactivate api
+    deactivate vue
+end
+@enduml

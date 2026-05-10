@@ -48,7 +48,29 @@
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label><input v-model="form.latitude" type="number" step="any" class="input-field" required /></div>
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label><input v-model="form.longitude" type="number" step="any" class="input-field" required /></div>
             </div>
-            <div class="flex gap-3 justify-end">
+
+            <!-- Images Management -->
+            <div class="space-y-3 pt-2 border-t">
+              <label class="block text-xs font-semibold text-gray-500">Photos de l'hôtel</label>
+              <div class="flex gap-2">
+                <input v-model="newPhotoUrl" placeholder="URL de l'image (ex: https://...)" class="input-field flex-1" @keyup.enter="addPhoto" />
+                <button type="button" @click="addPhoto" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">Ajouter</button>
+              </div>
+              
+              <div v-if="form.photos && form.photos.length" class="grid grid-cols-4 gap-3 mt-3">
+                <div v-for="(photo, index) in form.photos" :key="index" class="relative group aspect-video rounded-lg overflow-hidden bg-gray-100 border">
+                  <img :src="photo" class="w-full h-full object-cover" />
+                  <button type="button" @click="removePhoto(index)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <p v-else class="text-xs text-gray-400 italic">Aucune photo personnalisée. Les images par défaut seront utilisées.</p>
+            </div>
+
+            <div class="flex gap-3 justify-end pt-4">
               <button type="button" @click="showModal=false" class="btn-outline">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn-primary">{{ form._id ? 'Enregistrer' : 'Créer' }}</button>
             </div>
@@ -72,7 +94,8 @@ const hotels = ref([])
 const showModal = ref(false)
 const deleteModal = ref({ show: false, hotel: null })
 const errorMsg = ref('')
-const form = reactive({ _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null })
+const newPhotoUrl = ref('')
+const form = reactive({ _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null, photos: [] })
 const cols = [
   { key: 'nom', label: 'Nom' }, { key: 'ville', label: 'Ville' }, { key: 'etoiles', label: 'Étoiles' },
   { key: 'prix_min', label: 'Prix min' }, { key: 'noteMoyenne', label: 'Note' }, { key: 'statut', label: 'Statut' }, { key: 'actions', label: 'Actions' }
@@ -82,9 +105,26 @@ async function fetchHotels() {
   hotels.value = data.data || data
 }
 function openModal(hotel) {
-  if (hotel) Object.assign(form, { ...hotel, _id: hotel._id })
-  else Object.assign(form, { _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null })
+  if (hotel) {
+    Object.assign(form, { 
+      ...hotel, 
+      _id: hotel._id,
+      photos: Array.isArray(hotel.photos) ? [...hotel.photos] : []
+    })
+  } else {
+    Object.assign(form, { _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null, photos: [] })
+  }
+  newPhotoUrl.value = ''
   showModal.value = true
+}
+function addPhoto() {
+  if (!newPhotoUrl.value.trim()) return
+  if (!form.photos) form.photos = []
+  form.photos.push(newPhotoUrl.value.trim())
+  newPhotoUrl.value = ''
+}
+function removePhoto(index) {
+  form.photos.splice(index, 1)
 }
 async function saveHotel() {
   try {

@@ -221,7 +221,7 @@ class HotelController extends Controller
         $isAdminContext = $this->isAdminContext($request);
         $filters = $this->normalizeHotelFilters($request);
         $sort = $this->normalizeSort((string) $request->input('sort', 'recommande'));
-        $strictAvailability = $request->boolean('strict_availability', false);
+        $strictAvailability = $request->boolean('strict_availability', ($filters['date_arrivee'] !== null || $filters['date_depart'] !== null));
         $perPage = (int) ($request->input('per_page', 10));
         if ($perPage <= 0) {
             $perPage = 10;
@@ -255,15 +255,12 @@ class HotelController extends Controller
             }
 
             if (
-                $strictAvailability
-                &&
-                (
                 $filters['prix_min'] !== null
                 || $filters['prix_max'] !== null
-                || ($filters['date_arrivee'] !== null && $filters['date_depart'] !== null)
-                )
+                || $filters['nb_voyageurs'] !== null
+                || ($strictAvailability && $filters['date_arrivee'] !== null && $filters['date_depart'] !== null)
             ) {
-                $availableRooms = Chambre::query()->where('estDisponible', true);
+                $availableRooms = Chambre::query()->where('statut', '!=', 'ENTRETIEN');
 
                 if ($filters['prix_min'] !== null) {
                     $availableRooms->where('prix_base', '>=', $filters['prix_min']);
@@ -443,6 +440,8 @@ class HotelController extends Controller
                 'prix_min' => 'nullable|numeric|min:0',
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
+                'photos' => 'nullable|array',
+                'photos.*' => 'url',
             ]);
 
             $hotel = Hotel::create($validated);
@@ -470,6 +469,8 @@ class HotelController extends Controller
                 'prix_min' => 'nullable|numeric|min:0',
                 'latitude' => 'sometimes|numeric',
                 'longitude' => 'sometimes|numeric',
+                'photos' => 'nullable|array',
+                'photos.*' => 'url',
             ]);
             $hotel->update($validated);
             Cache::flush();
@@ -495,7 +496,7 @@ class HotelController extends Controller
 
     public function chambresDisponibles(Request $request, $id)
     {
-        $query = Chambre::where('hotelId', $id)->where('estDisponible', true);
+        $query = Chambre::where('hotelId', $id)->where('statut', '!=', 'ENTRETIEN');
 
         if ($request->has('dateArrivee') && $request->has('dateDepart')) {
             $dateArrivee = $request->dateArrivee;
@@ -538,6 +539,7 @@ class HotelController extends Controller
                         'prenom' => (string) ($client->prenom ?? ''),
                         'nom' => (string) ($client->nom ?? ''),
                     ] : null,
+                    'reponse' => (string) ($review->reponse_marketing ?? $review->reponseHotel ?? ''),
                 ];
             })
             ->values();
@@ -674,6 +676,7 @@ class HotelController extends Controller
         $priceByHotelId = [];
         $rooms = Chambre::query()
             ->whereIn('hotelId', $hotelIds)
+            ->where('statut', '!=', 'ENTRETIEN')
             ->get(['hotelId', 'prix_base']);
 
         foreach ($rooms as $room) {

@@ -452,22 +452,47 @@ class HotelSeeder extends Seeder
                 ]
             );
 
-            Chambre::query()->updateOrCreate(
+            // Créer plusieurs chambres par hôtel pour éviter les problèmes de disponibilité
+            $roomTypes = [
                 [
-                    'hotelId' => (string) $hotel->_id,
-                    'nom' => 'Chambre Deluxe',
+                    'nom' => 'Chambre Standard',
+                    'type' => 'SIMPLE',
+                    'description' => 'Chambre confortable avec équipements de base.',
+                    'prix_base' => (float) $item['prix_par_nuit'] * 0.8,
+                    'maxVoyageurs' => 1,
+                    'equipements' => ['wifi', 'tv'],
                 ],
                 [
+                    'nom' => 'Chambre Deluxe',
                     'type' => 'DOUBLE',
                     'description' => 'Chambre premium avec prestations haut de gamme.',
                     'prix_base' => (float) $item['prix_par_nuit'],
                     'maxVoyageurs' => 2,
                     'equipements' => ['wifi', 'climatisation', 'tv'],
-                    'photos' => [$item['image']],
-                    'estDisponible' => true,
-                    'etage' => 1,
-                ]
-            );
+                ],
+                [
+                    'nom' => 'Suite Familiale',
+                    'type' => 'FAMILIALE',
+                    'description' => 'Suite spacieuse idéale pour les familles.',
+                    'prix_base' => (float) $item['prix_par_nuit'] * 1.5,
+                    'maxVoyageurs' => 4,
+                    'equipements' => ['wifi', 'climatisation', 'tv', 'cuisine'],
+                ],
+            ];
+
+            foreach ($roomTypes as $index => $roomData) {
+                Chambre::query()->updateOrCreate(
+                    [
+                        'hotelId' => (string) $hotel->_id,
+                        'nom' => $roomData['nom'],
+                    ],
+                    array_merge($roomData, [
+                        'photos' => [$item['image']],
+                        'estDisponible' => true,
+                        'etage' => $index + 1,
+                    ])
+                );
+            }
         }
     }
 }

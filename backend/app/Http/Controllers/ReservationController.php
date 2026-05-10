@@ -37,6 +37,7 @@ class ReservationController extends Controller
             ->first();
 
         $row = $reservation->toArray();
+        $row['_id'] = (string) $reservation->_id;
         $row['hotel'] = $hotel;
         $row['chambre'] = $chambre;
         $row['paiement'] = $paiement ? [
@@ -79,6 +80,10 @@ class ReservationController extends Controller
         ]);
 
         $chambre = Chambre::findOrFail($request->chambreId);
+        if ($chambre->statut === 'ENTRETIEN') {
+            return response()->json(['error' => 'Cette chambre est actuellement en maintenance et ne peut pas etre reservee'], 422);
+        }
+        
         if ((int) $request->nbVoyageurs > (int) ($chambre->maxVoyageurs ?? 1)) {
             return response()->json(['error' => 'Le nombre de voyageurs depasse la capacite de la chambre'], 422);
         }
@@ -100,15 +105,43 @@ class ReservationController extends Controller
 
         $remise = 0;
         if ($request->has('codePromo')) {
-            $promo = Promotion::where('codePromo', $request->codePromo)
+            $promoCode = trim((string) $request->codePromo);
+            $promo = Promotion::where('codePromo', $promoCode)
                 ->where('estActive', true)
-                ->where('dateDebut', '<=', now())
-                ->where('dateFin', '>=', now())
                 ->first();
+
             if ($promo) {
-                $remise = $promo->remise_pourcent;
-                $prixTotal = $prixTotal * (1 - $remise / 100);
-                $promo->increment('nbUtilisations');
+                $now = now();
+                $isValid = true;
+                
+                // Robust date check
+                $start = $promo->dateDebut;
+                $end = $promo->dateFin;
+
+                if ($start instanceof \DateTimeInterface) {
+                    if ($now < $start) $isValid = false;
+                } elseif (is_string($start) && !empty($start)) {
+                    if ($now->format('Y-m-d') < substr($start, 0, 10)) $isValid = false;
+                }
+
+                if ($isValid && $end instanceof \DateTimeInterface) {
+                    if ($now > $end) $isValid = false;
+                } elseif ($isValid && is_string($end) && !empty($end)) {
+                    if ($now->format('Y-m-d') > substr($end, 0, 10)) $isValid = false;
+                }
+
+                if ($isValid) {
+                    if (($promo->type ?? 'POURCENTAGE') === 'MONTANT_FIXE' || isset($promo->valeur_fixe)) {
+                        $remiseValeur = (float) ($promo->valeur ?? $promo->valeur_fixe ?? $promo->remise_pourcent ?? 0);
+                        $prixTotal = max(0, $prixTotal - $remiseValeur);
+                        $remise = $remiseValeur;
+                    } else {
+                        $remisePct = (int) ($promo->remise_pourcent ?? 0);
+                        $prixTotal = $prixTotal * (1 - $remisePct / 100);
+                        $remise = $remisePct;
+                    }
+                    $promo->increment('nbUtilisations');
+                }
             }
         }
 
@@ -213,6 +246,11 @@ class ReservationController extends Controller
 
         if ((string) $reservation->clientId !== (string) $user->_id) {
             return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
+        $chambre = Chambre::find($reservation->chambreId);
+        if ($chambre && $chambre->statut === 'ENTRETIEN') {
+            return response()->json(['error' => 'Cette chambre est actuellement en maintenance'], 422);
         }
 
         if ($reservation->statut !== 'CONFIRMEE') {
@@ -445,7 +483,10 @@ class ReservationController extends Controller
 
         $reservation->update(['statut' => 'EN_COURS', 'checkinAt' => now()]);
 
-        Chambre::where('_id', $reservation->chambreId)->update(['estDisponible' => false]);
+        Chambre::where('_id', $reservation->chambreId)->update([
+            'estDisponible' => false,
+            'statut' => 'OCCUPE'
+        ]);
 
         Notification::create([
             'userId' => $reservation->clientId,
@@ -466,7 +507,10 @@ class ReservationController extends Controller
 
         $reservation->update(['statut' => 'TERMINEE', 'checkoutAt' => now()]);
 
-        Chambre::where('_id', $reservation->chambreId)->update(['estDisponible' => true]);
+        Chambre::where('_id', $reservation->chambreId)->update([
+            'estDisponible' => true,
+            'statut' => 'LIBRE'
+        ]);
 
         Notification::create([
             'userId' => $reservation->clientId,
