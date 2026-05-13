@@ -1,60 +1,59 @@
 @startuml
+skinparam monochrome true
 skinparam shadowing false
+autonumber
 
 actor "Visiteur" as user
-participant "Interface" as vue
-participant "Contrôleur" as api
-participant "Base de données" as db
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+entity "Modèle" as model
 
-alt [Nouveau compte]
-    user -> vue : Saisir les informations d'inscription
+alt Scénario 1 : Inscription (Nouveau compte)
+    user -> vue : Remplit le formulaire d'inscription
     activate vue
-    vue -> api : Transmettre les données d'inscription
-    activate api
+    vue -> ctrl : Transmet les données d'inscription
+    activate ctrl
     
-    api -> api : Vérifier le format et l'unicité de l'email
-    activate db
-    db --> api : Retourner le résultat de la vérification
-    deactivate db
+    ctrl -> model : Vérifie si l'email existe déjà
+    activate model
+    model --> ctrl : Résultat de la recherche
+    deactivate model
     
-    alt [Email déjà utilisé]
-        api --> vue : Refuser la demande d'inscription
-        vue --> user : Afficher un message d'erreur
-    else [Email disponible]
-        api -> api : Sécuriser le mot de passe
-        api -> db : Enregistrer le nouveau compte
-        activate db
-        db --> api : Confirmer l'enregistrement
-        deactivate db
-        api --> vue : Confirmer la création du compte
-        vue --> user : Afficher le succès et rediriger
+    alt Email déjà utilisé
+        ctrl --> vue : Refuse l'inscription
+        vue --> user : Affiche "Cet email existe déjà"
+    else Email disponible
+        ctrl -> ctrl : Sécurise le mot de passe
+        ctrl -> model : Enregistre le nouvel utilisateur
+        activate model
+        model --> ctrl : Confirme la création
+        deactivate model
+        ctrl --> vue : Confirme le succès
+        vue --> user : Redirige vers la connexion
     end
-    deactivate api
+    deactivate ctrl
     deactivate vue
 
-else [Compte existant]
-    user -> vue : Saisir les identifiants de connexion
+else Scénario 2 : Connexion (Compte existant)
+    user -> vue : Saisit Email et Mot de passe
     activate vue
-    vue -> api : Transmettre la demande d'authentification
-    activate api
+    vue -> ctrl : Demande l'accès au compte
+    activate ctrl
     
-    api -> db : Rechercher le compte correspondant
-    activate db
-    db --> api : Retourner les informations du compte
-    deactivate db
+    ctrl -> model : Recherche l'utilisateur
+    activate model
+    model --> ctrl : Retourne les informations
+    deactivate model
     
-    api -> api : Vérifier la validité du mot de passe
-    alt [Identifiants incorrects]
-        api --> vue : Refuser la demande d'authentification
-        vue --> user : Afficher un message d'erreur
-    else [Identifiants corrects]
-        api -> api : Générer une session sécurisée
-        api --> vue : Confirmer l'authentification et transmettre le profil
-        
-        vue -> vue : Sauvegarder la session active
-        vue --> user : Rediriger vers le tableau de bord
+    ctrl -> ctrl : Vérifie le mot de passe
+    alt Identifiants incorrects
+        ctrl --> vue : Refuse l'accès
+        vue --> user : Affiche "Identifiants invalides"
+    else Identifiants corrects
+        ctrl --> vue : Autorise l'accès sécurisé
+        vue --> user : Redirige vers le tableau de bord
     end
-    deactivate api
+    deactivate ctrl
     deactivate vue
 end
 @enduml

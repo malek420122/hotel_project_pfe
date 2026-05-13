@@ -426,7 +426,15 @@ class ReservationController extends Controller
 
     public function confirmer($id)
     {
-        $reservation = Reservation::findOrFail($id);
+        $reservation = Reservation::where('_id', $id)->first();
+        if (!$reservation) {
+            $reservation = Reservation::where('reference', $id)->first();
+        }
+
+        if (!$reservation) {
+            return response()->json(['error' => 'Reservation non trouvee'], 404);
+        }
+
         if (!in_array($reservation->statut, ['EN_ATTENTE', 'REJETE'])) {
             return response()->json(['error' => 'Transition de statut invalide'], 422);
         }
@@ -439,7 +447,7 @@ class ReservationController extends Controller
         Notification::create([
             'userId' => $reservation->clientId,
             'type' => 'RESERVATION_CONFIRMEE',
-            'message' => "Votre réservation {$reservation->reference} est confirmée ! Bon séjour.",
+            'message' => "Votre rservation {$reservation->reference} est confirme ! Bon sjour.",
             'estLue' => false,
         ]);
 
@@ -448,7 +456,15 @@ class ReservationController extends Controller
 
     public function rejeter(Request $request, $id)
     {
-        $reservation = Reservation::findOrFail($id);
+        $reservation = Reservation::where('_id', $id)->first();
+        if (!$reservation) {
+            $reservation = Reservation::where('reference', $id)->first();
+        }
+
+        if (!$reservation) {
+            return response()->json(['error' => 'Reservation non trouvee'], 404);
+        }
+
         if (!in_array($reservation->statut, ['EN_ATTENTE', 'CONFIRMEE'])) {
             return response()->json(['error' => 'Transition de statut invalide'], 422);
         }
@@ -476,7 +492,15 @@ class ReservationController extends Controller
 
     public function checkin($id)
     {
-        $reservation = Reservation::findOrFail($id);
+        $reservation = Reservation::where('_id', $id)->first();
+        if (!$reservation) {
+            $reservation = Reservation::where('reference', $id)->first();
+        }
+
+        if (!$reservation) {
+            return response()->json(['error' => 'Reservation non trouvee'], 404);
+        }
+
         if (!in_array($reservation->statut, ['CONFIRMEE', 'EN_ATTENTE'])) {
             return response()->json(['error' => 'Check-in non autorise pour ce statut'], 422);
         }
@@ -500,7 +524,15 @@ class ReservationController extends Controller
 
     public function checkout($id)
     {
-        $reservation = Reservation::findOrFail($id);
+        $reservation = Reservation::where('_id', $id)->first();
+        if (!$reservation) {
+            $reservation = Reservation::where('reference', $id)->first();
+        }
+
+        if (!$reservation) {
+            return response()->json(['error' => 'Reservation non trouvee'], 404);
+        }
+
         if ($reservation->statut !== 'EN_COURS') {
             return response()->json(['error' => 'Check-out non autorise pour ce statut'], 422);
         }
@@ -524,10 +556,17 @@ class ReservationController extends Controller
 
     public function invoice($id)
     {
-        $reservation = Reservation::findOrFail($id);
+        // On cherche par ID ou par rfrence pour viter les erreurs de tlchargement
+        $reservation = Reservation::where('_id', $id)->orWhere('reference', $id)->firstOrFail();
+        
         $chambre = Chambre::find($reservation->chambreId);
         $hotel = Hotel::find($reservation->hotelId);
         $client = User::find($reservation->clientId);
+
+        // On s'assure que les donnes minimales existent pour la vue
+        if (!$hotel || !$client) {
+            return response()->json(['error' => 'Donnees hotel ou client manquantes pour la facture'], 404);
+        }
 
         $pdf = Pdf::loadView('invoices.facture', compact('reservation', 'chambre', 'hotel', 'client'));
         return $pdf->download("facture-{$reservation->reference}.pdf");

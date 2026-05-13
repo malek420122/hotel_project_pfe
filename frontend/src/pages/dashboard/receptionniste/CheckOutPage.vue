@@ -10,8 +10,8 @@
 
     <div class="checkout-stats-grid mb-6">
       <article class="checkout-stat-card checkout-stat-highlight">
-        <p class="checkout-stat-value">{{ stats.departuresToday }}</p>
-        <p class="checkout-stat-label">{{ t('checkout.todayCheckouts') }}</p>
+        <p class="checkout-stat-value">{{ stats.remaining }} / {{ stats.total }}</p>
+        <p class="checkout-stat-label">Départs restants</p>
       </article>
       <article class="checkout-stat-card">
         <p class="checkout-stat-value">{{ stats.totalToCollect }}€</p>
@@ -26,6 +26,11 @@
     <div class="card checkout-panel mb-6">
       <h3 class="checkout-section-title">{{ t('checkout.searchClient') }}</h3>
       <p v-if="errorMsg" class="checkout-error">{{ errorMsg }}</p>
+      <div v-if="successMsg" class="checkout-success-banner">
+        <span class="flex-1">{{ successMsg }}</span>
+        <button v-if="lastCheckoutRef" @click="downloadInvoice(lastCheckoutRef)" class="text-xs font-bold underline">Facture PDF</button>
+        <button @click="successMsg = ''" class="ml-2">✕</button>
+      </div>
       <div class="checkout-search-row">
         <input v-model="search" :placeholder="t('checkout.searchPlaceholder')" class="input-field flex-1" />
         <button @click="doSearch" class="btn-primary checkout-search-btn">{{ t('checkout.searchButton') }}</button>
@@ -50,7 +55,10 @@
               <span class="checkout-price">{{ r.prix }}€</span>
               <span class="checkout-price-sub">À régler</span>
             </div>
-            <button @click="doCheckOut(r)" class="btn-accent checkout-button">{{ t('checkout.checkoutButton') }}</button>
+            <div class="flex flex-col gap-2">
+              <button @click="doCheckOut(r)" class="btn-accent checkout-button">{{ t('checkout.checkoutButton') }}</button>
+              <button @click="downloadInvoice(r.ref)" class="text-[10px] font-bold text-gray-400 hover:text-secondary uppercase tracking-tight">Préparer facture</button>
+            </div>
           </div>
         </div>
         <div v-if="!filteredCheckouts.length" class="checkout-empty">{{ t('checkout.empty') }}</div>
@@ -67,6 +75,9 @@ const { t, locale } = useI18n()
 const search = ref('')
 const checkouts = ref([])
 const errorMsg = ref('')
+const successMsg = ref('')
+const lastCheckoutRef = ref('')
+const loadingToday = ref(false)
 
 const currentDateLabel = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'long',
@@ -127,22 +138,42 @@ const filteredCheckouts = computed(() => {
   )
 })
 
-const stats = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+const getLocalDateStr = (val) => {
+  if (!val) return ''
+  const d = new Date(val)
+  if (Number.isNaN(d.getTime())) return ''
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 
-  return checkouts.value.reduce((acc, checkout) => {
-    acc.departuresToday += 1
+const stats = computed(() => {
+  const todayStr = getLocalDateStr(new Date())
+
+  const localCounts = checkouts.value.reduce((acc, checkout) => {
+    const departureStr = getLocalDateStr(checkout.dateDepart)
+
+    if (departureStr === todayStr) {
+      acc.remaining += 1
+    }
+
     acc.totalToCollect += Number(checkout.prix || 0)
 
-    const departureDate = toDayStart(checkout.dateDepart)
-    if (departureDate && departureDate < today) acc.delayedDepartures += 1
+    if (departureStr && departureStr < todayStr) {
+      acc.delayedDepartures += 1
+    }
     return acc
   }, {
-    departuresToday: 0,
+    remaining: 0,
     totalToCollect: 0,
     delayedDepartures: 0,
   })
+
+  return {
+    ...localCounts,
+    total: Math.max(localCounts.remaining, dailyStats.value.departuresToday)
+  }
 })
 
 function getResId(r) {
@@ -154,11 +185,20 @@ function getResId(r) {
   return String(val)
 }
 
+const dailyStats = ref({ departuresToday: 0, delayedDepartures: 0, totalToCollect: 0 })
+
 async function loadCheckOuts() {
   try {
     errorMsg.value = ''
-    const { data } = await api.get('/reservations', { params: { statut: 'EN_COURS' } })
-    const rows = Array.isArray(data) ? data : []
+    loadingToday.value = true
+    
+    // On rcupre les rservations EN_COURS et les stats globales
+    const [resResp, statsResp] = await Promise.all([
+      api.get('/reservations', { params: { statut: 'EN_COURS' } }),
+      api.get('/receptionniste/stats')
+    ])
+    
+    const rows = Array.isArray(resResp.data) ? resResp.data : []
     checkouts.value = rows.map((r) => ({
       ref: getResId(r),
       client: [r?.client?.prenom, r?.client?.nom].filter(Boolean).join(' ') || t('checkout.clientFallback'),
@@ -174,23 +214,50 @@ async function loadCheckOuts() {
       prix: Number(r?.prixTotal || 0),
       dateDepart: r?.dateDepart,
     }))
+
+    // On met  jour les stats locales avec les donnes du backend pour la cohrence
+    if (statsResp.data) {
+      dailyStats.value.departuresToday = statsResp.data.checkouts_today
+    }
   } catch {
     checkouts.value = []
     errorMsg.value = t('checkout.loadError')
+  } finally {
+    loadingToday.value = false
   }
 }
 
 function doSearch() {
-  // Filtering is computed from current search value.
+  successMsg.value = ''
+  errorMsg.value = ''
 }
 
 async function doCheckOut(r) {
   try {
     errorMsg.value = ''
+    successMsg.value = ''
     await api.put(`/reservations/${encodeURIComponent(r.ref)}/checkout`)
+    successMsg.value = `Check-out de ${r.client} effectué avec succès.`
+    lastCheckoutRef.value = r.ref
     await loadCheckOuts()
   } catch {
     errorMsg.value = t('checkout.checkoutError', { name: r.client })
+  }
+}
+
+async function downloadInvoice(ref) {
+  try {
+    const response = await api.get(`/reservations/${ref}/invoice`, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `facture-${ref}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch {
+    errorMsg.value = "Erreur lors du tlchargement de la facture."
   }
 }
 
@@ -289,6 +356,20 @@ onMounted(loadCheckOuts)
   margin-bottom: 0.75rem;
   font-size: 0.875rem;
   color: #b91c1c;
+}
+
+.checkout-success-banner {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .checkout-search-row {

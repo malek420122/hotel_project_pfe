@@ -1,33 +1,36 @@
 @startuml
+skinparam monochrome true
 skinparam shadowing false
+autonumber
 
 actor "Client" as client
-participant "Interface" as vue
-participant "Contrôleur" as api
-participant "Base de données" as db
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+entity "Modèle" as model
 
-client -> vue : Sélectionner une chambre et des dates
+client -> vue : Choisit une chambre et des dates
 activate vue
-vue -> api : Transmettre demande de réservation
-activate api
+vue -> ctrl : Envoie la demande de réservation
+activate ctrl
 
-api -> api : Vérifier l'identité du client
-api -> db : Vérifier disponibilité pour les dates choisies
-activate db
-db --> api : Retourner état de disponibilité
-deactivate db
+ctrl -> ctrl : Vérifie l'identité du client
+ctrl -> model : Vérifie la disponibilité aux dates choisies
+activate model
+model --> ctrl : Retourne l'état (Libre ou Occupée)
+deactivate model
 
-alt [Chambre non disponible]
-    api --> vue : Refuser la demande de réservation
-    vue --> client : Afficher message d'indisponibilité
-else [Chambre libre]
-    api -> db : Enregistrer la nouvelle réservation
-    activate db
-    db --> api : Confirmer l'enregistrement
-    deactivate db
-    api --> vue : Confirmer la création de la réservation
-    vue --> client : Afficher succès et rediriger vers le paiement
+alt Chambre non disponible
+    ctrl --> vue : Refuse la demande
+    vue --> client : Affiche "Chambre indisponible"
+else Chambre libre
+    ctrl -> model : Enregistre la nouvelle réservation
+    activate model
+    model --> ctrl : Confirme l'enregistrement
+    deactivate model
+    ctrl --> vue : Confirme la création
+    vue --> client : Affiche le succès et passe au paiement
 end
-deactivate api
+
+deactivate ctrl
 deactivate vue
 @enduml

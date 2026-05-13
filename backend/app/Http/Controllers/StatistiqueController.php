@@ -150,12 +150,12 @@ class StatistiqueController extends Controller
         $today = Carbon::today();
 
         $checkinsToday = Reservation::query()
-            ->whereIn('statut', ['CONFIRMEE', 'EN_COURS'])
+            ->whereIn('statut', ['CONFIRMEE', 'EN_COURS', 'TERMINEE'])
             ->whereDate('dateArrivee', $today)
             ->count();
 
         $checkoutsToday = Reservation::query()
-            ->whereIn('statut', ['EN_COURS', 'CHECKIN'])
+            ->whereIn('statut', ['EN_COURS', 'TERMINEE'])
             ->whereDate('dateDepart', $today)
             ->count();
 
@@ -180,20 +180,32 @@ class StatistiqueController extends Controller
     {
         $today = Carbon::today();
 
-        $checkinsToday = Reservation::query()
-            ->whereIn('statut', ['CONFIRMEE', 'EN_COURS'])
+        // Total attendus aujourd'hui (pour le volume de la journe)
+        $checkinsTotal = Reservation::query()
+            ->whereIn('statut', ['CONFIRMEE', 'EN_COURS', 'TERMINEE'])
             ->whereDate('dateArrivee', $today)
             ->count();
 
-        $checkoutsToday = Reservation::query()
-            ->whereIn('statut', ['EN_COURS'])
+        $checkoutsTotal = Reservation::query()
+            ->whereIn('statut', ['EN_COURS', 'TERMINEE'])
+            ->whereDate('dateDepart', $today)
+            ->count();
+
+        // Tches restantes (pour le compteur "En attente")
+        $pendingCheckins = Reservation::query()
+            ->where('statut', 'CONFIRMEE')
+            ->whereDate('dateArrivee', $today)
+            ->count();
+
+        $pendingCheckouts = Reservation::query()
+            ->where('statut', 'EN_COURS')
             ->whereDate('dateDepart', $today)
             ->count();
 
         return response()->json([
-            'checkins_today' => $checkinsToday,
-            'checkouts_today' => $checkoutsToday,
-            'pending_reservations' => $checkinsToday + $checkoutsToday,
+            'checkins_today' => $checkinsTotal,
+            'checkouts_today' => $checkoutsTotal,
+            'pending_reservations' => $pendingCheckins + $pendingCheckouts,
         ]);
     }
 

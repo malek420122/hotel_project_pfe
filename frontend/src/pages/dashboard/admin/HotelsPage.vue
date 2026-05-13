@@ -52,9 +52,27 @@
             <!-- Images Management -->
             <div class="space-y-3 pt-2 border-t">
               <label class="block text-xs font-semibold text-gray-500">Photos de l'hôtel</label>
-              <div class="flex gap-2">
-                <input v-model="newPhotoUrl" placeholder="URL de l'image (ex: https://...)" class="input-field flex-1" @keyup.enter="addPhoto" />
-                <button type="button" @click="addPhoto" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">Ajouter</button>
+              
+              <div class="flex flex-col gap-3">
+                <!-- File Upload -->
+                <div class="flex gap-2">
+                  <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="onFileChange" />
+                  <button type="button" @click="$refs.fileInput.click()" :disabled="uploading" class="flex-1 px-4 py-2 bg-secondary/10 text-secondary rounded-lg hover:bg-secondary/20 text-sm font-medium transition-colors flex items-center justify-center gap-2 border border-secondary/20">
+                    <span v-if="uploading" class="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin"></span>
+                    {{ uploading ? 'Upload en cours...' : '📁 Choisir un fichier' }}
+                  </button>
+                </div>
+
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-100"></div></div>
+                  <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-gray-400">ou par URL</span></div>
+                </div>
+
+                <!-- URL Input -->
+                <div class="flex gap-2">
+                  <input v-model="newPhotoUrl" placeholder="https://..." class="input-field flex-1" @keyup.enter="addPhoto" />
+                  <button type="button" @click="addPhoto" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">Ajouter</button>
+                </div>
               </div>
               
               <div v-if="form.photos && form.photos.length" class="grid grid-cols-4 gap-3 mt-3">
@@ -95,7 +113,37 @@ const showModal = ref(false)
 const deleteModal = ref({ show: false, hotel: null })
 const errorMsg = ref('')
 const newPhotoUrl = ref('')
+const uploading = ref(false)
+const fileInput = ref(null)
+
 const form = reactive({ _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null, photos: [] })
+
+async function onFileChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+
+  try {
+    uploading.value = true
+    errorMsg.value = ''
+    
+    const formData = new FormData()
+    formData.append('image', file)
+
+    const { data } = await api.post('/admin/hotels/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    if (data.url) {
+      if (!form.photos) form.photos = []
+      form.photos.push(data.url)
+    }
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Erreur lors de l\'upload'
+  } finally {
+    uploading.value = false
+    if (fileInput.value) fileInput.value.value = ''
+  }
+}
 const cols = [
   { key: 'nom', label: 'Nom' }, { key: 'ville', label: 'Ville' }, { key: 'etoiles', label: 'Étoiles' },
   { key: 'prix_min', label: 'Prix min' }, { key: 'noteMoyenne', label: 'Note' }, { key: 'statut', label: 'Statut' }, { key: 'actions', label: 'Actions' }

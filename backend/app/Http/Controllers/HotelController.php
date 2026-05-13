@@ -481,6 +481,29 @@ class HotelController extends Controller
         }
     }
 
+    public function uploadImage(Request $request)
+    {
+        try {
+            $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('hotels', $filename, 'public');
+                $url = asset('storage/hotels/' . $filename);
+
+                return response()->json(['url' => $url]);
+            }
+
+            return response()->json(['message' => 'Aucun fichier reçu'], 400);
+        } catch (\Exception $e) {
+            \Log::error('Hotel image upload error: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur lors de l\'upload: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function destroy($id)
     {
         try {
@@ -865,14 +888,23 @@ class HotelController extends Controller
             return true;
         }
 
+        // Search in City
         $cityCandidates = $this->extractLocalizedStringVariants($hotel->ville ?? null, $lang);
-
         foreach ($cityCandidates as $candidate) {
             $normalizedCandidate = $this->normalizeText((string) $candidate);
             foreach ($needles as $needle) {
                 if (mb_strpos($normalizedCandidate, $needle) !== false) {
                     return true;
                 }
+            }
+        }
+
+        // Also search in Hotel Name (very useful if user types the hotel name in the city field)
+        $nameCandidate = (string) ($hotel->nom ?? '');
+        $normalizedName = $this->normalizeText($nameCandidate);
+        foreach ($needles as $needle) {
+            if (mb_strpos($normalizedName, $needle) !== false) {
+                return true;
             }
         }
 

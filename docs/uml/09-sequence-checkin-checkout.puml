@@ -1,39 +1,42 @@
 @startuml
+skinparam monochrome true
 skinparam shadowing false
+autonumber
 
 actor "Réceptionniste" as recep
-participant "Interface" as vue
-participant "Contrôleur" as api
-participant "Base de données" as db
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+entity "Modèle" as model
 
-note left of recep
-  Le jour de l'arrivée
-end note
-recep -> vue : Demander l'enregistrement du client (Check-in)
+== Arrivée du client (Check-in) ==
+recep -> vue : Valide l'arrivée du client
 activate vue
-vue -> api : Transmettre demande d'enregistrement
-activate api
-api -> api : Vérifier les droits d'accès
-api -> db : Marquer la réservation comme en cours
-api -> db : Changer le statut de la chambre à occupée
-api --> vue : Confirmer l'enregistrement
-deactivate api
-vue --> recep : Afficher le succès de l'opération
+vue -> ctrl : Transmet l'information d'arrivée
+activate ctrl
+ctrl -> ctrl : Vérifie que l'employé est autorisé
+ctrl -> model : Change le statut de la chambre (Occupée)
+activate model
+model --> ctrl : Confirme la mise à jour
+deactivate model
+ctrl --> vue : Confirme l'enregistrement
+deactivate ctrl
+vue --> recep : Affiche le succès
 deactivate vue
 
 |||
-note left of recep
-  Fin du séjour
-end note
-recep -> vue : Demander le départ du client (Check-out)
+== Départ du client (Check-out) ==
+recep -> vue : Valide le départ du client
 activate vue
-vue -> api : Transmettre demande de départ
-activate api
-api -> api : Vérifier les droits d'accès
-api -> db : Clôturer la réservation
-api -> db : Libérer la chambre
-api --> vue : Confirmer le départ
-deactivate api
-vue --> recep : Afficher le succès de l'opération
+vue -> ctrl : Transmet l'information de départ
+activate ctrl
+ctrl -> ctrl : Vérifie que l'employé est autorisé
+ctrl -> model : Change le statut (Chambre à nettoyer)
+activate model
+model --> ctrl : Confirme la mise à jour
+deactivate model
+ctrl -> ctrl : Prépare la facture du séjour
+ctrl --> vue : Confirme le départ et donne la facture
+deactivate ctrl
+vue --> recep : Affiche le succès et imprime la facture
 deactivate vue
 @enduml

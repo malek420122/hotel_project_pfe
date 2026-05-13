@@ -1,49 +1,47 @@
 @startuml
-skinparam style strictuml
-skinparam sequenceMessageAlign center
+skinparam monochrome true
 skinparam shadowing false
+autonumber
 
 actor "Client" as client
-participant "Interface" as vue
-participant "Contrôleur" as api
-participant "Système de Paiement" as stripe
-participant "Base de données" as db
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+participant "Plateforme Bancaire" as stripe
+entity "Modèle" as model
 
-== Initialisation du paiement en ligne ==
-
-client -> vue : Demander le paiement en ligne
+== Phase 1 : Redirection vers le paiement ==
+client -> vue : Clique sur "Payer en ligne"
 activate vue
-vue -> api : Transmettre demande d'initialisation
-activate api
-api -> db : Récupérer les détails de la réservation
-api -> stripe : Créer une session de paiement
+vue -> ctrl : Demande la page de paiement
+activate ctrl
+
+ctrl -> model : Récupère les détails du séjour
+activate model
+model --> ctrl : Renvoie les informations
+deactivate model
+
+ctrl -> stripe : Demande un accès sécurisé pour le client
 activate stripe
-stripe --> api : Lien de paiement sécurisé
+stripe --> ctrl : Fournit le lien de paiement sécurisé
 deactivate stripe
-api --> vue : Transmettre le lien
-deactivate api
-vue --> client : Rediriger vers Stripe
+ctrl --> vue : Transmet le lien bancaire
+deactivate ctrl
+vue --> client : Redirige vers la banque
 deactivate vue
 
-== Saisie des informations bancaires ==
-
-client -> stripe : Saisir les informations et valider
+client -> stripe : Saisit sa carte et valide
 activate stripe
-stripe --> client : Rediriger vers la page de succès
+stripe --> client : Ramène le client sur le site
 deactivate stripe
 
-== Confirmation asynchrone (Webhook) ==
-
-note left of client
-  Paiement réussi
-end note
-
-stripe -> api : Notifier le succès (Webhook)
-activate api
-api -> api : Vérifier l'authenticité
-api -> db : Marquer le paiement comme réglé
-api -> db : Confirmer la réservation
-api --> stripe : Accuser réception
-deactivate api
-
+== Phase 2 : Confirmation automatique ==
+stripe ->> ctrl : Informe que le paiement a réussi
+activate ctrl
+ctrl -> ctrl : Vérifie l'authenticité du message
+ctrl -> model : Marque la réservation comme payée
+activate model
+model --> ctrl : Confirme la mise à jour
+deactivate model
+ctrl -->> stripe : Confirme la réception du message
+deactivate ctrl
 @enduml

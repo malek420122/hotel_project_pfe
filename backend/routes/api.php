@@ -49,6 +49,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::get('reservations/{id}/invoice', [ReservationController::class, 'invoice']);
 
     // Incidents are structured tickets created by reception/admin/manager only.
     Route::middleware('role:receptionniste,admin,manager')->group(function () {
@@ -72,7 +73,7 @@ Route::middleware(['jwt.auth', 'role:client,admin'])->group(function () {
     Route::get('client/loyalty', [UserController::class, 'fidelite']);
     Route::post('client/loyalty/redeem', [UserController::class, 'redeemPoints']);
     Route::delete('reservations/{id}', [ReservationController::class, 'cancel']);
-    Route::get('reservations/{id}/invoice', [ReservationController::class, 'invoice']);
+
     Route::post('avis', [AvisController::class, 'store']);
     Route::post('reviews', [AvisController::class, 'store']);
     Route::get('client/reviews', [AvisController::class, 'myReviews']);
@@ -120,6 +121,7 @@ Route::middleware(['jwt.auth', 'role:receptionniste,admin'])->group(function () 
 // Admin routes
 Route::middleware(['jwt.auth', 'role:admin'])->group(function () {
     Route::apiResource('admin/hotels', HotelController::class);
+    Route::post('admin/hotels/upload', [HotelController::class, 'uploadImage']);
     Route::put('admin/hotels/{hotel}/toggle', [HotelController::class, 'toggle']);
     Route::apiResource('admin/chambres', ChambreController::class);
     Route::apiResource('admin/services', ServiceController::class);

@@ -9,6 +9,10 @@
       <KpiCard :icon="KeyRound" :label="t('reception.queue.checkinsToday')" :value="stats.checkinsToday" color="blue" />
       <KpiCard :icon="DoorOpen" :label="t('reception.queue.checkoutsToday')" :value="stats.checkoutsToday" color="green" />
     </div>
+    <div v-if="successMsg" class="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-center justify-between">
+      <span>{{ successMsg }}</span>
+      <button @click="successMsg = ''">✕</button>
+    </div>
     <p v-if="errorMsg" class="mb-4 text-sm text-red-600">{{ errorMsg }}</p>
     <div class="card">
       <h3 class="text-[16px] font-medium text-gray-800 mb-4">{{ t('reception.queue.realtimeQueue') }}</h3>
@@ -55,6 +59,7 @@ const loadingQueue = ref(true)
 const stats = ref({ pendingReservations: 0, checkinsToday: 0, checkoutsToday: 0 })
 const queue = ref([])
 const errorMsg = ref('')
+const successMsg = ref('')
 
 function toIsoDate(value) {
   if (!value) return ''
@@ -136,7 +141,9 @@ async function loadQueue() {
 async function process(item) {
   try {
     errorMsg.value = ''
+    successMsg.value = ''
     await api.put(`/reservations/${encodeURIComponent(item.id)}/${item.type}`)
+    successMsg.value = `${item.type === 'checkin' ? 'Check-in' : 'Check-out'} de ${item.client} réussi.`
     await loadQueue()
   } catch {
     errorMsg.value = t('reception.queue.processError', { name: item.client })

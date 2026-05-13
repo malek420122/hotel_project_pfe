@@ -141,7 +141,7 @@ async function confirmDeleteRoom() {
   }
 }
 onMounted(async () => {
-  const { data } = await api.get('/admin/hotels')
+  const { data } = await api.get('/admin/hotels', { params: { per_page: 100 } })
   hotels.value = data.data || data
   await loadRooms()
 })
