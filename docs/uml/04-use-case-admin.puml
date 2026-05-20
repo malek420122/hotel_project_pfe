@@ -5,26 +5,32 @@ skinparam actorStyle awesome
 skinparam roundcorner 10
 skinparam backgroundColor #FFFFFF
 
+scale 1.5
 skinparam usecase {
   BackgroundColor #FFFFFF
   BorderColor #888888
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam actor {
   BackgroundColor #FFFFFF
   BorderColor #666666
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam note {
   BackgroundColor #FFFDE7
   BorderColor #CCBB88
-  FontSize 11
+  FontSize 30
   FontName Arial
 }
+skinparam rectangle {
+  FontSize 40
+  FontName Arial
+  BorderColor #444444
+}
 skinparam ArrowColor #888888
-skinparam ArrowFontSize 10
+skinparam ArrowFontSize 28
 
 actor "Administrateur" as Admin
 
@@ -41,16 +47,16 @@ rectangle "Gestion Administrative et Système" {
   (Modifier le statut) as UC_C_Status
   (Supprimer la chambre) as UC_C_Del
 
-  (Gérer les utilisateurs) as UC_U
-  (Modifier rôles et statuts) as UC_U_Ext
+  (Gérer les\nutilisateurs) as UC_U
+  (Modifier rôles\net statuts) as UC_U_Ext
 
-  (Consulter les paiements) as UC_P
-  (Exporter paiements CSV) as UC_CSV
-  (Consulter stats globales) as UC_Stats
+  (Consulter les\npaiements) as UC_P
+  (Exporter\npaiements CSV) as UC_CSV
+  (Consulter stats\nglobales) as UC_Stats
 
-  (Gérer les incidents) as UC_Inc
-  (Changer le statut d'un incident) as UC_Inc_Stat
-  (Filtrer les incidents) as UC_Inc_Filt
+  (Gérer les\nincidents) as UC_Inc
+  (Changer le statut\nd'un incident) as UC_Inc_Stat
+  (Filtrer les\nincidents) as UC_Inc_Filt
 
   UC_H_Add .up.> UC_H : <<extend>>
   UC_H_Edit .up.> UC_H : <<extend>>

@@ -1,0 +1,39 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+node "Appareil Client" as nc {
+    component "Navigateur" as nav
+    artifact "Application SPA Vue.js\n(JavaScript, HTML/CSS, Axios)" as art_vue
+    nav .. art_vue
+}
+
+node "Serveur d'Application (API REST)" as nsapp {
+    component "Contrôleurs Laravel" as backend
+    
+    package "Moteur Intelligent" {
+        component "RecommendationService" as reco
+        component "Calculs & Similarité" as algo
+    }
+    
+    artifact "PHP\n(Laravel Framework)" as art_php
+    backend .. art_php
+    reco .. art_php
+}
+
+node "Serveur de Base de Données" as ndb {
+    component "Base de Données MongoDB" as db
+    artifact "MongoDB\n(Utilisateurs, Hôtels, Actions, Avis)" as art_mongo
+    db .. art_mongo
+}
+
+' Relations physiques et logiques
+nav "HTTPS" --> backend : Requêtes API
+backend --> reco : Demande des recommandations
+reco --> algo : Analyse des données
+backend "TCP/IP" ---> db : Connexion standard
+reco "TCP/IP" ---> db : Extraction Historique & Avis
+
+@enduml

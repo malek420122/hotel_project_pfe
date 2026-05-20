@@ -1,0 +1,49 @@
+@startuml
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    roundCorner 15
+}
+skinparam database {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam monochrome true
+skinparam shadowing false
+
+title Flux de données du moteur de recommandation (HotelEase)
+
+database "Base MongoDB" as db
+
+rectangle "Extraction des Données" as extract
+rectangle "Traces de Navigation" as traces
+rectangle "Historique Réservations" as hist
+rectangle "Avis & Profils" as avis
+
+rectangle "Analyse Comportementale\n(Pondération & Obsolescence)" as algo_comportement
+rectangle "Filtrage Collaboratif\n(Similarité entre clients)" as algo_collab
+rectangle "Analyse Textuelle\n(Indexation MongoDB)" as algo_texte
+rectangle "Algorithme de Popularité\n(Fallback / Cold Start)" as algo_pop
+
+rectangle "Fusion Multi-Critères\n(Agrégation et Normalisation des Scores)" as fusion
+rectangle "Top Recommandations\n(Liste des meilleurs hôtels)" as resultat
+
+db --> extract
+extract --> traces
+extract --> hist
+extract --> avis
+
+traces --> algo_comportement
+hist --> algo_collab
+avis --> algo_texte
+
+algo_comportement --> fusion
+algo_collab --> fusion
+algo_texte --> fusion
+
+extract ...> algo_pop : "Si profil utilisateur vide\n(Nouveau client)"
+algo_pop --> fusion
+
+fusion --> resultat
+
+@enduml

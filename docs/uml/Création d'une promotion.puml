@@ -1,0 +1,33 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+autonumber
+
+actor "Équipe Marketing" as marketing
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+entity "Modèle" as model
+
+marketing -> vue : Soumettre les informations de la nouvelle promotion
+activate vue
+
+vue -> ctrl : Transmettre les données de la promotion
+activate ctrl
+
+ctrl -> ctrl : Valider les informations saisies
+
+ctrl -> ctrl : Pré-traiter les données (génération automatique du code promo)
+
+ctrl -> model : Enregistrer la promotion
+activate model
+
+model --> ctrl : Confirmer l'enregistrement
+deactivate model
+
+ctrl --> vue : Retourner la confirmation de création
+deactivate ctrl
+
+vue --> marketing : Afficher la nouvelle promotion dans la liste
+deactivate vue
+
+@enduml

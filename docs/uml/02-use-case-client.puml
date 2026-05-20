@@ -1,29 +1,31 @@
 @startuml
 left to right direction
 skinparam shadowing false
-skinparam actorStyle default
+skinparam actorStyle awesome
 skinparam roundcorner 10
+skinparam backgroundColor #FFFFFF
 
+scale 1.5
 skinparam usecase {
   BackgroundColor #FFFFFF
   BorderColor #888888
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam actor {
   BackgroundColor #FFFFFF
   BorderColor #666666
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam note {
   BackgroundColor #FFFDE7
   BorderColor #CCBB88
-  FontSize 11
+  FontSize 30
   FontName Arial
 }
 skinparam ArrowColor #888888
-skinparam ArrowFontSize 10
+skinparam ArrowFontSize 28
 
 actor "Client" as Client
 entity "Passerelle de Paiement" as Stripe <<System>>
@@ -32,35 +34,50 @@ entity "Moteur de Suggestion" as Reco <<System>>
 
 rectangle "Gestion des Réservations et Paiements" {
 
-  ' --- RECHERCHE ---
-  usecase "Rechercher et Filtrer" as UC_Search
-  usecase "Consulter les recommandations" as UC_Reco
+  ' --- ACTIONS PRINCIPALES ---
+  (Rechercher\net Filtrer) as UC_Search
+  (Consulter les\nrecommandations) as UC_Reco
+  (Effectuer une\nréservation) as UC_Book
+  (Gérer ses\nréservations) as UC_Manage
+  (Gérer son\nprogramme fidélité) as UC_Loyalty
+  (Obtenir de\nl'assistance) as UC_Support
 
-  ' --- RÉSERVATION ---
-  usecase "Effectuer une réservation" as UC_Book
-  usecase "Gérer les demandes spéciales" as UC_Special
-  usecase "Appliquer un code promo" as UC_Promo
-  usecase "Payer la réservation" as UC_Pay
+  ' --- EXTENSIONS ET INCLUSIONS ---
+  (Payer la\nréservation) as UC_Pay
+  (Gérer les\ndemandes spéciales) as UC_Special
+  (Appliquer un\ncode promo) as UC_Promo
 
-  ' --- GESTION ---
-  usecase "Gérer ses réservations" as UC_Manage
-  usecase "Consulter par statut" as UC_View
-  usecase "Modifier une réservation" as UC_Modify
-  usecase "Annuler une réservation" as UC_Cancel
-  usecase "Télécharger la facture" as UC_Invoice
+  (Consulter\npar statut) as UC_View
+  (Modifier une\nréservation) as UC_Modify
+  (Annuler une\nréservation) as UC_Cancel
+  (Télécharger\nla facture) as UC_Invoice
 
-  ' --- FIDÉLITÉ ---
-  usecase "Gérer son programme fidélité" as UC_Loyalty
-  usecase "Échanger des points contre un code" as UC_Redeem
+  (Échanger des points\ncontre un code) as UC_Redeem
 
-  ' --- SUPPORT ---
-  usecase "Utiliser le chatbot IA" as UC_Chatbot
+  (Utiliser le\nchatbot IA) as UC_Chatbot
+  (Signaler\nun incident) as UC_Incident
 
-  ' --- ORDRE VERTICAL ---
-  UC_Search -[hidden]down-> UC_Book
-  UC_Book -[hidden]down-> UC_Manage
-  UC_Manage -[hidden]down-> UC_Loyalty
-  UC_Loyalty -[hidden]down-> UC_Chatbot
+  ' --- ORDRE HORIZONTAL POUR MAXIMISER LA LARGEUR EN PAYSAGE ---
+  UC_Search -[hidden]right-> UC_Book
+  UC_Book -[hidden]right-> UC_Manage
+  UC_Manage -[hidden]right-> UC_Loyalty
+  UC_Loyalty -[hidden]right-> UC_Support
+
+  ' --- RELATIONS EXTEND / INCLUDE ---
+  UC_Book ..> UC_Pay : <<include>>
+  UC_Special .up.> UC_Book : <<extend>>
+  UC_Promo .up.> UC_Book : <<extend>>
+
+  UC_Manage ..> UC_View : <<include>>
+  UC_Modify .up.> UC_Manage : <<extend>>
+  UC_Cancel .up.> UC_Manage : <<extend>>
+  UC_Invoice .up.> UC_Manage : <<extend>>
+
+  UC_Redeem .up.> UC_Loyalty : <<extend>>
+  UC_Redeem .up.> UC_Promo : <<extend>>
+
+  UC_Chatbot .up.> UC_Support : <<extend>>
+  UC_Incident .up.> UC_Support : <<extend>>
 
   ' --- LIAISONS CLIENT ---
   Client --> UC_Search
@@ -68,24 +85,11 @@ rectangle "Gestion des Réservations et Paiements" {
   Client --> UC_Book
   Client --> UC_Manage
   Client --> UC_Loyalty
-  Client --> UC_Chatbot
-
-  ' --- RELATIONS INTERNES ---
-  UC_Book ..> UC_Pay : <<include>>
-  UC_Special .up.> UC_Book : <<extend>>
-  UC_Promo .up.> UC_Pay : <<extend>>
-
-  UC_Manage ..> UC_View : <<include>>
-  UC_Manage ..> UC_Modify : <<include>>
-  UC_Manage ..> UC_Cancel : <<include>>
-  UC_Manage ..> UC_Invoice : <<include>>
-
-  UC_Redeem .up.> UC_Loyalty : <<extend>>
-  UC_Redeem .up.> UC_Promo : <<extend>>
+  Client --> UC_Support
 
   ' --- LIAISONS SYSTÈMES ---
   UC_Pay -- Stripe
-  UC_Chatbot -- Chatbot
+  UC_Chatbot -up- Chatbot
   UC_Reco -- Reco
 
   ' --- NOTES ---

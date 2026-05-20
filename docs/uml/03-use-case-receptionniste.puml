@@ -5,26 +5,32 @@ skinparam actorStyle awesome
 skinparam roundcorner 10
 skinparam backgroundColor #FFFFFF
 
+scale 2
 skinparam usecase {
   BackgroundColor #FFFFFF
   BorderColor #888888
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam actor {
   BackgroundColor #FFFFFF
   BorderColor #666666
-  FontSize 12
+  FontSize 35
   FontName Arial
 }
 skinparam note {
   BackgroundColor #FFFDE7
   BorderColor #CCBB88
-  FontSize 11
+  FontSize 30
   FontName Arial
 }
+skinparam rectangle {
+  FontSize 40
+  FontName Arial
+  BorderColor #444444
+}
 skinparam ArrowColor #888888
-skinparam ArrowFontSize 10
+skinparam ArrowFontSize 28
 
 actor "Réceptionniste" as Reception
 

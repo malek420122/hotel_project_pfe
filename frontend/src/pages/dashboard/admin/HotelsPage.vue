@@ -31,6 +31,7 @@
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
           <h3 class="text-xl font-bold text-gray-800 mb-4">{{ form._id ? 'Modifier hôtel' : 'Ajouter un hôtel' }}</h3>
+          <p v-if="errorMsg" class="mb-4 text-sm text-red-600 font-medium bg-red-50 p-2 rounded-lg border border-red-100">⚠️ {{ errorMsg }}</p>
           <form @submit.prevent="saveHotel" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div><label class="block text-xs font-semibold text-gray-500 mb-1">Nom</label><input v-model="form.nom" class="input-field" required /></div>
@@ -163,6 +164,7 @@ function openModal(hotel) {
     Object.assign(form, { _id: null, nom: '', ville: '', adresse: '', description: '', etoiles: 4, prix_min: 0, latitude: null, longitude: null, photos: [] })
   }
   newPhotoUrl.value = ''
+  errorMsg.value = ''
   showModal.value = true
 }
 function addPhoto() {

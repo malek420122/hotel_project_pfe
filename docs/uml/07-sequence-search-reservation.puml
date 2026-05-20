@@ -10,25 +10,34 @@ entity "Modèle" as model
 
 client -> vue : Choisit une chambre et des dates
 activate vue
+
+client -> vue : Clique sur "Réserver"
 vue -> ctrl : Envoie la demande de réservation
 activate ctrl
 
-ctrl -> ctrl : Vérifie l'identité du client
-ctrl -> model : Vérifie la disponibilité aux dates choisies
+ref over client,ctrl : Authentification / Inscription
+
+ctrl -> model : Demander les informations\n de la chambre pour ces dates
 activate model
-model --> ctrl : Retourne l'état (Libre ou Occupée)
+model --> ctrl : Retourne l'état\n(Libre ou Occupée)
 deactivate model
 
 alt Chambre non disponible
-    ctrl --> vue : Refuse la demande
+    ctrl --> vue : Refus de réservation
     vue --> client : Affiche "Chambre indisponible"
-else Chambre libre
-    ctrl -> model : Enregistre la nouvelle réservation
+
+else Chambre disponible
+
+    ctrl -> model : Enregistrer la réservation
     activate model
-    model --> ctrl : Confirme l'enregistrement
+    model --> ctrl : Confirmation d'enregistrement
     deactivate model
-    ctrl --> vue : Confirme la création
-    vue --> client : Affiche le succès et passe au paiement
+
+    ctrl --> vue : Confirmation de réservation
+    vue --> client : Affiche message de succès
+
+    note over ctrl : Passage au paiement
+
 end
 
 deactivate ctrl

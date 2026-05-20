@@ -1,0 +1,33 @@
+Algorithme : GenererRecommandations(utilisateur_courant, liste_hotels, historique_global)
+Entrée : 
+  - utilisateur_courant : Le client ciblé
+  - liste_hotels : Tous les hôtels disponibles
+  - historique_global : Données de navigation de tous les utilisateurs
+Sortie : recommandations : Liste des 10 meilleurs hôtels
+
+Début
+  recommandations_finales <- Liste Vide()
+  
+  // Étape 1 : Vérification du "Cold Start" (Démarrage à froid)
+  Si EstNouveau(utilisateur_courant) Alors
+    recommandations_finales <- ObtenirHotelsParPopularite(liste_hotels, 10)
+    Retourner recommandations_finales
+  Fin Si
+
+  // Étape 2 : Évaluation hybride
+  Pour chaque hotel dans liste_hotels Faire
+    score_comportemental <- CalculerScoreComportemental(utilisateur_courant, hotel, historique_global)
+    score_collaboratif <- CalculerSimilariteCollaborative(utilisateur_courant, hotel, historique_global)
+    
+    // Pondération des stratégies (60% comportement, 40% collaboratif)
+    score_total <- (score_comportemental * 0.6) + (score_collaboratif * 0.4)
+    
+    Ajouter(recommandations_finales, {hotel, score_total})
+  Fin Pour
+
+  // Étape 3 : Tri et Extraction
+  TrierParOrdreDecroissant(recommandations_finales, "score_total")
+  recommandations_finales <- ExtraireTopN(recommandations_finales, 10)
+
+  Retourner recommandations_finales
+Fin

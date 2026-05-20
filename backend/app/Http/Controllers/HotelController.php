@@ -444,6 +444,21 @@ class HotelController extends Controller
                 'photos.*' => 'url',
             ]);
 
+            $nomNorm = $this->normalizeText($this->localizeField($validated['nom'], 'fr'));
+            $adresseNorm = $this->normalizeText($this->localizeField($validated['adresse'], 'fr'));
+            $villeNorm = $this->normalizeText($this->localizeField($validated['ville'], 'fr'));
+
+            $exists = Hotel::get()->contains(function ($h) use ($nomNorm, $adresseNorm, $villeNorm) {
+                $hNom = $this->normalizeText($this->localizeField($h->nom ?? '', 'fr'));
+                $hAdr = $this->normalizeText($this->localizeField($h->adresse ?? '', 'fr'));
+                $hVil = $this->normalizeText($this->localizeField($h->ville ?? '', 'fr'));
+                return $hNom === $nomNorm && $hAdr === $adresseNorm && $hVil === $villeNorm;
+            });
+
+            if ($exists) {
+                return response()->json(['message' => 'Un hôtel avec le même nom et la même adresse dans cette ville existe déjà (doublon détecté).'], 422);
+            }
+
             $hotel = Hotel::create($validated);
             Cache::flush();
             return response()->json($hotel, 201);
@@ -472,6 +487,28 @@ class HotelController extends Controller
                 'photos' => 'nullable|array',
                 'photos.*' => 'url',
             ]);
+            $identityChanged = isset($validated['nom']) || isset($validated['adresse']) || isset($validated['ville']);
+
+            if ($identityChanged) {
+                $nomNorm = $this->normalizeText($this->localizeField($validated['nom'] ?? $hotel->nom, 'fr'));
+                $adresseNorm = $this->normalizeText($this->localizeField($validated['adresse'] ?? $hotel->adresse, 'fr'));
+                $villeNorm = $this->normalizeText($this->localizeField($validated['ville'] ?? $hotel->ville, 'fr'));
+
+                $exists = Hotel::get()->contains(function ($h) use ($nomNorm, $adresseNorm, $villeNorm, $hotel) {
+                    if ((string) $h->_id === (string) $hotel->_id) {
+                        return false;
+                    }
+                    $hNom = $this->normalizeText($this->localizeField($h->nom ?? '', 'fr'));
+                    $hAdr = $this->normalizeText($this->localizeField($h->adresse ?? '', 'fr'));
+                    $hVil = $this->normalizeText($this->localizeField($h->ville ?? '', 'fr'));
+                    return $hNom === $nomNorm && $hAdr === $adresseNorm && $hVil === $villeNorm;
+                });
+
+                if ($exists) {
+                    return response()->json(['message' => 'Un autre hôtel avec le même nom et la même adresse dans cette ville existe déjà (doublon détecté).'], 422);
+                }
+            }
+
             $hotel->update($validated);
             Cache::flush();
             return response()->json($hotel);
@@ -957,9 +994,11 @@ class HotelController extends Controller
 
         return $hotelCollection->map(function ($hotel) use ($priceByHotelId) {
             $hotelId = (string) ($hotel->_id ?? '');
-            $hotel->prix_min = array_key_exists($hotelId, $priceByHotelId)
-                ? round((float) $priceByHotelId[$hotelId], 2)
-                : null;
+            $dynamicPrice = array_key_exists($hotelId, $priceByHotelId) ? round((float) $priceByHotelId[$hotelId], 2) : null;
+            
+            if (($hotel->prix_min === null || $hotel->prix_min == 0) && $dynamicPrice !== null) {
+                $hotel->prix_min = $dynamicPrice;
+            }
             $hotel->etoiles = max(1, min(5, (int) ($hotel->etoiles ?? 0)));
 
             return $hotel;

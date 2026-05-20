@@ -1,0 +1,25 @@
+@startuml
+skinparam state {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor #2C3E50
+}
+skinparam monochrome true
+skinparam shadowing false
+
+title Diagramme d'état : Gestion du statut d'une Réservation
+
+[*] --> EN_ATTENTE : Création de la réservation\n(par le Client)
+
+EN_ATTENTE --> CONFIRMEE : Paiement validé\n(via Stripe)
+EN_ATTENTE --> ANNULEE : Délai d'attente dépassé /\nÉchec du paiement
+
+CONFIRMEE --> EN_COURS : Arrivée du client\n(Check-in par Réceptionniste)
+CONFIRMEE --> ANNULEE : Demande d'annulation\n(par Client ou Admin)
+
+EN_COURS --> TERMINEE : Fin du séjour\n(Check-out par Réceptionniste)
+
+ANNULEE --> [*]
+TERMINEE --> [*]
+
+@enduml

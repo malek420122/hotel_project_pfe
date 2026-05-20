@@ -1,32 +1,31 @@
 @startuml
-skinparam style strictuml
-skinparam sequenceMessageAlign center
+skinparam monochrome true
 skinparam shadowing false
 autonumber
 
 actor "Administrateur" as admin
-participant "Interface" as vue
-participant "Contrôleur" as api
-participant "Base de données" as db
+boundary "Vue" as vue
+control "Contrôleur" as ctrl
+entity "Modèle" as model
 
 == Création d'un nouvel établissement ==
 
 admin -> vue : Saisir les informations de l'hôtel
 activate vue
-vue -> api : Transmettre les données de création
-activate api
+vue -> ctrl : Transmettre les données de création
+activate ctrl
 
-api -> api : Vérifier les droits (Admin)
+ctrl -> ctrl : Vérifier les droits (Admin)
 
-api -> db : Enregistrer l'hôtel
-activate db
-db --> api : Confirmation d'enregistrement
-deactivate db
+ctrl -> model : Enregistrer l'hôtel
+activate model
+model --> ctrl : Confirmation d'enregistrement
+deactivate model
 
-api --> vue : Confirmation de la création
+ctrl --> vue : Confirmation de la création
 vue --> admin : Afficher succès et actualiser la liste
 
-deactivate api
+deactivate ctrl
 deactivate vue
 
 @enduml
